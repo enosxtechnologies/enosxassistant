@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { FounderModeProvider } from "./contexts/FounderModeContext";
+import { WindowContextProvider } from "./contexts/WindowContext";
 import ChatPage from "./pages/ChatPage";
 import AboutPage from "./pages/AboutPage";
 
@@ -24,7 +25,8 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <FounderModeProvider>
-          <TooltipProvider>
+          <WindowContextProvider>
+            <TooltipProvider>
           <Toaster
             theme="dark"
             toastOptions={{
@@ -37,7 +39,8 @@ function App() {
             }}
           />
           <Router />
-          </TooltipProvider>
+            </TooltipProvider>
+          </WindowContextProvider>
         </FounderModeProvider>
       </ThemeProvider>
     </ErrorBoundary>

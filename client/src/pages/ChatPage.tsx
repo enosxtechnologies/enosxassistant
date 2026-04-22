@@ -27,11 +27,15 @@ import WelcomeScreen from "@/components/WelcomeScreen";
 import FloatingOrb from "@/components/FloatingOrb";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import CommandChainProgress from "@/components/CommandChainProgress";
+import ContextIndicator from "@/components/ContextIndicator";
+import AppAwareSuggestions from "@/components/AppAwareSuggestions";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
 import { useCommandChain } from "@/hooks/useCommandChain";
+import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
+import { useActiveWindow } from "@/contexts/WindowContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -88,6 +92,8 @@ export default function ChatPage() {
   const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
   const { executeAction } = useSystemActions();
   const { progress } = useCommandChain();
+  const { enrichMessageWithContext } = useContextAwareMessages();
+  const { activeWindow } = useActiveWindow();
 
   // Sync sound enabled state
   useEffect(() => {
@@ -193,10 +199,11 @@ export default function ChatPage() {
       playSound("send");
 
       const allMessages = [...currentMessages, userMessage];
+      const contextEnrichedMessages = enrichMessageWithContext(allMessages, activeWindow);
       let fullResponse = "";
 
       await sendMessage(
-        allMessages,
+        contextEnrichedMessages,
         (chunk) => {
           fullResponse += chunk;
           setConversations((prev) =>
@@ -381,6 +388,9 @@ export default function ChatPage() {
             )}
           </div>
 
+          {/* Center: Context Indicator */}
+          <ContextIndicator />
+
           {/* Right: controls */}
           <div className="flex items-center gap-2">
             {/* Theme switcher */}
@@ -541,7 +551,14 @@ export default function ChatPage() {
                 transition={{ duration: 0.3 }}
                 className="h-full"
               >
-                <WelcomeScreen onSuggestion={handleSend} />
+                <div className="h-full flex flex-col">
+                  <div className="px-5 pt-5">
+                    <AppAwareSuggestions onSuggestionClick={handleSend} />
+                  </div>
+                  <div className="flex-1">
+                    <WelcomeScreen onSuggestion={handleSend} />
+                  </div>
+                </div>
               </motion.div>
             ) : (
               <motion.div
