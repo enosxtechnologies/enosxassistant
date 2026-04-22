@@ -29,6 +29,8 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import CommandChainProgress from "@/components/CommandChainProgress";
 import ContextIndicator from "@/components/ContextIndicator";
 import AppAwareSuggestions from "@/components/AppAwareSuggestions";
+import FileDropZone from "@/components/FileDropZone";
+import FileContextBadge from "@/components/FileContextBadge";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -36,6 +38,7 @@ import { useSystemActions } from "@/hooks/useSystemActions";
 import { useCommandChain } from "@/hooks/useCommandChain";
 import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
+import { useFileContext } from "@/hooks/useFileContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -94,6 +97,7 @@ export default function ChatPage() {
   const { progress } = useCommandChain();
   const { enrichMessageWithContext } = useContextAwareMessages();
   const { activeWindow } = useActiveWindow();
+  const { fileContext, loadFile, clearFile, getFileContextMessage } = useFileContext();
 
   // Sync sound enabled state
   useEffect(() => {
@@ -165,10 +169,16 @@ export default function ChatPage() {
 
       const targetConvId = convId;
 
+      // Append file context if available
+      let messageContent = text;
+      if (fileContext.isLoaded) {
+        messageContent += getFileContextMessage();
+      }
+
       const userMessage: Message = {
         id: nanoid(),
         role: "user",
-        content: text,
+        content: messageContent,
         timestamp: new Date(),
       };
 
@@ -197,6 +207,11 @@ export default function ChatPage() {
       );
 
       playSound("send");
+
+      // Clear file context after sending
+      if (fileContext.isLoaded) {
+        clearFile();
+      }
 
       const allMessages = [...currentMessages, userMessage];
       const contextEnrichedMessages = enrichMessageWithContext(allMessages, activeWindow);
@@ -315,6 +330,9 @@ export default function ChatPage() {
           filter: "blur(60px)",
         }}
       />
+
+      {/* File Drop Zone */}
+      <FileDropZone onFileSelected={loadFile} isActive={true} />
 
       {/* Command Chain Progress Indicator */}
       <CommandChainProgress progress={progress} />
@@ -618,6 +636,13 @@ export default function ChatPage() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* File Context Badge */}
+        {fileContext.isLoaded && (
+          <div className="px-5 pb-2">
+            <FileContextBadge fileContext={fileContext} onClear={clearFile} />
+          </div>
+        )}
 
         {/* Command bar */}
         <CommandBar
