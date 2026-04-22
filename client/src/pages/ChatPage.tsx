@@ -118,7 +118,7 @@ export default function ChatPage() {
   const triggerGodMode = useCallback(() => {
     if (isGodModeActive) return;
     setIsGodModeActive(true);
-    playSound("listenStart"); // Use a tech sound for initialization
+    playSound("godMode"); // High-tech system override sound
     
     // Voice greeting for Enosh
     setTimeout(() => {

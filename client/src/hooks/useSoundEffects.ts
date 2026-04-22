@@ -7,7 +7,7 @@
 
 import { useCallback, useRef } from "react";
 
-type SoundType = "click" | "send" | "receive" | "listenStart" | "listenStop" | "error";
+type SoundType = "click" | "send" | "receive" | "listenStart" | "listenStop" | "error" | "godMode";
 
 function createAudioContext(): AudioContext | null {
   try {
@@ -92,6 +92,23 @@ export function useSoundEffects() {
         case "error":
           // Low buzz
           playTone(ctx, 200, 0.2, "sawtooth", 0.04);
+          break;
+
+        case "godMode":
+          // High-tech "System Override" sequence
+          // 1. Low bass pulse
+          playTone(ctx, 60, 1.2, "sine", 0.15);
+          // 2. Rising digital sweep
+          for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+              playTone(ctx, 200 + i * 150, 0.1, "square", 0.03);
+            }, i * 80);
+          }
+          // 3. Final high chime
+          setTimeout(() => {
+            playTone(ctx, 1200, 0.4, "sine", 0.08);
+            playTone(ctx, 1800, 0.3, "sine", 0.05);
+          }, 700);
           break;
       }
     } catch {
