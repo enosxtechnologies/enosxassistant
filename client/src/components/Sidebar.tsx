@@ -87,7 +87,7 @@ export default function Sidebar({
                 className="text-sm font-bold truncate"
                 style={{ color: config.text, letterSpacing: "-0.02em" }}
               >
-                ENOSX XAI
+                ENOSX TECHNOLOGIES
               </span>
               {isPro && (
                 <span
@@ -262,7 +262,7 @@ export default function Sidebar({
               className="text-xs"
               style={{ color: config.textMuted, letterSpacing: "0.04em", fontSize: "10px" }}
             >
-              ENOSX v2.0 · Built by Enosh
+              ENOSX · PROPRIETARY SYSTEM
             </p>
           </motion.div>
         )}

@@ -121,18 +121,20 @@ export function useVoice() {
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 1.05;
-    utterance.pitch = 0.95;
+    
+    // Deep smooth voice profile
+    utterance.rate = 0.95; // Slightly slower for more gravitas
+    utterance.pitch = 0.85; // Lower pitch for a deeper, more authoritative tone
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
-    const preferredVoice = voices.find(
-      (v) =>
-        v.name.includes("Google") ||
-        v.name.includes("Microsoft") ||
-        v.name.includes("Samantha") ||
-        v.lang === "en-US"
-    );
+    // Prioritize premium male voices for the "deep" effect
+    const preferredVoice = 
+      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Google US English Male")) ||
+      voices.find(v => v.name.includes("Male") || v.name.includes("Guy")) ||
+      voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
+      voices.find(v => v.lang === "en-US");
+      
     if (preferredVoice) utterance.voice = preferredVoice;
 
     utterance.onstart = () => setVoiceState("speaking");

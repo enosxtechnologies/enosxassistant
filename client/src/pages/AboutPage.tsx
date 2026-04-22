@@ -136,11 +136,11 @@ export default function AboutPage() {
               className="text-lg leading-relaxed"
               style={{ color: "rgba(255,255,255,0.75)" }}
             >
-              Founded in 2024 by Enosh, Enosx Technologies was born out of a
-              simple necessity: the need for an AI that doesn't just "chat," but
-              operates. While others built chatbots, Enosh envisioned a system
-              that breathes with Windows—a fluid, iridescent interface powered
-              by the raw speed of Groq LPU architecture.
+              Enosx Technologies was born out of a simple necessity: the need for 
+              an AI that doesn't just "chat," but operates. Founded by Enosh, 
+              the vision was a system that breathes with the OS—a fluid, 
+              iridescent interface powered by high-performance architecture 
+              and proprietary design language.
             </p>
           </div>
         </motion.div>
@@ -207,10 +207,10 @@ export default function AboutPage() {
               className="text-lg leading-relaxed"
               style={{ color: "rgba(255,255,255,0.75)" }}
             >
-              At just 17, Enosh leads the design and architectural direction of
-              the ENOSX ecosystem. His philosophy is simple: Speed is UX. By
-              leveraging cutting-edge inference engines and a glassmorphic design
-              language, Enosh has turned the standard desktop into an intelligent
+              Enosh leads the design and architectural direction of the ENOSX 
+              ecosystem. His philosophy is simple: Speed is UX. By leveraging 
+              high-performance inference engines and a glassmorphic design 
+              language, Enosh has turned the standard desktop into an intelligent 
               workspace.
             </p>
           </div>

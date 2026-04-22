@@ -171,7 +171,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           className="text-xs text-center"
           style={{ color: config.textMuted, opacity: 0.5, letterSpacing: "0.04em" }}
         >
-          Powered by Groq · llama-3.3-70b-versatile
+          ENOSX TECHNOLOGIES · PROPRIETARY SYSTEM
         </motion.p>
       </div>
     </div>

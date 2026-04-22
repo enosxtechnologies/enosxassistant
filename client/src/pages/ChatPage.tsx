@@ -29,6 +29,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useSystemActions } from "@/hooks/useSystemActions";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -83,6 +84,7 @@ export default function ChatPage() {
   } = useVoice();
 
   const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
+  const { executeAction } = useSystemActions();
 
   // Sync sound enabled state
   useEffect(() => {
@@ -219,6 +221,9 @@ export default function ChatPage() {
             })
           );
           playSound("receive");
+          
+          // Execute any system actions found in the response
+          executeAction(fullResponse);
 
           if (autoSpeak && fullResponse) {
             setSpeakingMessageId(assistantId);
