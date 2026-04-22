@@ -122,7 +122,7 @@ export default function ChatPage() {
     
     // Voice greeting for Enosh
     setTimeout(() => {
-      speak("Welcome ENOSH, what's the plan today?");
+      speak("Greetings, Enosh. How may I assist you today?");
     }, 1500);
   }, [isGodModeActive, playSound, speak]);
 
