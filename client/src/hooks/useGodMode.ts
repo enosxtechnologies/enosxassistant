@@ -1,25 +1,36 @@
 /*
  * ENOSX XAI — useGodMode
- * Custom hook to detect the "GOD MODE" key sequence: Ctrl + E + X + C.
- * When the sequence is matched, it triggers the callback.
+ * Custom hook to detect the "GOD MODE" key sequences.
+ * 
+ * Supported Sequences:
+ * 1. Control + E + X + C
+ * 2. Alt + E + X (Alternative)
+ *
+ * When either sequence is matched, it triggers the callback.
  */
 import { useEffect, useRef, useCallback } from "react";
 
 export function useGodMode(onTrigger: () => void) {
   // Track currently pressed keys
   const pressedKeys = useRef<Set<string>>(new Set());
-  
-  // The required sequence: Control + E + X + C
-  // Note: We use lowercase 'e', 'x', 'c' as e.key returns lowercase unless Shift is held
-  const REQUIRED_KEYS = ["Control", "e", "x", "c"];
 
   const checkSequence = useCallback(() => {
-    const isControl = pressedKeys.current.has("Control");
-    const isE = pressedKeys.current.has("e") || pressedKeys.current.has("E");
-    const isX = pressedKeys.current.has("x") || pressedKeys.current.has("X");
-    const isC = pressedKeys.current.has("c") || pressedKeys.current.has("C");
+    // Helper to check if all keys in a set are pressed
+    const hasKeys = (keys: string[]) => {
+      return keys.every(key => 
+        pressedKeys.current.has(key) || 
+        pressedKeys.current.has(key.toLowerCase()) || 
+        pressedKeys.current.has(key.toUpperCase())
+      );
+    };
 
-    if (isControl && isE && isX && isC) {
+    // Sequence 1: Control + E + X + C
+    const sequence1 = hasKeys(["Control", "e", "x", "c"]);
+    
+    // Sequence 2: Alt + E + X
+    const sequence2 = hasKeys(["Alt", "e", "x"]);
+
+    if (sequence1 || sequence2) {
       onTrigger();
       // Clear after trigger to prevent multiple activations
       pressedKeys.current.clear();
@@ -28,6 +39,7 @@ export function useGodMode(onTrigger: () => void) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Use e.key for detection (case-sensitive, but handled in checkSequence)
       pressedKeys.current.add(e.key);
       checkSequence();
     };
