@@ -6,8 +6,10 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, X, Zap, ShieldAlert, Cpu } from "lucide-react";
+import { X, ShieldAlert, Cpu, Database } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { MemoryEntry } from "@/hooks/useMemoryBank";
+import MemoryBank from "./MemoryBank";
 
 interface TerminalLine {
   id: string;
@@ -20,9 +22,19 @@ interface GodModeTerminalProps {
   isOpen: boolean;
   onClose: () => void;
   onExecute: (command: string) => Promise<string>;
+  memories: MemoryEntry[];
+  onAddMemory: (category: MemoryEntry["category"], content: string) => void;
+  onRemoveMemory: (id: string) => void;
 }
 
-export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeTerminalProps) {
+export default function GodModeTerminal({ 
+  isOpen, 
+  onClose, 
+  onExecute,
+  memories,
+  onAddMemory,
+  onRemoveMemory
+}: GodModeTerminalProps) {
   const { config } = useTheme();
   const [history, setHistory] = useState<TerminalLine[]>([
     {
@@ -82,6 +94,28 @@ export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeT
       return;
     }
 
+    // Specialized Memory Commands
+    if (cmd.toLowerCase().startsWith("memo ")) {
+      const content = cmd.substring(5).trim();
+      if (content) {
+        onAddMemory("fact", content);
+        addLine("system", `Memory logged to core: "${content}"`);
+        return;
+      }
+    }
+
+    if (cmd.toLowerCase() === "ls memo") {
+      if (memories.length === 0) {
+        addLine("system", "No memory entries found in core.");
+      } else {
+        addLine("system", `Listing ${memories.length} active memory entries:`);
+        memories.forEach((m, i) => {
+          addLine("system", `${i + 1}. [${m.category.toUpperCase()}] ${m.content}`);
+        });
+      }
+      return;
+    }
+
     setIsExecuting(true);
     try {
       const result = await onExecute(cmd);
@@ -138,12 +172,14 @@ export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeT
               </button>
             </div>
 
-            {/* Terminal Output */}
-            <div 
-              ref={scrollRef}
-              className="flex-1 overflow-y-auto p-6 font-mono text-sm space-y-2"
-              style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0, 242, 255, 0.2) transparent" }}
-            >
+            {/* Terminal Layout: Split view for output and Memory Bank */}
+            <div className="flex-1 flex overflow-hidden">
+              {/* Terminal Output */}
+              <div 
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto p-6 font-mono text-sm space-y-2"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0, 242, 255, 0.2) transparent" }}
+              >
               {history.map((line) => (
                 <div key={line.id} className="flex gap-3">
                   <span className="opacity-30 select-none">
@@ -185,6 +221,32 @@ export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeT
                 </div>
               )}
             </div>
+
+            {/* Side Panel: Memory Bank (Only visible in God Mode) */}
+            <div 
+              className="w-80 border-l p-4 overflow-y-auto bg-black/20"
+              style={{ borderColor: "rgba(0, 242, 255, 0.1)" }}
+            >
+              <div className="mb-6 flex items-center gap-2 text-cyan-400">
+                <Database size={16} />
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Core Memory Bank</span>
+              </div>
+              <MemoryBank 
+                memories={memories} 
+                onRemove={onRemoveMemory} 
+                onAdd={onAddMemory} 
+              />
+              <div className="mt-8 p-3 rounded-lg bg-cyan-400/5 border border-cyan-400/10">
+                <p className="text-[9px] text-cyan-400/60 leading-relaxed font-mono">
+                  COMMANDS:<br/>
+                  - memo [text]: Add new fact<br/>
+                  - ls memo: List entries<br/>
+                  - clear: Reset terminal<br/>
+                  - exit: Close GOD MODE
+                </p>
+              </div>
+            </div>
+          </div>
 
             {/* Terminal Input */}
             <form 

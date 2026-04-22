@@ -35,7 +35,7 @@ import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
-import MemoryBank from "@/components/MemoryBank";
+// MemoryBank imported but only used in GodModeTerminal now
 import AutoContextIndicator from "@/components/AutoContextIndicator";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
@@ -416,15 +416,7 @@ export default function ChatPage() {
         onNew={createNewChat}
         onDelete={deleteConversation}
         isPro={isPro}
-      >
-        <div className="mt-auto px-2 pb-4">
-          <MemoryBank 
-            memories={memories} 
-            onRemove={removeMemory} 
-            onAdd={addMemory} 
-          />
-        </div>
-      </Sidebar>
+      />
 
       {/* Main area */}
       <motion.div
@@ -766,6 +758,9 @@ export default function ChatPage() {
           setIsGodModeActive(false);
         }}
         onExecute={executeGodCommand}
+        memories={memories}
+        onAddMemory={addMemory}
+        onRemoveMemory={removeMemory}
       />
     </div>
   );
