@@ -31,6 +31,8 @@ import ContextIndicator from "@/components/ContextIndicator";
 import AppAwareSuggestions from "@/components/AppAwareSuggestions";
 import FileDropZone from "@/components/FileDropZone";
 import FileContextBadge from "@/components/FileContextBadge";
+import ClipboardBadge from "@/components/ClipboardBadge";
+import ContextualActionBar from "@/components/ContextualActionBar";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -39,6 +41,7 @@ import { useCommandChain } from "@/hooks/useCommandChain";
 import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
 import { useFileContext } from "@/hooks/useFileContext";
+import { useClipboardListener } from "@/hooks/useClipboardListener";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -98,6 +101,12 @@ export default function ChatPage() {
   const { enrichMessageWithContext } = useContextAwareMessages();
   const { activeWindow } = useActiveWindow();
   const { fileContext, loadFile, clearFile, getFileContextMessage } = useFileContext();
+  const {
+    copiedText,
+    isVisible: clipboardVisible,
+    dismiss: dismissClipboard,
+    consume: consumeClipboard,
+  } = useClipboardListener();
 
   // Sync sound enabled state
   useEffect(() => {
@@ -286,6 +295,15 @@ export default function ChatPage() {
     setSpeakingMessageId(null);
     playSound("listenStop");
   }, [stopSpeaking, playSound]);
+
+  // Summarize clipboard content via AI — defined after handleSend
+  const handleClipboardSummarize = useCallback(
+    async (text: string) => {
+      const prompt = `Please summarize the following text concisely:\n\n${text}`;
+      await handleSend(prompt);
+    },
+    [handleSend]
+  );
 
   const messages = activeConversation?.messages ?? [];
 
@@ -644,6 +662,11 @@ export default function ChatPage() {
           </div>
         )}
 
+        {/* Contextual Action Bar — context-aware quick-action buttons */}
+        <div className="px-5 pt-2">
+          <ContextualActionBar onAction={handleSend} />
+        </div>
+
         {/* Command bar */}
         <CommandBar
           onSend={handleSend}
@@ -657,6 +680,15 @@ export default function ChatPage() {
           disabled={isLoading}
         />
       </motion.div>
+
+      {/* Clipboard Badge — glowing Enosx icon when text is copied */}
+      <ClipboardBadge
+        copiedText={copiedText}
+        isVisible={clipboardVisible}
+        onDismiss={dismissClipboard}
+        onConsume={consumeClipboard}
+        onSummarize={handleClipboardSummarize}
+      />
     </div>
   );
 }
