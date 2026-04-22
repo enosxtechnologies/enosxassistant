@@ -1,0 +1,2 @@
+# enosxassistant
+AI for windows
