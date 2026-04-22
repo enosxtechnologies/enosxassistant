@@ -26,10 +26,12 @@ import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import FloatingOrb from "@/components/FloatingOrb";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import CommandChainProgress from "@/components/CommandChainProgress";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
+import { useCommandChain } from "@/hooks/useCommandChain";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -85,6 +87,7 @@ export default function ChatPage() {
 
   const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
   const { executeAction } = useSystemActions();
+  const { progress } = useCommandChain();
 
   // Sync sound enabled state
   useEffect(() => {
@@ -305,6 +308,9 @@ export default function ChatPage() {
           filter: "blur(60px)",
         }}
       />
+
+      {/* Command Chain Progress Indicator */}
+      <CommandChainProgress progress={progress} />
 
       {/* Sidebar */}
       <Sidebar
