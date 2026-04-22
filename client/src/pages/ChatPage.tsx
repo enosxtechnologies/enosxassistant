@@ -33,6 +33,8 @@ import FileDropZone from "@/components/FileDropZone";
 import FileContextBadge from "@/components/FileContextBadge";
 import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
+import GodModeTerminal from "@/components/GodModeTerminal";
+import CircuitDoor from "@/components/CircuitDoor";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -42,6 +44,7 @@ import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
 import { useFileContext } from "@/hooks/useFileContext";
 import { useClipboardListener } from "@/hooks/useClipboardListener";
+import { useGodMode } from "@/hooks/useGodMode";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -107,6 +110,36 @@ export default function ChatPage() {
     dismiss: dismissClipboard,
     consume: consumeClipboard,
   } = useClipboardListener();
+
+  // GOD MODE state
+  const [isGodModeActive, setIsGodModeActive] = useState(false);
+  const [showGodTerminal, setShowGodTerminal] = useState(false);
+
+  const triggerGodMode = useCallback(() => {
+    if (isGodModeActive) return;
+    setIsGodModeActive(true);
+    playSound("listenStart"); // Use a tech sound for initialization
+    
+    // Voice greeting for Enosh
+    setTimeout(() => {
+      speak("Welcome ENOSH, what's the plan today?");
+    }, 1500);
+  }, [isGodModeActive, playSound, speak]);
+
+  useGodMode(triggerGodMode);
+
+  const handleGodModeAnimationComplete = useCallback(() => {
+    if (isGodModeActive) {
+      setShowGodTerminal(true);
+    }
+  }, [isGodModeActive]);
+
+  const executeGodCommand = useCallback(async (command: string) => {
+    // Forward command to AI for processing
+    const prompt = `[GOD MODE COMMAND] ${command}`;
+    await handleSend(prompt);
+    return "Command executed via ENOSX Core.";
+  }, [handleSend]);
 
   // Sync sound enabled state
   useEffect(() => {
@@ -688,6 +721,22 @@ export default function ChatPage() {
         onDismiss={dismissClipboard}
         onConsume={consumeClipboard}
         onSummarize={handleClipboardSummarize}
+      />
+
+      {/* GOD MODE — Transition Doors */}
+      <CircuitDoor 
+        isActive={isGodModeActive} 
+        onAnimationComplete={handleGodModeAnimationComplete} 
+      />
+
+      {/* GOD MODE — Developer Terminal */}
+      <GodModeTerminal
+        isOpen={showGodTerminal}
+        onClose={() => {
+          setShowGodTerminal(false);
+          setIsGodModeActive(false);
+        }}
+        onExecute={executeGodCommand}
       />
     </div>
   );
