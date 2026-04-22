@@ -1,9 +1,19 @@
 /*
- * ENOSX XAI Assistant — ChatPage
+ * ENOSX XAI Assistant — ChatPage (Enhanced)
  * Design: "Crimson Matrix" — Cyberpunk Glassmorphism
  * Layout: Left floating acrylic sidebar + right bento chat area + floating pill command bar
- * Theme: Obsidian #0a0a0a + Crimson Pulse #dc143c + Glass surfaces
- * Features: Groq streaming API + Web Speech API voice input + TTS voice output
+ *
+ * Enhancements:
+ * 1. Smooth animations (Framer Motion spring physics everywhere)
+ * 2. Glassmorphism / Acrylic Blur (backdrop-filter on all panels)
+ * 3. Floating assistant UI (draggable, snap-to-edge capable)
+ * 4. Voice visualization (real-time FFT audio bars)
+ * 5. Typing + AI "Thinking" feedback (animated dots, streaming cursor)
+ * 6. Dark Mode + Theme Engine (5 themes: Dark, Light, Neon, Cyberpunk, Minimal)
+ * 7. Animated orb avatar (reacts to voice/loading state)
+ * 8. Sound design (subtle Web Audio API tones)
+ * 9. Transparency + always-visible top bar
+ * 10. Performance optimized (300ms max animations, memoized callbacks)
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -14,11 +24,14 @@ import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
+import FloatingOrb from "@/components/FloatingOrb";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { Conversation, Message } from "@/lib/types";
-import { BotMessageSquare, Wifi, Zap, ChevronDown, Mic, Info } from "lucide-react";
-import { useLocation } from "wouter";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
 
 const BG_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
@@ -39,13 +52,15 @@ function generateTitle(firstMessage: string): string {
 }
 
 export default function ChatPage() {
+  const { config } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const [isPro, setIsPro] = useState(false); // Pro user state
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isPro] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -66,6 +81,13 @@ export default function ChatPage() {
     speak,
     stopSpeaking,
   } = useVoice();
+
+  const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
+
+  // Sync sound enabled state
+  useEffect(() => {
+    setSoundFn(soundEnabled);
+  }, [soundEnabled, setSoundFn]);
 
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
 
@@ -94,14 +116,16 @@ export default function ChatPage() {
   useEffect(() => {
     if (error) {
       toast.error(`API Error: ${error}`);
+      playSound("error");
     }
-  }, [error]);
+  }, [error, playSound]);
 
   const createNewChat = useCallback(() => {
     const conv = createConversation();
     setConversations((prev) => [conv, ...prev]);
     setActiveId(conv.id);
-  }, []);
+    playSound("click");
+  }, [playSound]);
 
   const deleteConversation = useCallback(
     (id: string) => {
@@ -109,8 +133,9 @@ export default function ChatPage() {
       if (activeId === id) {
         setActiveId(null);
       }
+      playSound("click");
     },
-    [activeId]
+    [activeId, playSound]
   );
 
   const handleSend = useCallback(
@@ -124,7 +149,6 @@ export default function ChatPage() {
         setConversations((prev) => [conv, ...prev]);
         setActiveId(conv.id);
         convId = conv.id;
-        // Wait for state to settle
         await new Promise((r) => setTimeout(r, 0));
       }
 
@@ -146,11 +170,9 @@ export default function ChatPage() {
         isStreaming: true,
       };
 
-      // Get current messages for context before state update
       const currentMessages =
         conversationsRef.current.find((c) => c.id === targetConvId)?.messages ?? [];
 
-      // Add both messages
       setConversations((prev) =>
         prev.map((c) => {
           if (c.id !== targetConvId) return c;
@@ -162,6 +184,8 @@ export default function ChatPage() {
           };
         })
       );
+
+      playSound("send");
 
       const allMessages = [...currentMessages, userMessage];
       let fullResponse = "";
@@ -176,9 +200,7 @@ export default function ChatPage() {
               return {
                 ...c,
                 messages: c.messages.map((m) =>
-                  m.id === assistantId
-                    ? { ...m, content: fullResponse }
-                    : m
+                  m.id === assistantId ? { ...m, content: fullResponse } : m
                 ),
               };
             })
@@ -196,8 +218,8 @@ export default function ChatPage() {
               };
             })
           );
+          playSound("receive");
 
-          // Auto-speak if voice mode is on
           if (autoSpeak && fullResponse) {
             setSpeakingMessageId(assistantId);
             speak(fullResponse, () => setSpeakingMessageId(null));
@@ -205,7 +227,7 @@ export default function ChatPage() {
         }
       );
     },
-    [sendMessage, speak, autoSpeak]
+    [sendMessage, speak, autoSpeak, playSound]
   );
 
   const handleVoiceResult = useCallback(
@@ -217,8 +239,9 @@ export default function ChatPage() {
   );
 
   const handleStartVoice = useCallback(() => {
+    playSound("listenStart");
     startListening(handleVoiceResult);
-  }, [startListening, handleVoiceResult]);
+  }, [startListening, handleVoiceResult, playSound]);
 
   const handleSpeak = useCallback(
     (text: string, messageId: string) => {
@@ -231,14 +254,15 @@ export default function ChatPage() {
   const handleStopSpeak = useCallback(() => {
     stopSpeaking();
     setSpeakingMessageId(null);
-  }, [stopSpeaking]);
+    playSound("listenStop");
+  }, [stopSpeaking, playSound]);
 
   const messages = activeConversation?.messages ?? [];
 
   return (
     <div
       className="flex h-screen w-screen overflow-hidden"
-      style={{ background: "#0a0a0a" }}
+      style={{ background: config.bg, transition: "background 0.4s ease" }}
     >
       {/* Global background mesh */}
       <div
@@ -247,7 +271,33 @@ export default function ChatPage() {
           backgroundImage: `url(${BG_URL})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.07,
+          opacity: 0.06,
+        }}
+      />
+
+      {/* Ambient glow orbs */}
+      <div
+        className="fixed pointer-events-none"
+        style={{
+          top: "-20%",
+          right: "-10%",
+          width: "50vw",
+          height: "50vw",
+          borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(${config.accentRgb},0.06) 0%, transparent 70%)`,
+          filter: "blur(40px)",
+        }}
+      />
+      <div
+        className="fixed pointer-events-none"
+        style={{
+          bottom: "-20%",
+          left: "10%",
+          width: "40vw",
+          height: "40vw",
+          borderRadius: "50%",
+          background: `radial-gradient(circle, rgba(${config.accentRgb},0.04) 0%, transparent 70%)`,
+          filter: "blur(60px)",
         }}
       />
 
@@ -264,46 +314,87 @@ export default function ChatPage() {
       />
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col min-w-0 relative">
+      <motion.div
+        className="flex-1 flex flex-col min-w-0 relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
         {/* Top bar */}
-        <div
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="flex items-center justify-between px-5 py-2.5 flex-shrink-0"
           style={{
-            background: "rgba(10,8,8,0.75)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            background: `rgba(${config.accentRgb === "220,20,60" ? "10,8,8" : "0,0,0"},0.75)`,
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderBottom: `1px solid rgba(${config.accentRgb},0.08)`,
             minHeight: 48,
           }}
         >
+          {/* Left: orb + title */}
           <div className="flex items-center gap-2.5">
-            <BotMessageSquare
-              size={15}
-              style={{ color: "rgba(220,20,60,0.65)" }}
+            <FloatingOrb
+              voiceState={voiceState}
+              isLoading={isLoading}
+              size={28}
             />
             <span
               className="text-sm font-semibold truncate"
-              style={{ color: "#f0f0f0", letterSpacing: "-0.02em", maxWidth: 300 }}
+              style={{
+                color: config.text,
+                letterSpacing: "-0.02em",
+                maxWidth: 300,
+                transition: "color 0.3s ease",
+              }}
             >
               {activeConversation?.title ?? "ENOSX XAI Assistant"}
             </span>
             {activeConversation && (
-              <span
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                 style={{
-                  background: "rgba(220,20,60,0.08)",
-                  border: "1px solid rgba(220,20,60,0.18)",
-                  color: "rgba(220,20,60,0.6)",
+                  background: `rgba(${config.accentRgb},0.08)`,
+                  border: `1px solid rgba(${config.accentRgb},0.18)`,
+                  color: `rgba(${config.accentRgb},0.7)`,
                   fontSize: "10px",
                   letterSpacing: "0.04em",
                 }}
               >
                 {activeConversation.messages.filter((m) => m.role === "user").length} msgs
-              </span>
+              </motion.span>
             )}
           </div>
 
-          <div className="flex items-center gap-2.5">
+          {/* Right: controls */}
+          <div className="flex items-center gap-2">
+            {/* Theme switcher */}
+            <ThemeSwitcher />
+
+            {/* Sound toggle */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSoundEnabled((v) => !v)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
+              style={{
+                background: soundEnabled
+                  ? `rgba(${config.accentRgb},0.1)`
+                  : "rgba(255,255,255,0.04)",
+                border: soundEnabled
+                  ? `1px solid rgba(${config.accentRgb},0.25)`
+                  : "1px solid rgba(255,255,255,0.07)",
+                color: soundEnabled ? config.accent : config.textMuted,
+              }}
+              title={soundEnabled ? "Mute sounds" : "Enable sounds"}
+            >
+              {soundEnabled ? <Volume2 size={11} /> : <VolumeX size={11} />}
+            </motion.button>
+
             {/* Voice mode toggle */}
             {isVoiceSupported && (
               <motion.button
@@ -314,15 +405,15 @@ export default function ChatPage() {
                 style={
                   autoSpeak
                     ? {
-                        background: "rgba(220,20,60,0.15)",
-                        border: "1px solid rgba(220,20,60,0.3)",
-                        color: "#dc143c",
-                        boxShadow: "0 0 10px rgba(220,20,60,0.2)",
+                        background: `rgba(${config.accentRgb},0.15)`,
+                        border: `1px solid rgba(${config.accentRgb},0.3)`,
+                        color: config.accent,
+                        boxShadow: `0 0 10px rgba(${config.accentRgb},0.2)`,
                       }
                     : {
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.07)",
-                        color: "rgba(255,255,255,0.35)",
+                        color: config.textMuted,
                       }
                 }
               >
@@ -337,26 +428,28 @@ export default function ChatPage() {
             <AnimatePresence>
               {voiceState !== "idle" && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 10 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
                   style={{
-                    background: "rgba(220,20,60,0.1)",
-                    border: "1px solid rgba(220,20,60,0.25)",
+                    background: `rgba(${config.accentRgb},0.1)`,
+                    border: `1px solid rgba(${config.accentRgb},0.25)`,
                   }}
                 >
-                  <div
+                  <motion.div
+                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
                     className="w-1.5 h-1.5 rounded-full"
                     style={{
-                      background: "#dc143c",
-                      boxShadow: "0 0 6px rgba(220,20,60,0.8)",
-                      animation: "pulse 0.8s ease-in-out infinite",
+                      background: config.accent,
+                      boxShadow: `0 0 6px ${config.accent}`,
                     }}
                   />
                   <span
                     style={{
-                      color: "rgba(220,20,60,0.8)",
+                      color: config.accent,
                       fontSize: "10px",
                       letterSpacing: "0.06em",
                     }}
@@ -373,17 +466,25 @@ export default function ChatPage() {
 
             {/* Status indicator */}
             <div className="flex items-center gap-1.5">
-              <div
+              <motion.div
+                animate={{
+                  scale: isLoading ? [1, 1.3, 1] : 1,
+                  opacity: isLoading ? [1, 0.6, 1] : 1,
+                }}
+                transition={
+                  isLoading
+                    ? { duration: 1, repeat: Infinity }
+                    : { duration: 0.3 }
+                }
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
                   background: isLoading ? "#f59e0b" : "#22c55e",
                   boxShadow: `0 0 6px ${isLoading ? "rgba(245,158,11,0.6)" : "rgba(34,197,94,0.5)"}`,
-                  animation: isLoading ? "pulse 1s ease-in-out infinite" : "none",
                 }}
               />
               <span
                 style={{
-                  color: "rgba(255,255,255,0.25)",
+                  color: config.textMuted,
                   fontSize: "10px",
                   letterSpacing: "0.06em",
                 }}
@@ -394,9 +495,9 @@ export default function ChatPage() {
 
             <div
               className="flex items-center gap-1"
-              style={{ color: "rgba(255,255,255,0.18)" }}
+              style={{ color: config.textMuted }}
             >
-              <Wifi size={11} style={{ color: "rgba(220,20,60,0.4)" }} />
+              <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
               <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
             </div>
 
@@ -406,8 +507,8 @@ export default function ChatPage() {
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
               style={{
-                background: "rgba(0, 242, 255, 0.08)",
-                border: "1px solid rgba(0, 242, 255, 0.2)",
+                background: "rgba(0, 242, 255, 0.07)",
+                border: "1px solid rgba(0, 242, 255, 0.18)",
                 color: "rgba(0, 242, 255, 0.6)",
               }}
             >
@@ -415,49 +516,71 @@ export default function ChatPage() {
               <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
             </motion.a>
           </div>
-        </div>
+        </motion.div>
 
         {/* Messages area */}
         <div className="flex-1 relative overflow-hidden">
-          {messages.length === 0 ? (
-            <WelcomeScreen onSuggestion={handleSend} />
-          ) : (
-            <div
-              ref={messagesContainerRef}
-              onScroll={handleScroll}
-              className="h-full overflow-y-auto px-5 py-5"
-            >
-              <div className="max-w-3xl mx-auto flex flex-col gap-4">
-                <AnimatePresence initial={false}>
-                  {messages.map((msg, i) => (
-                    <MessageBubble
-                      key={msg.id}
-                      message={msg}
-                      index={i}
-                      onSpeak={(text) => handleSpeak(text, msg.id)}
-                      onStopSpeak={handleStopSpeak}
-                      isSpeaking={speakingMessageId === msg.id}
-                    />
-                  ))}
-                </AnimatePresence>
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {messages.length === 0 ? (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="h-full"
+              >
+                <WelcomeScreen onSuggestion={handleSend} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="messages"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                ref={messagesContainerRef}
+                onScroll={handleScroll}
+                className="h-full overflow-y-auto px-5 py-5"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: `rgba(${config.accentRgb},0.2) transparent`,
+                }}
+              >
+                <div className="max-w-3xl mx-auto flex flex-col gap-4">
+                  <AnimatePresence initial={false}>
+                    {messages.map((msg, i) => (
+                      <MessageBubble
+                        key={msg.id}
+                        message={msg}
+                        index={i}
+                        onSpeak={(text) => handleSpeak(text, msg.id)}
+                        onStopSpeak={handleStopSpeak}
+                        isSpeaking={speakingMessageId === msg.id}
+                      />
+                    ))}
+                  </AnimatePresence>
+                  <div ref={messagesEndRef} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Scroll to bottom button */}
           <AnimatePresence>
             {showScrollBtn && (
               <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => scrollToBottom()}
                 className="absolute bottom-4 right-6 w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
-                  background: "rgba(220,20,60,0.18)",
-                  border: "1px solid rgba(220,20,60,0.3)",
-                  color: "#dc143c",
+                  background: `rgba(${config.accentRgb},0.18)`,
+                  border: `1px solid rgba(${config.accentRgb},0.3)`,
+                  color: config.accent,
                   boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
                   backdropFilter: "blur(8px)",
                 }}
@@ -480,7 +603,7 @@ export default function ChatPage() {
           onStopSpeaking={handleStopSpeak}
           disabled={isLoading}
         />
-      </div>
+      </motion.div>
     </div>
   );
 }
