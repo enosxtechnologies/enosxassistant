@@ -35,6 +35,8 @@ import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
+import MemoryBank from "@/components/MemoryBank";
+import AutoContextIndicator from "@/components/AutoContextIndicator";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -45,6 +47,8 @@ import { useActiveWindow } from "@/contexts/WindowContext";
 import { useFileContext } from "@/hooks/useFileContext";
 import { useClipboardListener } from "@/hooks/useClipboardListener";
 import { useGodMode } from "@/hooks/useGodMode";
+import { useMemoryBank } from "@/hooks/useMemoryBank";
+import { useAutoContext } from "@/hooks/useAutoContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
@@ -110,6 +114,10 @@ export default function ChatPage() {
     dismiss: dismissClipboard,
     consume: consumeClipboard,
   } = useClipboardListener();
+
+  // Memory & Auto-Context Hooks
+  const { memories, addMemory, removeMemory, getMemoryContext } = useMemoryBank();
+  const { autoContext, getAutoContextMessage } = useAutoContext();
 
   // GOD MODE state
   const [isGodModeActive, setIsGodModeActive] = useState(false);
@@ -256,7 +264,17 @@ export default function ChatPage() {
       }
 
       const allMessages = [...currentMessages, userMessage];
-      const contextEnrichedMessages = enrichMessageWithContext(allMessages, activeWindow);
+      
+      // Inject Long-Term Memory and Auto-Context into the prompt
+      const memoryContext = getMemoryContext();
+      const autoAppContext = getAutoContextMessage();
+      
+      const enrichedUserMessage = {
+        ...userMessage,
+        content: userMessage.content + memoryContext + autoAppContext
+      };
+
+      const contextEnrichedMessages = enrichMessageWithContext([...currentMessages, enrichedUserMessage], activeWindow);
       let fullResponse = "";
 
       await sendMessage(
@@ -390,15 +408,23 @@ export default function ChatPage() {
 
       {/* Sidebar */}
       <Sidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         conversations={conversations}
         activeId={activeId}
         onSelect={setActiveId}
         onNew={createNewChat}
         onDelete={deleteConversation}
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         isPro={isPro}
-      />
+      >
+        <div className="mt-auto px-2 pb-4">
+          <MemoryBank 
+            memories={memories} 
+            onRemove={removeMemory} 
+            onAdd={addMemory} 
+          />
+        </div>
+      </Sidebar>
 
       {/* Main area */}
       <motion.div
@@ -553,6 +579,9 @@ export default function ChatPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Auto-Context Indicator */}
+            <AutoContextIndicator data={autoContext} />
 
             {/* Status indicator */}
             <div className="flex items-center gap-1.5">

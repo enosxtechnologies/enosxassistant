@@ -18,6 +18,7 @@ interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   isPro?: boolean;
+  children?: React.ReactNode;
 }
 
 export default function Sidebar({
@@ -29,6 +30,7 @@ export default function Sidebar({
   collapsed,
   onToggle,
   isPro = false,
+  children,
 }: SidebarProps) {
   const { config } = useTheme();
 
@@ -247,6 +249,9 @@ export default function Sidebar({
           </motion.div>
         )}
       </div>
+
+      {/* Custom Children (Memory Bank) */}
+      {!collapsed && children}
 
       {/* Footer */}
       <AnimatePresence>
