@@ -1,7 +1,12 @@
 /*
- * Assistant — CommandBar
+ * ENOSX XAI — CommandBar
  * Floating pill command bar with voice visualization, micro-interactions
  * Features: auto-resize textarea, voice input, animated send button, glassmorphism
+ *
+ * Voice interaction now uses the "Pulse" orb overlay:
+ *   Cyan/Blue  → Listening
+ *   Purple/Pink → Processing
+ *   White Sparkle → Completed
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -195,7 +200,7 @@ export default function CommandBar({
                   ? "Listening..."
                   : isSpeaking
                   ? "Speaking..."
-                  : "Ask anything..."
+                  : "Ask ENOSX AI anything..."
               }
               rows={1}
               disabled={disabled && !isListening}
@@ -304,7 +309,7 @@ export default function CommandBar({
             style={{ color: config.textMuted, fontSize: "10px", letterSpacing: "0.04em" }}
           >
             {isListening
-              ? "Speak now — tap anywhere to stop"
+              ? "Speak now — tap orb or mic to stop"
               : "Enter to send · Shift+Enter for new line"}
           </motion.p>
         </motion.div>

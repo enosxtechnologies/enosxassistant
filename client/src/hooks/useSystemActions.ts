@@ -1,11 +1,9 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useCommandChain, type SystemAction } from "./useCommandChain";
-import { useActiveWindow } from "@/contexts/WindowContext";
 
 export function useSystemActions() {
   const { executeChain } = useCommandChain();
-  const { openApp, openTab } = useActiveWindow();
 
   const parseActions = useCallback((text: string): SystemAction[] => {
     const actions: SystemAction[] = [];
@@ -38,12 +36,12 @@ export function useSystemActions() {
         try {
           if (action.type === "open_url") {
             if (!action.url) throw new Error("Missing URL");
-            openTab(action.url);
+            window.open(action.url, "_blank");
             toast.success(`Opening tab: ${action.url}`);
           } else if (action.type === "launch_app") {
             if (!action.app) throw new Error("Missing app name");
-            openApp(action.app);
-            toast.info(`Switching to: ${action.app}`);
+            console.log(`LAUNCH_APP_INTENT: ${action.app}`);
+            toast.info(`Launching: ${action.app}`);
           }
         } catch (e) {
           toast.error(`Action failed: ${e instanceof Error ? e.message : String(e)}`);
@@ -54,7 +52,7 @@ export function useSystemActions() {
         await executeChain(actions);
       }
     },
-    [parseActions, executeChain, openApp, openTab]
+    [parseActions, executeChain]
   );
 
   return { executeAction };

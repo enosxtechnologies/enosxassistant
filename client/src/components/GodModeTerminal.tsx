@@ -1,11 +1,11 @@
 /*
- * Assistant — GodModeTerminal
+ * ENOSX XAI — GodModeTerminal
  * A full-screen, high-security developer terminal for system overrides
  * and high-end cyberpunk styling.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, Cpu, Database, Users, Zap } from "lucide-react";
+import { X, ShieldAlert, Cpu, Database, Users, Zap, Brain } from "lucide-react";
 import { MemoryEntry } from "@/hooks/useMemoryBank";
 import MemoryBank from "./MemoryBank";
 
@@ -37,13 +37,13 @@ export default function GodModeTerminal({
     {
       id: "init",
       type: "system",
-      content: "Secure Kernel v4.2.0-stable loaded.",
+      content: "ENOSX Secure Kernel v4.2.0-stable loaded.",
       timestamp: new Date(),
     },
     {
       id: "auth",
       type: "system",
-      content: "Authentication successful. Welcome, Root User.",
+      content: "Authentication successful. Welcome, Root User Enosh.",
       timestamp: new Date(),
     }
   ]);
@@ -69,7 +69,7 @@ export default function GodModeTerminal({
     if (isOpen && history.length === 2) {
       const hour = new Date().getHours();
       let suggestion = "";
-      if (hour >= 9 && hour <= 11) suggestion = "Morning session initialized. Shall I prepare your development environment?";
+      if (hour >= 9 && hour <= 11) suggestion = "Enosh, it's morning. Shall I initialize your dev environment?";
       else if (hour >= 22 || hour <= 4) suggestion = "Late night session detected. Optimization mode recommended.";
       else suggestion = "System ready for deployment. What's the focus today?";
 
@@ -183,7 +183,7 @@ export default function GodModeTerminal({
             <div className="p-4 border-b flex items-center justify-between bg-black/40" style={{ borderColor: "rgba(0, 242, 255, 0.1)" }}>
               <div className="flex items-center gap-3">
                 <ShieldAlert size={18} className="text-cyan-400 animate-pulse" />
-                <span className="text-xs font-bold tracking-[0.3em] text-cyan-400 uppercase">System Core Controller</span>
+                <span className="text-xs font-bold tracking-[0.3em] text-cyan-400 uppercase">ENOSX Core Controller</span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-[10px] text-cyan-400/40 font-mono">
@@ -240,7 +240,7 @@ export default function GodModeTerminal({
 
                 {/* Terminal Input Form */}
                 <form onSubmit={handleCommand} className="p-4 border-t flex items-center gap-3" style={{ borderColor: "rgba(0, 242, 255, 0.2)", background: "rgba(0, 242, 255, 0.02)" }}>
-                  <span className="text-cyan-400 font-bold font-mono">root@system:~$</span>
+                  <span className="text-cyan-400 font-bold font-mono">enosh@enosx:~$</span>
                   <input
                     ref={inputRef}
                     type="text"

@@ -29,16 +29,6 @@ export function useVoice() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       synthRef.current = window.speechSynthesis;
-      // Ensure voices are loaded
-      const loadVoices = () => {
-        if (synthRef.current) {
-          synthRef.current.getVoices();
-        }
-      };
-      loadVoices();
-      if (synthRef.current.onvoiceschanged !== undefined) {
-        synthRef.current.onvoiceschanged = loadVoices;
-      }
     }
     return () => {
       stopListening();
@@ -132,18 +122,17 @@ export function useVoice() {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Smooth lady/assistant voice profile
-    utterance.rate = 1.0; 
-    utterance.pitch = 1.1; // Slightly higher pitch for a lady voice
+    // Deep smooth voice profile
+    utterance.rate = 0.95; // Slightly slower for more gravitas
+    utterance.pitch = 0.85; // Lower pitch for a deeper, more authoritative tone
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
-    // Prioritize high-quality lady voices
+    // Prioritize premium male voices for the "deep" effect
     const preferredVoice = 
-      voices.find(v => v.name.includes("Google UK English Female") || v.name.includes("Microsoft Zira")) ||
-      voices.find(v => v.name.includes("Samantha") || v.name.includes("Female") || v.name.includes("Woman")) ||
+      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Google US English Male")) ||
+      voices.find(v => v.name.includes("Male") || v.name.includes("Guy")) ||
       voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
-      voices.find(v => v.lang === "en-GB") ||
       voices.find(v => v.lang === "en-US");
       
     if (preferredVoice) utterance.voice = preferredVoice;

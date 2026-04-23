@@ -19,16 +19,12 @@ export interface ActiveWindow {
   appName: string;
   windowTitle: string;
   isDetected: boolean;
-  isMinimized: boolean;
 }
 
 interface WindowContextType {
   activeWindow: ActiveWindow;
   updateActiveWindow: (app: Partial<ActiveWindow>) => void;
   simulateActiveWindow: (appType: AppType) => void;
-  openApp: (app: string) => void;
-  openTab: (url: string) => void;
-  isSwitching: boolean;
 }
 
 const WindowContext = createContext<WindowContextType | undefined>(undefined);
@@ -67,12 +63,10 @@ function detectAppType(title: string): AppType {
 export function WindowContextProvider({ children }: { children: ReactNode }) {
   const [activeWindow, setActiveWindow] = useState<ActiveWindow>({
     appType: "unknown",
-    appName: "System",
-    windowTitle: "Active",
+    appName: "Unknown App",
+    windowTitle: "No active window detected",
     isDetected: false,
-    isMinimized: false,
   });
-  const [isSwitching, setIsSwitching] = useState(false);
 
   const updateActiveWindow = useCallback((app: Partial<ActiveWindow>) => {
     setActiveWindow((prev) => ({
@@ -81,31 +75,6 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
       isDetected: true,
     }));
   }, []);
-
-  const openApp = useCallback((app: string) => {
-    setIsSwitching(true);
-    // Simulate opening an app by updating window state
-    const type = detectAppType(app);
-    updateActiveWindow({
-      appType: type,
-      appName: app,
-      windowTitle: `${app} - Initializing...`,
-      isMinimized: true, // Start in small window mode as requested
-    });
-    setTimeout(() => setIsSwitching(false), 2000);
-  }, [updateActiveWindow]);
-
-  const openTab = useCallback((url: string) => {
-    setIsSwitching(true);
-    window.open(url, "_blank");
-    updateActiveWindow({
-      appType: "chrome",
-      appName: "Browser",
-      windowTitle: url,
-      isMinimized: true,
-    });
-    setTimeout(() => setIsSwitching(false), 2000);
-  }, [updateActiveWindow]);
 
   const simulateActiveWindow = useCallback((appType: AppType) => {
     const appNames: Record<AppType, string> = {
@@ -128,10 +97,10 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
       appName: appNames[appType],
       windowTitle: `${appNames[appType]} - Active`,
       isDetected: true,
-      isMinimized: false,
     });
   }, []);
 
+  // Detect active window from document title and focus events
   useEffect(() => {
     const handleFocus = () => {
       const title = document.title;
@@ -140,10 +109,10 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
         appType,
         appName: title.split(" - ")[0] || "Browser Tab",
         windowTitle: title,
-        isMinimized: false,
       });
     };
 
+    // Listen for title changes
     const observer = new MutationObserver(() => {
       handleFocus();
     });
@@ -154,11 +123,8 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
     });
 
     window.addEventListener("focus", handleFocus);
-    // When switching tabs or windows, trigger the "small window" effect
-    window.addEventListener("blur", () => {
-      setActiveWindow(prev => ({ ...prev, isMinimized: true }));
-    });
 
+    // Initial detection
     handleFocus();
 
     return () => {
@@ -168,14 +134,7 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
   }, [updateActiveWindow]);
 
   return (
-    <WindowContext.Provider value={{ 
-      activeWindow, 
-      updateActiveWindow, 
-      simulateActiveWindow, 
-      openApp, 
-      openTab,
-      isSwitching 
-    }}>
+    <WindowContext.Provider value={{ activeWindow, updateActiveWindow, simulateActiveWindow }}>
       {children}
     </WindowContext.Provider>
   );
