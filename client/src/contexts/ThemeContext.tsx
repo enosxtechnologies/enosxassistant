@@ -120,16 +120,29 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
+    
+    // Remove all theme classes
     root.classList.remove("dark", "light", "neon", "cyberpunk", "minimal");
+    body.classList.remove("dark", "light", "neon", "cyberpunk", "minimal");
+    
+    // Add current theme class to both html and body
     root.classList.add(theme);
-    root.style.setProperty("--accent", config.accent);
-    root.style.setProperty("--accent-rgb", config.accentRgb);
-    root.style.setProperty("--bg", config.bg);
-    root.style.setProperty("--surface", config.surface);
-    root.style.setProperty("--text", config.text);
-    root.style.setProperty("--text-muted", config.textMuted);
-    root.style.setProperty("--border-color", config.border);
-    root.style.setProperty("--glow", config.glow);
+    body.classList.add(theme);
+    
+    // Set ENOSX custom properties
+    root.style.setProperty("--enosx-accent", config.accent);
+    root.style.setProperty("--enosx-accent-rgb", config.accentRgb);
+    root.style.setProperty("--enosx-bg", config.bg);
+    root.style.setProperty("--enosx-surface", config.surface);
+    root.style.setProperty("--enosx-text", config.text);
+    root.style.setProperty("--enosx-text-muted", config.textMuted);
+    root.style.setProperty("--enosx-border", config.border);
+    root.style.setProperty("--enosx-glow", config.glow);
+    
+    // Also set background color directly on body for immediate effect
+    body.style.backgroundColor = config.bg;
+    body.style.color = config.text;
   }, [theme, config]);
 
   return (

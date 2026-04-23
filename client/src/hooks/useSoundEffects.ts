@@ -95,20 +95,43 @@ export function useSoundEffects() {
           break;
 
         case "godMode":
-          // High-tech "System Override" sequence
-          // 1. Low bass pulse
-          playTone(ctx, 60, 1.2, "sine", 0.15);
-          // 2. Rising digital sweep
-          for (let i = 0; i < 8; i++) {
+          // EPIC 2-second "System Override" cinematic sequence
+          // Phase 1: Deep cinematic bass rumble (0-400ms)
+          playTone(ctx, 35, 0.8, "sine", 0.2);
+          setTimeout(() => playTone(ctx, 45, 0.6, "sine", 0.18), 100);
+          setTimeout(() => playTone(ctx, 55, 0.5, "sine", 0.15), 200);
+          
+          // Phase 2: Rising digital sweep with multiple harmonics (200-800ms)
+          for (let i = 0; i < 12; i++) {
             setTimeout(() => {
-              playTone(ctx, 200 + i * 150, 0.1, "square", 0.03);
-            }, i * 80);
+              playTone(ctx, 150 + i * 100, 0.12, "square", 0.04);
+              playTone(ctx, 300 + i * 50, 0.08, "sawtooth", 0.02);
+            }, 200 + i * 50);
           }
-          // 3. Final high chime
+          
+          // Phase 3: Power surge pulse (800-1200ms)
           setTimeout(() => {
-            playTone(ctx, 1200, 0.4, "sine", 0.08);
-            playTone(ctx, 1800, 0.3, "sine", 0.05);
-          }, 700);
+            playTone(ctx, 80, 0.4, "sine", 0.25);
+            playTone(ctx, 160, 0.3, "triangle", 0.1);
+          }, 800);
+          
+          // Phase 4: Activation chime sequence (1200-1600ms)
+          setTimeout(() => {
+            playTone(ctx, 880, 0.25, "sine", 0.12);
+          }, 1200);
+          setTimeout(() => {
+            playTone(ctx, 1100, 0.2, "sine", 0.1);
+          }, 1350);
+          setTimeout(() => {
+            playTone(ctx, 1320, 0.15, "sine", 0.08);
+          }, 1450);
+          
+          // Phase 5: Final ethereal confirmation (1600-2000ms)
+          setTimeout(() => {
+            playTone(ctx, 1760, 0.4, "sine", 0.1);
+            playTone(ctx, 2200, 0.35, "sine", 0.06);
+            playTone(ctx, 880, 0.5, "sine", 0.05); // Undertone
+          }, 1600);
           break;
       }
     } catch {

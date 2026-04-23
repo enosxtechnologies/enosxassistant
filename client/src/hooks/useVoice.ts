@@ -118,22 +118,42 @@ export function useVoice() {
       .replace(/>\s/g, "")
       .trim();
 
+    // Skip empty text
+    if (!cleanText) {
+      onEnd?.();
+      return;
+    }
+
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Deep smooth voice profile
-    utterance.rate = 0.95; // Slightly slower for more gravitas
-    utterance.pitch = 0.85; // Lower pitch for a deeper, more authoritative tone
+    // Female AI assistant voice profile (Jarvis-like but feminine)
+    utterance.rate = 1.0; // Natural speaking pace
+    utterance.pitch = 1.15; // Slightly higher for feminine tone
     utterance.volume = 1;
 
+    // Wait for voices to load
     const voices = synthRef.current.getVoices();
-    // Prioritize premium male voices for the "deep" effect
+    
+    // Prioritize premium female voices for a sophisticated AI assistant feel
     const preferredVoice = 
-      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Google US English Male")) ||
-      voices.find(v => v.name.includes("Male") || v.name.includes("Guy")) ||
-      voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
-      voices.find(v => v.lang === "en-US");
+      // Microsoft premium female voices (best quality on Windows)
+      voices.find(v => v.name.includes("Microsoft Zira")) ||
+      voices.find(v => v.name.includes("Microsoft Eva")) ||
+      voices.find(v => v.name.includes("Microsoft Aria")) ||
+      // Google female voices
+      voices.find(v => v.name.includes("Google US English") && !v.name.includes("Male")) ||
+      // Apple female voices (macOS/iOS)
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.name.includes("Karen")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      // Generic female voice fallbacks
+      voices.find(v => v.name.toLowerCase().includes("female") && v.lang.startsWith("en")) ||
+      voices.find(v => (v.name.includes("Fiona") || v.name.includes("Moira")) && v.lang.startsWith("en")) ||
+      // Any English voice as last resort
+      voices.find(v => v.lang === "en-US") ||
+      voices.find(v => v.lang.startsWith("en"));
       
     if (preferredVoice) utterance.voice = preferredVoice;
 
