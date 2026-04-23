@@ -63,9 +63,13 @@ export default function MemoryBank({ memories, onRemove, onAdd }: MemoryBankProp
                         style={{ 
                           background: memory.category === 'preference' ? 'rgba(34,197,94,0.1)' : 
                                       memory.category === 'project' ? 'rgba(59,130,246,0.1)' : 
+                                      memory.category === 'skill' ? 'rgba(0,242,255,0.1)' :
+                                      memory.category === 'agent' ? 'rgba(236,72,153,0.1)' :
                                       'rgba(168,85,247,0.1)',
                           color: memory.category === 'preference' ? '#22c55e' : 
                                  memory.category === 'project' ? '#3b82f6' : 
+                                 memory.category === 'skill' ? '#00f2ff' :
+                                 memory.category === 'agent' ? '#ec4899' :
                                  '#a855f7'
                         }}
                       >

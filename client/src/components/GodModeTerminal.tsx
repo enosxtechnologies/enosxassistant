@@ -5,13 +5,13 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, Cpu, Database } from "lucide-react";
+import { X, ShieldAlert, Cpu, Database, Users, Zap, Brain } from "lucide-react";
 import { MemoryEntry } from "@/hooks/useMemoryBank";
 import MemoryBank from "./MemoryBank";
 
 interface TerminalLine {
   id: string;
-  type: "input" | "output" | "system" | "error";
+  type: "input" | "output" | "system" | "error" | "predictive";
   content: string;
   timestamp: Date;
 }
@@ -21,7 +21,7 @@ interface GodModeTerminalProps {
   onClose: () => void;
   onExecute: (command: string) => Promise<string>;
   memories: MemoryEntry[];
-  onAddMemory: (category: MemoryEntry["category"], content: string) => void;
+  onAddMemory: (category: MemoryEntry["category"], content: string, metadata?: any) => void;
   onRemoveMemory: (id: string) => void;
 }
 
@@ -64,6 +64,21 @@ export default function GodModeTerminal({
     ]);
   }, []);
 
+  // Predictive Workflow Logic
+  useEffect(() => {
+    if (isOpen && history.length === 2) {
+      const hour = new Date().getHours();
+      let suggestion = "";
+      if (hour >= 9 && hour <= 11) suggestion = "Enosh, it's morning. Shall I initialize your dev environment?";
+      else if (hour >= 22 || hour <= 4) suggestion = "Late night session detected. Optimization mode recommended.";
+      else suggestion = "System ready for deployment. What's the focus today?";
+
+      setTimeout(() => {
+        addLine("predictive", `[PROACTIVE SUGGESTION] ${suggestion}`);
+      }, 1000);
+    }
+  }, [isOpen, addLine]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -84,25 +99,39 @@ export default function GodModeTerminal({
     addLine("input", cmd);
     setInput("");
 
-    if (cmd.toLowerCase() === "clear") {
-      setHistory([
-        {
-          id: "clear-" + Date.now(),
-          type: "system",
-          content: "Terminal buffer cleared. Secure session active.",
-          timestamp: new Date(),
-        }
-      ]);
+    const cmdLower = cmd.toLowerCase();
+
+    // 1. DYNAMIC SKILLS ENGINE
+    if (cmdLower.startsWith("skill add ")) {
+      const content = cmd.substring(10).trim();
+      if (content) {
+        onAddMemory("skill", content);
+        addLine("system", `NEW SKILL ACQUIRED: "${content}"`);
+        return;
+      }
+    }
+
+    // 2. MULTI-AGENT ORCHESTRATION
+    if (cmdLower.startsWith("spawn ")) {
+      const agentName = cmd.substring(6).trim();
+      if (agentName) {
+        onAddMemory("agent", `Persona: ${agentName}`);
+        addLine("system", `AGENT DEPLOYED: ${agentName.toUpperCase()} is now monitoring this session.`);
+        return;
+      }
+    }
+
+    if (cmdLower === "clear") {
+      setHistory([{ id: "clear-" + Date.now(), type: "system", content: "Terminal buffer cleared. Secure session active.", timestamp: new Date() }]);
       return;
     }
 
-    if (cmd.toLowerCase() === "exit") {
+    if (cmdLower === "exit") {
       onClose();
       return;
     }
 
-    // Specialized Memory Commands
-    if (cmd.toLowerCase().startsWith("memo ")) {
+    if (cmdLower.startsWith("memo ")) {
       const content = cmd.substring(5).trim();
       if (content) {
         onAddMemory("fact", content);
@@ -111,11 +140,11 @@ export default function GodModeTerminal({
       }
     }
 
-    if (cmd.toLowerCase() === "ls memo") {
+    if (cmdLower === "ls memo") {
       if (memories.length === 0) {
         addLine("system", "No memory entries found in core.");
       } else {
-        addLine("system", `Listing ${memories.length} active memory entries:`);
+        addLine("system", `Listing ${memories.length} active core entries:`);
         memories.forEach((m, i) => {
           addLine("system", `${i + 1}. [${m.category.toUpperCase()}] ${m.content}`);
         });
@@ -154,14 +183,21 @@ export default function GodModeTerminal({
             <div className="p-4 border-b flex items-center justify-between bg-black/40" style={{ borderColor: "rgba(0, 242, 255, 0.1)" }}>
               <div className="flex items-center gap-3">
                 <ShieldAlert size={18} className="text-cyan-400 animate-pulse" />
-                <span className="text-xs font-bold tracking-[0.3em] text-cyan-400 uppercase">Secure Root Console</span>
+                <span className="text-xs font-bold tracking-[0.3em] text-cyan-400 uppercase">ENOSX Core Controller</span>
               </div>
-              <button 
-                onClick={onClose}
-                className="p-1 hover:bg-white/10 rounded-md transition-colors text-white/50 hover:text-white"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-[10px] text-cyan-400/40 font-mono">
+                  <Users size={12} />
+                  <span>AGENTS ACTIVE: {memories.filter(m => m.category === 'agent').length}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] text-cyan-400/40 font-mono">
+                  <Zap size={12} />
+                  <span>SKILLS: {memories.filter(m => m.category === 'skill').length}</span>
+                </div>
+                <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-md transition-colors text-white/50 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Main Layout Split View */}
@@ -184,6 +220,7 @@ export default function GodModeTerminal({
                             line.type === "input" ? "text-cyan-400" :
                             line.type === "error" ? "text-red-400" :
                             line.type === "system" ? "text-white/40 italic" :
+                            line.type === "predictive" ? "text-yellow-400 font-bold" :
                             "text-white/90"
                           }
                         >
@@ -195,26 +232,14 @@ export default function GodModeTerminal({
                   ))}
                   {isExecuting && (
                     <div className="flex gap-3 items-center">
-                      <span className="opacity-30 select-none">
-                        [{new Date().toLocaleTimeString([], { hour12: false })}]
-                      </span>
-                      <motion.div 
-                        animate={{ opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                        className="text-cyan-400"
-                      >
-                        Processing command...
-                      </motion.div>
+                      <span className="opacity-30 select-none">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
+                      <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1, repeat: Infinity }} className="text-cyan-400">Processing...</motion.div>
                     </div>
                   )}
                 </div>
 
                 {/* Terminal Input Form */}
-                <form 
-                  onSubmit={handleCommand}
-                  className="p-4 border-t flex items-center gap-3"
-                  style={{ borderColor: "rgba(0, 242, 255, 0.2)", background: "rgba(0, 242, 255, 0.02)" }}
-                >
+                <form onSubmit={handleCommand} className="p-4 border-t flex items-center gap-3" style={{ borderColor: "rgba(0, 242, 255, 0.2)", background: "rgba(0, 242, 255, 0.02)" }}>
                   <span className="text-cyan-400 font-bold font-mono">enosh@enosx:~$</span>
                   <input
                     ref={inputRef}
@@ -231,26 +256,20 @@ export default function GodModeTerminal({
               </div>
 
               {/* Right Side Panel: Memory Bank */}
-              <div 
-                className="w-80 border-l p-4 overflow-y-auto bg-black/20"
-                style={{ borderColor: "rgba(0, 242, 255, 0.1)" }}
-              >
+              <div className="w-80 border-l p-4 overflow-y-auto bg-black/20" style={{ borderColor: "rgba(0, 242, 255, 0.1)" }}>
                 <div className="mb-6 flex items-center gap-2 text-cyan-400">
                   <Database size={16} />
                   <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Core Memory Bank</span>
                 </div>
-                <MemoryBank 
-                  memories={memories} 
-                  onRemove={onRemoveMemory} 
-                  onAdd={onAddMemory} 
-                />
+                <MemoryBank memories={memories} onRemove={onRemoveMemory} onAdd={onAddMemory} />
                 <div className="mt-8 p-3 rounded-lg bg-cyan-400/5 border border-cyan-400/10">
                   <p className="text-[9px] text-cyan-400/60 leading-relaxed font-mono">
-                    COMMANDS:<br/>
-                    - memo [text]: Add new fact<br/>
+                    ADVANCED COMMANDS:<br/>
+                    - skill add [text]: Teach new skill<br/>
+                    - spawn [name]: Deploy sub-agent<br/>
+                    - memo [text]: Log core fact<br/>
                     - ls memo: List entries<br/>
-                    - clear: Reset terminal<br/>
-                    - exit: Close GOD MODE
+                    - clear / exit
                   </p>
                 </div>
               </div>
