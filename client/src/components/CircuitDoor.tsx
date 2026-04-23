@@ -4,7 +4,7 @@
  * Used when entering "GOD MODE".
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface CircuitDoorProps {
   isActive: boolean;
@@ -13,19 +13,62 @@ interface CircuitDoorProps {
 
 export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDoorProps) {
   const [showText, setShowText] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "closing" | "display" | "opening">("idle");
+  const hasCalledComplete = useRef(false);
 
   useEffect(() => {
-    if (isActive) {
-      const timer = setTimeout(() => setShowText(true), 400);
-      return () => clearTimeout(timer);
-    } else {
+    if (isActive && phase === "idle") {
+      hasCalledComplete.current = false;
+      setPhase("closing"); // Doors slide in
+    } else if (!isActive) {
+      setPhase("idle");
       setShowText(false);
+      hasCalledComplete.current = false;
     }
-  }, [isActive]);
+  }, [isActive, phase]);
+
+  useEffect(() => {
+    if (phase === "closing") {
+      // Doors have started closing, show text after a short delay
+      const textTimer = setTimeout(() => setShowText(true), 600);
+      // Move to display phase
+      const displayTimer = setTimeout(() => setPhase("display"), 800);
+      return () => {
+        clearTimeout(textTimer);
+        clearTimeout(displayTimer);
+      };
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "display") {
+      // Show the text for a moment, then open the doors
+      const openTimer = setTimeout(() => {
+        setPhase("opening");
+      }, 1500);
+      return () => clearTimeout(openTimer);
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "opening") {
+      // Doors are opening, trigger callback after animation
+      const completeTimer = setTimeout(() => {
+        if (!hasCalledComplete.current && onAnimationComplete) {
+          hasCalledComplete.current = true;
+          onAnimationComplete();
+        }
+      }, 1000);
+      return () => clearTimeout(completeTimer);
+    }
+  }, [phase, onAnimationComplete]);
+
+  // Determine if doors should be visible
+  const showDoors = phase === "closing" || phase === "display";
 
   return (
-    <AnimatePresence onExitComplete={onAnimationComplete}>
-      {isActive && (
+    <AnimatePresence>
+      {showDoors && (
         <motion.div
           key="circuit-door-container"
           className="fixed inset-0 z-[200] flex pointer-events-none"
