@@ -134,13 +134,6 @@ export default function ChatPage() {
     }
   }, [isGodModeActive]);
 
-  const executeGodCommand = useCallback(async (command: string) => {
-    // Forward command to AI for processing
-    const prompt = `[GOD MODE COMMAND] ${command}`;
-    await handleSend(prompt);
-    return "Command executed via ENOSX Core.";
-  }, [handleSend]);
-
   // Sync sound enabled state
   useEffect(() => {
     setSoundFn(soundEnabled);
@@ -299,8 +292,15 @@ export default function ChatPage() {
         }
       );
     },
-    [sendMessage, speak, autoSpeak, playSound]
+    [sendMessage, speak, autoSpeak, playSound, executeAction, enrichMessageWithContext, activeWindow, fileContext.isLoaded, getFileContextMessage, clearFile]
   );
+
+  const executeGodCommand = useCallback(async (command: string) => {
+    // Forward command to AI for processing
+    const prompt = `[GOD MODE COMMAND] ${command}`;
+    await handleSend(prompt);
+    return "Command executed via ENOSX Core.";
+  }, [handleSend]);
 
   const handleVoiceResult = useCallback(
     (text: string) => {
