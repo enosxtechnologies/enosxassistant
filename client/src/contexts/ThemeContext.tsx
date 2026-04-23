@@ -97,8 +97,9 @@ export function ThemeProvider({
   defaultTheme?: Theme;
 }) {
   const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return defaultTheme;
     try {
-      const stored = localStorage.getItem("enosx-theme") as Theme | null;
+      const stored = localStorage.getItem("assistant-theme") as Theme | null;
       return stored && THEMES[stored] ? stored : defaultTheme;
     } catch {
       return defaultTheme;
@@ -109,7 +110,9 @@ export function ThemeProvider({
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    try { localStorage.setItem("enosx-theme", t); } catch {}
+    if (typeof window !== "undefined") {
+      try { localStorage.setItem("assistant-theme", t); } catch {}
+    }
   };
 
   const toggleTheme = () => {
@@ -120,8 +123,12 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = document.documentElement;
+    // Remove all possible theme classes
     root.classList.remove("dark", "light", "neon", "cyberpunk", "minimal");
+    // Add current theme class
     root.classList.add(theme);
+    
+    // Set CSS variables for Tailwind and components
     root.style.setProperty("--accent", config.accent);
     root.style.setProperty("--accent-rgb", config.accentRgb);
     root.style.setProperty("--bg", config.bg);
@@ -130,6 +137,16 @@ export function ThemeProvider({
     root.style.setProperty("--text-muted", config.textMuted);
     root.style.setProperty("--border-color", config.border);
     root.style.setProperty("--glow", config.glow);
+    
+    // Update global enosx variables too for legacy CSS
+    root.style.setProperty("--enosx-accent", config.accent);
+    root.style.setProperty("--enosx-accent-rgb", config.accentRgb);
+    root.style.setProperty("--enosx-bg", config.bg);
+    root.style.setProperty("--enosx-surface", config.surface);
+    root.style.setProperty("--enosx-text", config.text);
+    root.style.setProperty("--enosx-text-muted", config.textMuted);
+    root.style.setProperty("--enosx-border", config.border);
+    root.style.setProperty("--enosx-glow", config.glow);
   }, [theme, config]);
 
   return (

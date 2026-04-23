@@ -1,8 +1,7 @@
 /*
- * ENOSX XAI — useSoundEffects
+ * Assistant — useSoundEffects
  * Subtle UI sound effects using Web Audio API
- * Sounds: click, send, receive, listen-start, listen-stop
- * All sounds are synthesized — no external files needed
+ * Sounds: click, send, receive, listen-start, listen-stop, godMode
  */
 
 import { useCallback, useRef } from "react";
@@ -23,20 +22,25 @@ function playTone(
   duration: number,
   type: OscillatorType = "sine",
   gainVal = 0.08,
-  fadeOut = true
+  fadeOut = true,
+  startTime?: number
 ) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
+  const start = startTime ?? ctx.currentTime;
+  
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.type = type;
-  osc.frequency.setValueAtTime(freq, ctx.currentTime);
-  gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+  osc.frequency.setValueAtTime(freq, start);
+  gain.gain.setValueAtTime(gainVal, start);
+  
   if (fadeOut) {
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
   }
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + duration);
+  
+  osc.start(start);
+  osc.stop(start + duration);
 }
 
 export function useSoundEffects() {
@@ -61,54 +65,61 @@ export function useSoundEffects() {
     try {
       switch (sound) {
         case "click":
-          // Soft tick
           playTone(ctx, 800, 0.08, "sine", 0.05);
           break;
 
         case "send":
-          // Rising two-tone whoosh
           playTone(ctx, 440, 0.12, "sine", 0.07);
           setTimeout(() => playTone(ctx, 660, 0.1, "sine", 0.05), 80);
           break;
 
         case "receive":
-          // Soft chime
           playTone(ctx, 880, 0.18, "sine", 0.06);
           setTimeout(() => playTone(ctx, 1100, 0.15, "sine", 0.04), 100);
           break;
 
         case "listenStart":
-          // Activation beep
           playTone(ctx, 600, 0.15, "sine", 0.08);
           setTimeout(() => playTone(ctx, 900, 0.12, "sine", 0.06), 100);
           break;
 
         case "listenStop":
-          // Deactivation descend
           playTone(ctx, 900, 0.12, "sine", 0.06);
           setTimeout(() => playTone(ctx, 600, 0.15, "sine", 0.05), 80);
           break;
 
         case "error":
-          // Low buzz
           playTone(ctx, 200, 0.2, "sawtooth", 0.04);
           break;
 
         case "godMode":
-          // High-tech "System Override" sequence
-          // 1. Low bass pulse
-          playTone(ctx, 60, 1.2, "sine", 0.15);
-          // 2. Rising digital sweep
-          for (let i = 0; i < 8; i++) {
-            setTimeout(() => {
-              playTone(ctx, 200 + i * 150, 0.1, "square", 0.03);
-            }, i * 80);
+          // EPIC 2-SECOND SEQUENCE
+          const now = ctx.currentTime;
+          
+          // 1. Deep cinematic impact (0s - 1.5s)
+          playTone(ctx, 50, 1.5, "sine", 0.2, true, now);
+          playTone(ctx, 100, 1.2, "sine", 0.1, true, now);
+          
+          // 2. Rising digital power-up sweep (0s - 1.2s)
+          for (let i = 0; i < 12; i++) {
+            const time = now + i * 0.1;
+            const f = 150 + i * 120;
+            playTone(ctx, f, 0.15, "square", 0.02, true, time);
           }
-          // 3. Final high chime
-          setTimeout(() => {
-            playTone(ctx, 1200, 0.4, "sine", 0.08);
-            playTone(ctx, 1800, 0.3, "sine", 0.05);
-          }, 700);
+          
+          // 3. High-frequency "data stream" texture (0.5s - 1.5s)
+          for (let i = 0; i < 20; i++) {
+            const time = now + 0.5 + i * 0.05;
+            const f = 2000 + Math.random() * 1000;
+            playTone(ctx, f, 0.04, "sine", 0.01, true, time);
+          }
+          
+          // 4. Final resonant "Power On" chime (1.2s - 2.0s)
+          const chimeTime = now + 1.2;
+          playTone(ctx, 880, 0.8, "sine", 0.1, true, chimeTime);
+          playTone(ctx, 1320, 0.7, "sine", 0.06, true, chimeTime + 0.1);
+          playTone(ctx, 1760, 0.6, "sine", 0.04, true, chimeTime + 0.2);
+          
           break;
       }
     } catch {

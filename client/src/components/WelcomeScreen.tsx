@@ -1,7 +1,6 @@
 /*
- * ENOSX XAI — WelcomeScreen
- * Animated welcome with floating orb avatar, suggestion chips
- * Features: breathing orb, staggered fade-in, glassmorphism cards
+ * Assistant — WelcomeScreen
+ * Initial state shown before a conversation starts
  */
 
 import { motion } from "framer-motion";
@@ -107,13 +106,13 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
               letterSpacing: "-0.03em",
             }}
           >
-            ENOSX XAI
+            AI ASSISTANT
           </h1>
           <p
             className="text-sm"
             style={{ color: config.textMuted, letterSpacing: "0.08em" }}
           >
-            COMMAND INTELLIGENCE · BUILT BY ENOSH
+            INTELLIGENCE AT YOUR COMMAND
           </p>
         </motion.div>
 
@@ -171,7 +170,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           className="text-xs text-center"
           style={{ color: config.textMuted, opacity: 0.5, letterSpacing: "0.04em" }}
         >
-          ENOSX TECHNOLOGIES · PROPRIETARY SYSTEM
+          SECURE SYSTEM · PROPRIETARY INTELLIGENCE
         </motion.p>
       </div>
     </div>

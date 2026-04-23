@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — Sidebar
+ * Assistant — Sidebar
  * Glassmorphism acrylic panel with smooth slide animation
  * Features: conversation list, new chat, delete, collapse toggle
  */
@@ -89,7 +89,7 @@ export default function Sidebar({
                 className="text-sm font-bold truncate"
                 style={{ color: config.text, letterSpacing: "-0.02em" }}
               >
-                ENOSX TECHNOLOGIES
+                ASSISTANT
               </span>
               {isPro && (
                 <span
@@ -267,7 +267,7 @@ export default function Sidebar({
               className="text-xs"
               style={{ color: config.textMuted, letterSpacing: "0.04em", fontSize: "10px" }}
             >
-              ENOSX · PROPRIETARY SYSTEM
+              SECURE SYSTEM · ACTIVE
             </p>
           </motion.div>
         )}
