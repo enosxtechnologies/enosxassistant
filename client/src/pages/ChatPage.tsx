@@ -142,13 +142,6 @@ export default function ChatPage() {
     }
   }, [isGodModeActive]);
 
-  const executeGodCommand = useCallback(async (command: string) => {
-    // Forward command to AI for processing
-    const prompt = `[GOD MODE COMMAND] ${command}`;
-    await handleSend(prompt);
-    return "Command executed via ENOSX Core.";
-  }, [handleSend]);
-
   // Sync sound enabled state
   useEffect(() => {
     setSoundFn(soundEnabled);
@@ -346,6 +339,14 @@ export default function ChatPage() {
     setSpeakingMessageId(null);
     playSound("listenStop");
   }, [stopSpeaking, playSound]);
+
+  // executeGodCommand — defined after handleSend to avoid TDZ (Temporal Dead Zone) error
+  const executeGodCommand = useCallback(async (command: string) => {
+    // Forward command to AI for processing
+    const prompt = `[GOD MODE COMMAND] ${command}`;
+    await handleSend(prompt);
+    return "Command executed via ENOSX Core.";
+  }, [handleSend]);
 
   // Summarize clipboard content via AI — defined after handleSend
   const handleClipboardSummarize = useCallback(
