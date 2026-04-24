@@ -19,7 +19,7 @@ ENOSX AI uses **Groq's Mixtral-8x7b** model for lightning-fast AI responses. Fol
 1. Open `.env.local` in your project root
 2. Set your API key:
    ```
-   GROQ_API_KEY=gsk_your_actual_api_key_here
+   VITE_GROQ_API_KEY=gsk_your_actual_api_key_here
    ```
 3. Save the file
 
@@ -49,7 +49,7 @@ ENOSX AI uses **mixtral-8x7b-32768** by default, which offers:
 ## Troubleshooting
 
 ### "Groq API key not configured"
-- Check that `GROQ_API_KEY` is set in `.env.local`
+- Check that `VITE_GROQ_API_KEY` is set in `.env.local`
 - Restart the dev server after adding the key
 - Verify the key starts with `gsk_`
 
