@@ -40,7 +40,8 @@ import { useMemoryBank } from "@/hooks/useMemoryBank";
 import { useAutoContext } from "@/hooks/useAutoContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Wifi, ChevronDown, Info, Volume2, VolumeX } from "lucide-react";
+import { useCompactMode } from "@/hooks/useCompactMode";
+import { ChevronDown, Info, Volume2, VolumeX, Minimize2, Maximize2 } from "lucide-react";
 import { createAdaptiveActionHandler, createClipboardSummarizeHandler } from "./ChatPage_handlers";
 
 const BG_URL =
@@ -109,6 +110,7 @@ export default function ChatPage() {
 
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
+  const { isCompactMode, toggleCompactMode } = useCompactMode();
 
   // handleSend defined early to avoid circular dependencies
   const handleSend = useCallback(
@@ -443,7 +445,14 @@ export default function ChatPage() {
               </span>
             </div>
 
-            {/* Groq icon removed as requested */}
+            <button
+              onClick={toggleCompactMode}
+              className="p-2 rounded-lg transition-all hover:bg-white/5"
+              style={{ color: config.textMuted }}
+              title={isCompactMode ? "Maximize" : "Minimize to floating window"}
+            >
+              {isCompactMode ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+            </button>
 
             <motion.a
               href="/about"
@@ -590,6 +599,83 @@ export default function ChatPage() {
               onAddMemory={addMemory}
               onRemoveMemory={removeMemory}
             />
+          )}
+        </AnimatePresence>
+
+        {/* Mini Window Mode */}
+        <AnimatePresence>
+          {isCompactMode && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              className="fixed bottom-6 right-6 z-40 rounded-2xl overflow-hidden"
+              style={{
+                width: "320px",
+                height: "384px",
+                background: config.surface,
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: `1px solid rgba(${config.accentRgb}, 0.2)`,
+                boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(${config.accentRgb}, 0.1)`,
+              }}
+            >
+              {/* Mini Header */}
+              <div
+                className="flex items-center justify-between px-3 py-2"
+                style={{
+                  background: `rgba(${config.accentRgb}, 0.05)`,
+                  borderBottom: `1px solid rgba(${config.accentRgb}, 0.1)`,
+                }}
+              >
+                <span
+                  className="text-xs font-bold"
+                  style={{ color: config.text, letterSpacing: "0.04em" }}
+                >
+                  COMPACT
+                </span>
+                <button
+                  onClick={toggleCompactMode}
+                  className="w-5 h-5 rounded flex items-center justify-center"
+                  style={{
+                    background: `rgba(${config.accentRgb}, 0.1)`,
+                    border: `1px solid rgba(${config.accentRgb}, 0.2)`,
+                    color: config.accent,
+                  }}
+                >
+                  <Maximize2 size={10} />
+                </button>
+              </div>
+              
+              {/* Mini Chat Area */}
+              <div className="h-[calc(100%-32px)] overflow-y-auto flex flex-col">
+                {messages.length > 0 ? (
+                  <div className="flex-1 px-2 py-2 space-y-2 overflow-y-auto">
+                    {messages.slice(-3).map((m) => (
+                      <div
+                        key={m.id}
+                        className="text-xs rounded-lg p-2"
+                        style={{
+                          background: m.role === "user" ? `rgba(${config.accentRgb}, 0.15)` : `rgba(${config.accentRgb}, 0.05)`,
+                          color: config.text,
+                        }}
+                      >
+                        <div className="font-semibold text-[10px] mb-1" style={{ color: config.accent }}>
+                          {m.role === "user" ? "You" : "ENOSX"}
+                        </div>
+                        <div className="line-clamp-2 text-[11px]">{m.content.substring(0, 80)}...</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-center px-2">
+                    <div className="text-[10px]" style={{ color: config.textMuted }}>
+                      Start a conversation
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </main>
