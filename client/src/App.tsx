@@ -12,7 +12,7 @@ import AboutPage from "./pages/AboutPage";
 function Router() {
   return (
     <Switch>
-      <Route path={"//"} component={ChatPage} />
+      <Route path={"/"} component={ChatPage} />
       <Route path={"/about"} component={AboutPage} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
