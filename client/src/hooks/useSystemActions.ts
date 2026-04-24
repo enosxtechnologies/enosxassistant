@@ -36,8 +36,18 @@ export function useSystemActions() {
         try {
           if (action.type === "open_url") {
             if (!action.url) throw new Error("Missing URL");
-            window.open(action.url, "_blank");
-            toast.success(`Opening tab: ${action.url}`);
+            const newWindow = window.open(action.url, "_blank");
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+              toast.error("Popup blocked! Please allow popups for this site to open new tabs.", {
+                duration: 6000,
+                action: {
+                  label: "How to fix?",
+                  onClick: () => window.alert("Click the 'Pop-up blocked' icon in your browser's address bar and select 'Always allow pop-ups from this site'.")
+                }
+              });
+            } else {
+              toast.success(`Opening tab: ${action.url}`);
+            }
           } else if (action.type === "launch_app") {
             if (!action.app) throw new Error("Missing app name");
             console.log(`LAUNCH_APP_INTENT: ${action.app}`);
