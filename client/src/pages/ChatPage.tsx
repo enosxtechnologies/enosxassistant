@@ -410,7 +410,7 @@ export default function ChatPage() {
                 transition: "color 0.3s ease",
               }}
             >
-              {activeConversation?.title ?? "ENOSX XAI Assistant"}
+              {activeConversation?.title ?? "ENOSX AI"}
             </span>
             {activeConversation && (
               <div className="flex items-center gap-1 ml-2">
