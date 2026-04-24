@@ -224,9 +224,13 @@ export default function ChatPage() {
     if (isGodModeActive) return;
     setIsGodModeActive(true);
     playSound("godMode");
+    
+    // Auto-transition to terminal after animation completes (3s total duration)
     setTimeout(() => {
+      setIsGodModeActive(false);
+      setShowGodTerminal(true);
       speak("Greetings, Enosh. How may I assist you today?");
-    }, 1500);
+    }, 3000);
   }, [isGodModeActive, playSound, speak]);
 
   useGodMode(triggerGodMode);
@@ -439,13 +443,7 @@ export default function ChatPage() {
               </span>
             </div>
 
-            <div
-              className="flex items-center gap-1"
-              style={{ color: config.textMuted }}
-            >
-              <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
-              <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
-            </div>
+            {/* Groq icon removed as requested */}
 
             <motion.a
               href="/about"
