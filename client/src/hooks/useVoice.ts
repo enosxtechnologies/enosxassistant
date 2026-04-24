@@ -122,16 +122,16 @@ export function useVoice() {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Deep smooth voice profile
-    utterance.rate = 0.95; // Slightly slower for more gravitas
-    utterance.pitch = 0.85; // Lower pitch for a deeper, more authoritative tone
+    // Sophisticated female AI voice profile
+    utterance.rate = 1.0; 
+    utterance.pitch = 1.15; // Slightly higher pitch for a sophisticated AI feel
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
-    // Prioritize premium male voices for the "deep" effect
+    // Prioritize sophisticated female voices
     const preferredVoice = 
-      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Google US English Male")) ||
-      voices.find(v => v.name.includes("Male") || v.name.includes("Guy")) ||
+      voices.find(v => v.name.includes("Microsoft Zira") || v.name.includes("Samantha") || v.name.includes("Karen")) ||
+      voices.find(v => v.name.includes("Female") || v.name.includes("Google US English")) ||
       voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
       voices.find(v => v.lang === "en-US");
       
