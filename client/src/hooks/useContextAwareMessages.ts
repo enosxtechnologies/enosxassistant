@@ -5,30 +5,19 @@ import type { ActiveWindow } from "@/contexts/WindowContext";
 export function useContextAwareMessages() {
   const enrichMessageWithContext = useCallback(
     (messages: Message[], activeWindow: ActiveWindow): Message[] => {
+      // Simply return messages as-is; context is already in system prompt
+      // and enriched into user message content in ChatPage
+      return messages;
+    },
+    []
+  );
+
+  const getContextInfo = useCallback(
+    (activeWindow: ActiveWindow): string => {
       if (!activeWindow.isDetected || activeWindow.appType === "unknown") {
-        return messages;
+        return "";
       }
-
-      // Add a system message at the beginning if not already present
-      const hasContextMessage = messages.some(
-        (m) => m.role === "system" && m.content.includes("Active Application:")
-      );
-
-      if (hasContextMessage) {
-        return messages;
-      }
-
-      const contextMessage: Message = {
-        id: "context-" + Date.now(),
-        role: "system",
-        content: `Active Application: ${activeWindow.appName} (${activeWindow.appType})
-Window Title: ${activeWindow.windowTitle}
-
-Tailor your response to be specifically helpful for this application. Acknowledge the app and provide relevant suggestions.`,
-        timestamp: new Date(),
-      };
-
-      return [contextMessage, ...messages];
+      return `\n\n[ACTIVE APP: ${activeWindow.appName} (${activeWindow.appType}) - Window: ${activeWindow.windowTitle}]`;
     },
     []
   );
@@ -108,6 +97,7 @@ Tailor your response to be specifically helpful for this application. Acknowledg
 
   return {
     enrichMessageWithContext,
+    getContextInfo,
     getAppSpecificSuggestions,
   };
 }
