@@ -2,18 +2,6 @@
  * ENOSX XAI Assistant — ChatPage (Enhanced)
  * Design: "Crimson Matrix" — Cyberpunk Glassmorphism
  * Layout: Left floating acrylic sidebar + right bento chat area + floating pill command bar
- *
- * Enhancements:
- * 1. Smooth animations (Framer Motion spring physics everywhere)
- * 2. Glassmorphism / Acrylic Blur (backdrop-filter on all panels)
- * 3. Floating assistant UI (draggable, snap-to-edge capable)
- * 4. Voice visualization (real-time FFT audio bars)
- * 5. Typing + AI "Thinking" feedback (animated dots, streaming cursor)
- * 6. Dark Mode + Theme Engine (5 themes: Dark, Light, Neon, Cyberpunk, Minimal)
- * 7. Animated orb avatar (reacts to voice/loading state)
- * 8. Sound design (subtle Web Audio API tones)
- * 9. Transparency + always-visible top bar
- * 10. Performance optimized (300ms max animations, memoized callbacks)
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -24,7 +12,9 @@ import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
-import FloatingOrb from "@/components/FloatingOrb";
+import PulseOrb from "@/components/PulseOrb";
+import AdaptiveActionButtons from "@/components/AdaptiveActionButtons";
+import ClipboardNotification from "@/components/ClipboardNotification";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import CommandChainProgress from "@/components/CommandChainProgress";
 import ContextIndicator from "@/components/ContextIndicator";
@@ -35,7 +25,6 @@ import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
-// MemoryBank imported but only used in GodModeTerminal now
 import AutoContextIndicator from "@/components/AutoContextIndicator";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
@@ -51,7 +40,8 @@ import { useMemoryBank } from "@/hooks/useMemoryBank";
 import { useAutoContext } from "@/hooks/useAutoContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX } from "lucide-react";
+import { Wifi, ChevronDown, Info, Volume2, VolumeX } from "lucide-react";
+import { createAdaptiveActionHandler, createClipboardSummarizeHandler } from "./ChatPage_handlers";
 
 const BG_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
@@ -80,7 +70,6 @@ export default function ChatPage() {
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isPro] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -115,92 +104,17 @@ export default function ChatPage() {
     consume: consumeClipboard,
   } = useClipboardListener();
 
-  // Memory & Auto-Context Hooks
   const { memories, addMemory, removeMemory, getMemoryContext } = useMemoryBank();
   const { autoContext, getAutoContextMessage } = useAutoContext();
 
-  // GOD MODE state
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
 
-  const triggerGodMode = useCallback(() => {
-    if (isGodModeActive) return;
-    setIsGodModeActive(true);
-    playSound("godMode"); // High-tech system override sound
-    
-    // Voice greeting for Enosh
-    setTimeout(() => {
-      speak("Greetings, Enosh. How may I assist you today?");
-    }, 1500);
-  }, [isGodModeActive, playSound, speak]);
-
-  useGodMode(triggerGodMode);
-
-  const handleGodModeAnimationComplete = useCallback(() => {
-    if (isGodModeActive) {
-      setShowGodTerminal(true);
-    }
-  }, [isGodModeActive]);
-
-  // Sync sound enabled state
-  useEffect(() => {
-    setSoundFn(soundEnabled);
-  }, [soundEnabled, setSoundFn]);
-
-  const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
-
-  // Scroll to bottom
-  const scrollToBottom = useCallback((smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: smooth ? "smooth" : "auto",
-    });
-  }, []);
-
-  useEffect(() => {
-    if (activeConversation?.messages.length) {
-      scrollToBottom();
-    }
-  }, [activeConversation?.messages.length, scrollToBottom]);
-
-  // Track scroll for scroll-to-bottom button
-  const handleScroll = () => {
-    const el = messagesContainerRef.current;
-    if (!el) return;
-    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    setShowScrollBtn(distFromBottom > 200);
-  };
-
-  // Show error toast
-  useEffect(() => {
-    if (error) {
-      toast.error(`API Error: ${error}`);
-      playSound("error");
-    }
-  }, [error, playSound]);
-
-  const createNewChat = useCallback(() => {
-    const conv = createConversation();
-    setConversations((prev) => [conv, ...prev]);
-    setActiveId(conv.id);
-    playSound("click");
-  }, [playSound]);
-
-  const deleteConversation = useCallback(
-    (id: string) => {
-      setConversations((prev) => prev.filter((c) => c.id !== id));
-      if (activeId === id) {
-        setActiveId(null);
-      }
-      playSound("click");
-    },
-    [activeId, playSound]
-  );
-
+  // handleSend defined early to avoid circular dependencies
   const handleSend = useCallback(
     async (text: string) => {
       let convId = activeIdRef.current;
 
-      // Create new conversation if none active
       if (!convId) {
         const conv = createConversation();
         conv.title = generateTitle(text);
@@ -211,8 +125,6 @@ export default function ChatPage() {
       }
 
       const targetConvId = convId;
-
-      // Append file context if available
       let messageContent = text;
       if (fileContext.isLoaded) {
         messageContent += getFileContextMessage();
@@ -251,14 +163,10 @@ export default function ChatPage() {
 
       playSound("send");
 
-      // Clear file context after sending
       if (fileContext.isLoaded) {
         clearFile();
       }
 
-      const allMessages = [...currentMessages, userMessage];
-      
-      // Inject Long-Term Memory and Auto-Context into the prompt
       const memoryContext = getMemoryContext();
       const autoAppContext = getAutoContextMessage();
       
@@ -299,8 +207,6 @@ export default function ChatPage() {
             })
           );
           playSound("receive");
-          
-          // Execute any system actions found in the response
           executeAction(fullResponse);
 
           if (autoSpeak && fullResponse) {
@@ -310,7 +216,80 @@ export default function ChatPage() {
         }
       );
     },
-    [sendMessage, speak, autoSpeak, playSound]
+    [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, getAutoContextMessage, enrichMessageWithContext, activeWindow, executeAction]
+  );
+
+  const triggerGodMode = useCallback(() => {
+    if (isGodModeActive) return;
+    setIsGodModeActive(true);
+    playSound("godMode");
+    setTimeout(() => {
+      speak("Greetings, Enosh. How may I assist you today?");
+    }, 1500);
+  }, [isGodModeActive, playSound, speak]);
+
+  useGodMode(triggerGodMode);
+
+  const handleGodModeAnimationComplete = useCallback(() => {
+    if (isGodModeActive) {
+      setShowGodTerminal(true);
+    }
+  }, [isGodModeActive]);
+
+  const executeGodCommand = useCallback(async (command: string) => {
+    const prompt = `[GOD MODE COMMAND] ${command}`;
+    await handleSend(prompt);
+    return "Command executed via ENOSX Core.";
+  }, [handleSend]);
+
+  useEffect(() => {
+    setSoundFn(soundEnabled);
+  }, [soundEnabled, setSoundFn]);
+
+  const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
+
+  const scrollToBottom = useCallback((smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (activeConversation?.messages.length) {
+      scrollToBottom();
+    }
+  }, [activeConversation?.messages.length, scrollToBottom]);
+
+  const handleScroll = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollBtn(distFromBottom > 200);
+  };
+
+  useEffect(() => {
+    if (error) {
+      toast.error(`API Error: ${error}`);
+      playSound("error");
+    }
+  }, [error, playSound]);
+
+  const createNewChat = useCallback(() => {
+    const conv = createConversation();
+    setConversations((prev) => [conv, ...prev]);
+    setActiveId(conv.id);
+    playSound("click");
+  }, [playSound]);
+
+  const deleteConversation = useCallback(
+    (id: string) => {
+      setConversations((prev) => prev.filter((c) => c.id !== id));
+      if (activeId === id) {
+        setActiveId(null);
+      }
+      playSound("click");
+    },
+    [activeId, playSound]
   );
 
   const handleVoiceResult = useCallback(
@@ -340,20 +319,13 @@ export default function ChatPage() {
     playSound("listenStop");
   }, [stopSpeaking, playSound]);
 
-  // executeGodCommand — defined after handleSend to avoid TDZ (Temporal Dead Zone) error
-  const executeGodCommand = useCallback(async (command: string) => {
-    // Forward command to AI for processing
-    const prompt = `[GOD MODE COMMAND] ${command}`;
-    await handleSend(prompt);
-    return "Command executed via ENOSX Core.";
-  }, [handleSend]);
+  const handleAdaptiveAction = useCallback(
+    (action: string) => createAdaptiveActionHandler(handleSend)(action),
+    [handleSend]
+  );
 
-  // Summarize clipboard content via AI — defined after handleSend
   const handleClipboardSummarize = useCallback(
-    async (text: string) => {
-      const prompt = `Please summarize the following text concisely:\n\n${text}`;
-      await handleSend(prompt);
-    },
+    async (text: string) => createClipboardSummarizeHandler(handleSend)(text),
     [handleSend]
   );
 
@@ -364,7 +336,6 @@ export default function ChatPage() {
       className="flex h-screen w-screen overflow-hidden"
       style={{ background: config.bg, transition: "background 0.4s ease" }}
     >
-      {/* Global background mesh */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
@@ -375,19 +346,6 @@ export default function ChatPage() {
         }}
       />
 
-      {/* Ambient glow orbs */}
-      <div
-        className="fixed pointer-events-none"
-        style={{
-          top: "-20%",
-          right: "-10%",
-          width: "50vw",
-          height: "50vw",
-          borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(${config.accentRgb},0.06) 0%, transparent 70%)`,
-          filter: "blur(40px)",
-        }}
-      />
       <div
         className="fixed pointer-events-none"
         style={{
@@ -401,13 +359,14 @@ export default function ChatPage() {
         }}
       />
 
-      {/* File Drop Zone */}
       <FileDropZone onFileSelected={loadFile} isActive={true} />
-
-      {/* Command Chain Progress Indicator */}
       <CommandChainProgress progress={progress} />
+      <ClipboardNotification
+        clipboardData={copiedText}
+        onSummarize={handleClipboardSummarize}
+        onDismiss={dismissClipboard}
+      />
 
-      {/* Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -416,36 +375,24 @@ export default function ChatPage() {
         onSelect={setActiveId}
         onNew={createNewChat}
         onDelete={deleteConversation}
-        isPro={isPro}
       />
 
-      {/* Main area */}
-      <motion.div
-        className="flex-1 flex flex-col min-w-0 relative"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-      >
-        {/* Top bar */}
+      <main className="flex-1 flex flex-col relative">
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="flex items-center justify-between px-5 py-2.5 flex-shrink-0"
+          className="h-16 flex items-center justify-between px-6 z-10"
           style={{
-            background: `rgba(${config.accentRgb === "220,20,60" ? "10,8,8" : "0,0,0"},0.75)`,
+            background: "rgba(10, 10, 10, 0.4)",
             backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderBottom: `1px solid rgba(${config.accentRgb},0.08)`,
-            minHeight: 48,
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
           }}
         >
-          {/* Left: orb + title */}
           <div className="flex items-center gap-2.5">
-            <FloatingOrb
+            <PulseOrb
               voiceState={voiceState}
               isLoading={isLoading}
-              size={28}
+              size={32}
             />
             <span
               className="text-sm font-semibold truncate"
@@ -459,144 +406,30 @@ export default function ChatPage() {
               {activeConversation?.title ?? "ENOSX XAI Assistant"}
             </span>
             {activeConversation && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-                style={{
-                  background: `rgba(${config.accentRgb},0.08)`,
-                  border: `1px solid rgba(${config.accentRgb},0.18)`,
-                  color: `rgba(${config.accentRgb},0.7)`,
-                  fontSize: "10px",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                {activeConversation.messages.filter((m) => m.role === "user").length} msgs
-              </motion.span>
+              <div className="flex items-center gap-1 ml-2">
+                <ContextIndicator />
+                <AutoContextIndicator data={autoContext} />
+              </div>
             )}
           </div>
 
-          {/* Center: Context Indicator */}
-          <ContextIndicator />
-
-          {/* Right: controls */}
-          <div className="flex items-center gap-2">
-            {/* Theme switcher */}
-            <ThemeSwitcher />
-
-            {/* Sound toggle */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSoundEnabled((v) => !v)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
-              style={{
-                background: soundEnabled
-                  ? `rgba(${config.accentRgb},0.1)`
-                  : "rgba(255,255,255,0.04)",
-                border: soundEnabled
-                  ? `1px solid rgba(${config.accentRgb},0.25)`
-                  : "1px solid rgba(255,255,255,0.07)",
-                color: soundEnabled ? config.accent : config.textMuted,
-              }}
-              title={soundEnabled ? "Mute sounds" : "Enable sounds"}
-            >
-              {soundEnabled ? <Volume2 size={11} /> : <VolumeX size={11} />}
-            </motion.button>
-
-            {/* Voice mode toggle */}
-            {isVoiceSupported && (
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setAutoSpeak((v) => !v)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
-                style={
-                  autoSpeak
-                    ? {
-                        background: `rgba(${config.accentRgb},0.15)`,
-                        border: `1px solid rgba(${config.accentRgb},0.3)`,
-                        color: config.accent,
-                        boxShadow: `0 0 10px rgba(${config.accentRgb},0.2)`,
-                      }
-                    : {
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        color: config.textMuted,
-                      }
-                }
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 pr-4 border-r border-white/5">
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="p-2 rounded-lg transition-all hover:bg-white/5"
+                style={{ color: soundEnabled ? `rgba(${config.accentRgb},0.8)` : config.textMuted }}
               >
-                <Mic size={10} />
-                <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>
-                  {autoSpeak ? "VOICE ON" : "VOICE"}
-                </span>
-              </motion.button>
-            )}
+                {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              </button>
+              <ThemeSwitcher />
+            </div>
 
-            {/* Voice state indicator */}
-            <AnimatePresence>
-              {voiceState !== "idle" && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, x: 10 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, x: 10 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
-                  style={{
-                    background: `rgba(${config.accentRgb},0.1)`,
-                    border: `1px solid rgba(${config.accentRgb},0.25)`,
-                  }}
-                >
-                  <motion.div
-                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity }}
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      background: config.accent,
-                      boxShadow: `0 0 6px ${config.accent}`,
-                    }}
-                  />
-                  <span
-                    style={{
-                      color: config.accent,
-                      fontSize: "10px",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
-                    {voiceState === "listening"
-                      ? "LISTENING"
-                      : voiceState === "speaking"
-                      ? "SPEAKING"
-                      : "PROCESSING"}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Auto-Context Indicator */}
-            <AutoContextIndicator data={autoContext} />
-
-            {/* Status indicator */}
-            <div className="flex items-center gap-1.5">
-              <motion.div
-                animate={{
-                  scale: isLoading ? [1, 1.3, 1] : 1,
-                  opacity: isLoading ? [1, 0.6, 1] : 1,
-                }}
-                transition={
-                  isLoading
-                    ? { duration: 1, repeat: Infinity }
-                    : { duration: 0.3 }
-                }
-                className="w-1.5 h-1.5 rounded-full"
-                style={{
-                  background: isLoading ? "#f59e0b" : "#22c55e",
-                  boxShadow: `0 0 6px ${isLoading ? "rgba(245,158,11,0.6)" : "rgba(34,197,94,0.5)"}`,
-                }}
-              />
+            <div className="hidden md:flex flex-col items-end gap-0.5">
               <span
+                className="font-black"
                 style={{
-                  color: config.textMuted,
+                  color: isLoading ? `rgba(${config.accentRgb},1)` : config.text,
                   fontSize: "10px",
                   letterSpacing: "0.06em",
                 }}
@@ -630,7 +463,6 @@ export default function ChatPage() {
           </div>
         </motion.div>
 
-        {/* Messages area */}
         <div className="flex-1 relative overflow-hidden">
           <AnimatePresence mode="wait">
             {messages.length === 0 ? (
@@ -645,6 +477,7 @@ export default function ChatPage() {
                 <div className="h-full flex flex-col">
                   <div className="px-5 pt-5">
                     <AppAwareSuggestions onSuggestionClick={handleSend} />
+                    <AdaptiveActionButtons onActionClick={handleAdaptiveAction} />
                   </div>
                   <div className="flex-1">
                     <WelcomeScreen onSuggestion={handleSend} />
@@ -653,116 +486,114 @@ export default function ChatPage() {
               </motion.div>
             ) : (
               <motion.div
-                key="messages"
+                key="chat"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                ref={messagesContainerRef}
-                onScroll={handleScroll}
-                className="h-full overflow-y-auto px-5 py-5"
-                style={{
-                  scrollbarWidth: "thin",
-                  scrollbarColor: `rgba(${config.accentRgb},0.2) transparent`,
-                }}
+                className="h-full flex flex-col"
               >
-                <div className="max-w-3xl mx-auto flex flex-col gap-4">
-                  <AnimatePresence initial={false}>
-                    {messages.map((msg, i) => (
+                <div
+                  ref={messagesContainerRef}
+                  onScroll={handleScroll}
+                  className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"
+                >
+                  <div className="max-w-3xl mx-auto space-y-6">
+                    {messages.map((m, idx) => (
                       <MessageBubble
-                        key={msg.id}
-                        message={msg}
-                        index={i}
-                        onSpeak={(text) => handleSpeak(text, msg.id)}
+                        key={m.id}
+                        message={m}
+                        index={idx}
+                        onSpeak={() => handleSpeak(m.content, m.id)}
                         onStopSpeak={handleStopSpeak}
-                        isSpeaking={speakingMessageId === msg.id}
+                        isSpeaking={speakingMessageId === m.id}
                       />
                     ))}
-                  </AnimatePresence>
-                  <div ref={messagesEndRef} />
+                    <div ref={messagesEndRef} className="h-4" />
+                  </div>
                 </div>
+
+                <AnimatePresence>
+                  {showScrollBtn && (
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      onClick={() => scrollToBottom()}
+                      className="absolute bottom-4 right-8 p-2 rounded-full shadow-lg z-20 border"
+                      style={{
+                        background: "rgba(20, 20, 20, 0.8)",
+                        backdropFilter: "blur(10px)",
+                        borderColor: `rgba(${config.accentRgb}, 0.2)`,
+                        color: config.text,
+                      }}
+                    >
+                      <ChevronDown size={20} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Scroll to bottom button */}
-          <AnimatePresence>
-            {showScrollBtn && (
-              <motion.button
-                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => scrollToBottom()}
-                className="absolute bottom-4 right-6 w-8 h-8 rounded-full flex items-center justify-center"
-                style={{
-                  background: `rgba(${config.accentRgb},0.18)`,
-                  border: `1px solid rgba(${config.accentRgb},0.3)`,
-                  color: config.accent,
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                <ChevronDown size={14} />
-              </motion.button>
-            )}
-          </AnimatePresence>
         </div>
 
-        {/* File Context Badge */}
-        {fileContext.isLoaded && (
-          <div className="px-5 pb-2">
-            <FileContextBadge fileContext={fileContext} onClear={clearFile} />
+        <div className="p-4 md:p-6 z-20">
+          <div className="max-w-3xl mx-auto relative">
+            <div className="absolute bottom-full left-0 right-0 mb-4 flex flex-col gap-2 pointer-events-none">
+              <div className="pointer-events-auto">
+                <FileContextBadge 
+                  fileContext={fileContext} 
+                  onClear={clearFile} 
+                />
+                <ClipboardBadge 
+                  copiedText={copiedText}
+                  isVisible={clipboardVisible}
+                  onSummarize={handleClipboardSummarize}
+                  onDismiss={dismissClipboard}
+                  onConsume={consumeClipboard}
+                />
+                <ContextualActionBar 
+                  onAction={handleAdaptiveAction}
+                />
+              </div>
+            </div>
+            
+            <CommandBar
+              onSend={handleSend}
+              isLoading={isLoading}
+              isVoiceSupported={isVoiceSupported}
+              onStartVoice={handleStartVoice}
+              onStopVoice={stopListening}
+              onStopSpeaking={handleStopSpeak}
+              voiceState={voiceState}
+              transcript={transcript}
+            />
           </div>
-        )}
-
-        {/* Contextual Action Bar — context-aware quick-action buttons */}
-        <div className="px-5 pt-2">
-          <ContextualActionBar onAction={handleSend} />
         </div>
 
-        {/* Command bar */}
-        <CommandBar
-          onSend={handleSend}
-          isLoading={isLoading}
-          voiceState={voiceState}
-          transcript={transcript}
-          isVoiceSupported={isVoiceSupported}
-          onStartVoice={handleStartVoice}
-          onStopVoice={stopListening}
-          onStopSpeaking={handleStopSpeak}
-          disabled={isLoading}
-        />
-      </motion.div>
+        <AnimatePresence>
+          {isGodModeActive && (
+            <CircuitDoor 
+              isActive={isGodModeActive} 
+              onAnimationComplete={handleGodModeAnimationComplete}
+            />
+          )}
+        </AnimatePresence>
 
-      {/* Clipboard Badge — glowing Enosx icon when text is copied */}
-      <ClipboardBadge
-        copiedText={copiedText}
-        isVisible={clipboardVisible}
-        onDismiss={dismissClipboard}
-        onConsume={consumeClipboard}
-        onSummarize={handleClipboardSummarize}
-      />
-
-      {/* GOD MODE — Transition Doors */}
-      <CircuitDoor 
-        isActive={isGodModeActive} 
-        onAnimationComplete={handleGodModeAnimationComplete} 
-      />
-
-      {/* GOD MODE — Developer Terminal */}
-      <GodModeTerminal
-        isOpen={showGodTerminal}
-        onClose={() => {
-          setShowGodTerminal(false);
-          setIsGodModeActive(false);
-        }}
-        onExecute={executeGodCommand}
-        memories={memories}
-        onAddMemory={addMemory}
-        onRemoveMemory={removeMemory}
-      />
+        <AnimatePresence>
+          {showGodTerminal && (
+            <GodModeTerminal 
+              isOpen={showGodTerminal}
+              onClose={() => {
+                setShowGodTerminal(false);
+                setIsGodModeActive(false);
+              }}
+              onExecute={executeGodCommand}
+              memories={memories}
+              onAddMemory={addMemory}
+              onRemoveMemory={removeMemory}
+            />
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   );
 }

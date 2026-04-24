@@ -26,71 +26,103 @@ interface ContextAction {
   colorRgb: string;
 }
 
-const APP_ACTIONS: Partial<Record<AppType, ContextAction>> = {
-  vscode: {
-    label: "Debug Code",
-    prompt:
-      "I'm working in VS Code. Please help me debug the code I'm currently looking at. Identify potential issues, explain what might be going wrong, and suggest fixes.",
-    icon: <Bug size={14} />,
-    color: "#22c55e",
-    colorRgb: "34,197,94",
-  },
-  chrome: {
-    label: "Summarize Article",
-    prompt:
-      "I'm browsing in Google Chrome. Please summarize the article or page I'm currently reading. Extract the key points, main argument, and any important conclusions.",
-    icon: <BookOpen size={14} />,
-    color: "#4285F4",
-    colorRgb: "66,133,244",
-  },
-  firefox: {
-    label: "Summarize Page",
-    prompt:
-      "I'm browsing in Firefox. Please summarize the page I'm currently reading. Extract the key points and main takeaways.",
-    icon: <BookOpen size={14} />,
-    color: "#FF7139",
-    colorRgb: "255,113,57",
-  },
-  edge: {
-    label: "Summarize Page",
-    prompt:
-      "I'm browsing in Microsoft Edge. Please summarize the page I'm currently reading. Extract the key points and main takeaways.",
-    icon: <BookOpen size={14} />,
-    color: "#0078D4",
-    colorRgb: "0,120,212",
-  },
-  terminal: {
-    label: "Explain Command",
-    prompt:
-      "I'm in the terminal. Please explain the last command I ran, what it does, common flags, and any potential pitfalls.",
-    icon: <Terminal size={14} />,
-    color: "#00A4EF",
-    colorRgb: "0,164,239",
-  },
-  figma: {
-    label: "Review Design",
-    prompt:
-      "I'm working in Figma. Please review my current design, suggest improvements for usability and aesthetics, and recommend best practices.",
-    icon: <Palette size={14} />,
-    color: "#F24E1E",
-    colorRgb: "242,78,30",
-  },
-  notion: {
-    label: "Organize Notes",
-    prompt:
-      "I'm working in Notion. Please help me organize my notes more effectively. Suggest a structure, identify gaps, and recommend templates.",
-    icon: <Database size={14} />,
-    color: "#888888",
-    colorRgb: "136,136,136",
-  },
-  photoshop: {
-    label: "Edit Suggestions",
-    prompt:
-      "I'm working in Adobe Photoshop. Please suggest image editing techniques, layer organization tips, and creative improvements for my current project.",
-    icon: <FileText size={14} />,
-    color: "#31A8FF",
-    colorRgb: "49,168,255",
-  },
+const APP_ACTIONS: Partial<Record<AppType, ContextAction[]>> = {
+  vscode: [
+    {
+      label: "Debug Code",
+      prompt:
+        "I'm working in VS Code. Please help me debug the code I'm currently looking at. Identify potential issues, explain what might be going wrong, and suggest fixes.",
+      icon: <Bug size={14} />,
+      color: "#ef4444",
+      colorRgb: "239,68,68",
+    },
+    {
+      label: "Refactor",
+      prompt:
+        "I'm working in VS Code. Please help me refactor this code for better performance, readability, and adherence to best practices.",
+      icon: <FileText size={14} />,
+      color: "#22c55e",
+      colorRgb: "34,197,94",
+    },
+  ],
+  chrome: [
+    {
+      label: "Summarize",
+      prompt:
+        "I'm browsing in Google Chrome. Please summarize the article or page I'm currently reading. Extract the key points, main argument, and any important conclusions.",
+      icon: <BookOpen size={14} />,
+      color: "#4285F4",
+      colorRgb: "66,133,244",
+    },
+    {
+      label: "Key Facts",
+      prompt:
+        "I'm browsing in Google Chrome. Please extract the most important facts, statistics, and dates from this page.",
+      icon: <FileText size={14} />,
+      color: "#fbbf24",
+      colorRgb: "251,191,36",
+    },
+  ],
+  firefox: [
+    {
+      label: "Summarize Page",
+      prompt:
+        "I'm browsing in Firefox. Please summarize the page I'm currently reading. Extract the key points and main takeaways.",
+      icon: <BookOpen size={14} />,
+      color: "#FF7139",
+      colorRgb: "255,113,57",
+    },
+  ],
+  edge: [
+    {
+      label: "Summarize Page",
+      prompt:
+        "I'm browsing in Microsoft Edge. Please summarize the page I'm currently reading. Extract the key points and main takeaways.",
+      icon: <BookOpen size={14} />,
+      color: "#0078D4",
+      colorRgb: "0,120,212",
+    },
+  ],
+  terminal: [
+    {
+      label: "Explain Command",
+      prompt:
+        "I'm in the terminal. Please explain the last command I ran, what it does, common flags, and any potential pitfalls.",
+      icon: <Terminal size={14} />,
+      color: "#00A4EF",
+      colorRgb: "0,164,239",
+    },
+  ],
+  figma: [
+    {
+      label: "Review Design",
+      prompt:
+        "I'm working in Figma. Please review my current design, suggest improvements for usability and aesthetics, and recommend best practices.",
+      icon: <Palette size={14} />,
+      color: "#F24E1E",
+      colorRgb: "242,78,30",
+    },
+  ],
+  notion: [
+    {
+      label: "Organize Notes",
+      prompt:
+        "I'm working in Notion. Please help me organize my notes more effectively. Suggest a structure, identify gaps, and recommend templates.",
+      icon: <Database size={14} />,
+      color: "#888888",
+      colorRgb: "136,136,136",
+    },
+  ],
+  photoshop: [
+    {
+      label: "Edit Suggestions",
+      prompt:
+        "I'm working in Adobe Photoshop. Please suggest image editing techniques, layer organization tips, and creative improvements for my current project.",
+      icon: <FileText size={14} />,
+      color: "#31A8FF",
+      colorRgb: "49,168,255",
+    },
+  ],
 };
 
 interface ContextualActionBarProps {
@@ -101,10 +133,10 @@ export default function ContextualActionBar({ onAction }: ContextualActionBarPro
   const { config } = useTheme();
   const { activeWindow } = useActiveWindow();
 
-  const action = APP_ACTIONS[activeWindow.appType];
+  const actions = APP_ACTIONS[activeWindow.appType];
 
   // Only render if we have a specific action for this app
-  if (!action || !activeWindow.isDetected) return null;
+  if (!actions || actions.length === 0 || !activeWindow.isDetected) return null;
 
   return (
     <AnimatePresence>
@@ -122,39 +154,44 @@ export default function ContextualActionBar({ onAction }: ContextualActionBarPro
           style={{ color: config.textMuted, letterSpacing: "0.03em" }}
         >
           Focused on{" "}
-          <span style={{ color: action.color }}>{activeWindow.appName}</span>
+          <span style={{ color: actions[0].color }}>{activeWindow.appName}</span>
           {" "}—
         </span>
 
-        {/* Action button */}
-        <motion.button
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.94 }}
-          onClick={() => onAction(action.prompt)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
-          style={{
-            background: `rgba(${action.colorRgb}, 0.12)`,
-            border: `1px solid rgba(${action.colorRgb}, 0.35)`,
-            color: action.color,
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            boxShadow: `0 0 10px rgba(${action.colorRgb}, 0.15)`,
-            cursor: "pointer",
-          }}
-        >
-          {/* Pulsing dot */}
-          <motion.div
-            animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{
-              background: action.color,
-              boxShadow: `0 0 5px ${action.color}`,
-            }}
-          />
-          <span style={{ color: action.color }}>{action.icon}</span>
-          {action.label}
-        </motion.button>
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2">
+          {actions.map((action, i) => (
+            <motion.button
+              key={i}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => onAction(action.prompt)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
+              style={{
+                background: `rgba(${action.colorRgb}, 0.12)`,
+                border: `1px solid rgba(${action.colorRgb}, 0.35)`,
+                color: action.color,
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                boxShadow: `0 0 10px rgba(${action.colorRgb}, 0.15)`,
+                cursor: "pointer",
+              }}
+            >
+              {/* Pulsing dot */}
+              <motion.div
+                animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{
+                  background: action.color,
+                  boxShadow: `0 0 5px ${action.color}`,
+                }}
+              />
+              <span style={{ color: action.color }}>{action.icon}</span>
+              {action.label}
+            </motion.button>
+          ))}
+        </div>
       </motion.div>
     </AnimatePresence>
   );

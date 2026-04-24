@@ -19,7 +19,7 @@ interface ClipboardBadgeProps {
   isVisible: boolean;
   onDismiss: () => void;
   onConsume: () => void;
-  onSummarize: (text: string) => Promise<void>;
+  onSummarize: (text: string) => void | Promise<void>;
 }
 
 export default function ClipboardBadge({

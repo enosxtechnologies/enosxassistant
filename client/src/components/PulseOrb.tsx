@@ -64,10 +64,10 @@ const STATE_COLORS = {
 
 /* Organic border-radius keyframes for morphing effect */
 const MORPH_FRAMES = [
-  "60% 40% 30% 70% / 60% 30% 70% 40%",
-  "30% 60% 70% 40% / 50% 60% 30% 60%",
-  "50% 60% 30% 60% / 30% 70% 50% 60%",
-  "60% 40% 30% 70% / 60% 30% 70% 40%",
+  "42% 58% 70% 30% / 45% 45% 55% 55%",
+  "70% 30% 46% 54% / 30% 29% 71% 70%",
+  "30% 70% 70% 30% / 49% 60% 40% 51%",
+  "42% 58% 70% 30% / 45% 45% 55% 55%",
 ];
 
 /* ─────────────────────────── sparkle particle ─────────────────────────── */
@@ -281,7 +281,7 @@ export default function PulseOrb({
             ease: "easeInOut",
           },
         }}
-        className="relative flex items-center justify-center"
+        className="relative flex items-center justify-center overflow-hidden"
         style={{
           width: size,
           height: size,
@@ -291,6 +291,14 @@ export default function PulseOrb({
           transition: "background 0.5s ease",
         }}
       >
+        {/* SVG Noise Filter for Organic Texture */}
+        <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+          <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+        </svg>
         {/* Inner highlight */}
         <div
           className="absolute pointer-events-none"

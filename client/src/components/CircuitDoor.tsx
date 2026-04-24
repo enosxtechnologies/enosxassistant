@@ -41,7 +41,6 @@ export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDo
               type: "spring", 
               stiffness: 40, 
               damping: 15,
-              exit: { duration: 1, ease: [0.7, 0, 0.3, 1], delay: 0.5 }
             }}
             className="w-1/2 h-full relative overflow-hidden"
             style={{
@@ -77,7 +76,6 @@ export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDo
               type: "spring", 
               stiffness: 40, 
               damping: 15,
-              exit: { duration: 1, ease: [0.7, 0, 0.3, 1], delay: 0.5 }
             }}
             className="w-1/2 h-full relative overflow-hidden"
             style={{
