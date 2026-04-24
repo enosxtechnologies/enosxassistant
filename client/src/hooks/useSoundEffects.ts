@@ -95,20 +95,38 @@ export function useSoundEffects() {
           break;
 
         case "godMode":
-          // High-tech "System Override" sequence
-          // 1. Low bass pulse
-          playTone(ctx, 60, 1.2, "sine", 0.15);
-          // 2. Rising digital sweep
-          for (let i = 0; i < 8; i++) {
+          // Cinematic 5-phase GOD MODE sequence (2.0s)
+          // Phase 1: Deep bass rumble (0-400ms)
+          playTone(ctx, 40, 1.5, "sine", 0.2, true);
+          playTone(ctx, 60, 1.2, "triangle", 0.1, true);
+
+          // Phase 2: Rising digital sweep with harmonics (200-800ms)
+          for (let i = 0; i < 12; i++) {
             setTimeout(() => {
-              playTone(ctx, 200 + i * 150, 0.1, "square", 0.03);
-            }, i * 80);
+              playTone(ctx, 150 + i * 120, 0.15, "square", 0.04 - i * 0.002, true);
+              if (i % 3 === 0) playTone(ctx, 300 + i * 200, 0.1, "sine", 0.02, true);
+            }, 200 + i * 50);
           }
-          // 3. Final high chime
+
+          // Phase 3: Power surge pulse (800-1200ms)
           setTimeout(() => {
-            playTone(ctx, 1200, 0.4, "sine", 0.08);
-            playTone(ctx, 1800, 0.3, "sine", 0.05);
-          }, 700);
+            playTone(ctx, 80, 0.4, "sawtooth", 0.12, true);
+            playTone(ctx, 120, 0.3, "sine", 0.08, true);
+          }, 800);
+
+          // Phase 4: Activation chime sequence (1200-1600ms)
+          setTimeout(() => {
+            const chimes = [880, 1100, 1320, 1760];
+            chimes.forEach((freq, idx) => {
+              setTimeout(() => playTone(ctx, freq, 0.4, "sine", 0.07, true), idx * 100);
+            });
+          }, 1200);
+
+          // Phase 5: Ethereal confirmation tones (1600-2000ms)
+          setTimeout(() => {
+            playTone(ctx, 2200, 0.8, "sine", 0.05, true);
+            playTone(ctx, 2600, 0.6, "sine", 0.03, true);
+          }, 1600);
           break;
       }
     } catch {
