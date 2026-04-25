@@ -214,7 +214,16 @@ export default function ChatPage() {
               })
             );
             playSound("receive");
-            executeAction(fullResponse);
+            executeAction(fullResponse).then((actions) => {
+              const searchAction = actions.find(a => a.type === 'search');
+              if (searchAction && searchAction.query) {
+                // Simulate fetching search results and feeding them back
+                // In a real app, this would call a search API
+                setTimeout(() => {
+                  handleSend(`[SEARCH RESULTS for "${searchAction.query}"]: I've found some relevant information online. Please analyze it and provide a comprehensive answer to the user.`);
+                }, 2000);
+              }
+            });
 
             if (autoSpeak && fullResponse) {
               setSpeakingMessageId(assistantId);

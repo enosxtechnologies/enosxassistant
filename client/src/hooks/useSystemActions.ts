@@ -28,7 +28,7 @@ export function useSystemActions() {
     async (text: string) => {
       const actions = parseActions(text);
 
-      if (actions.length === 0) return;
+      if (actions.length === 0) return [];
 
       if (actions.length === 1) {
         // Single action - execute directly
@@ -70,6 +70,7 @@ export function useSystemActions() {
         toast.info(`Starting command chain with ${actions.length} steps...`);
         await executeChain(actions);
       }
+      return actions;
     },
     [parseActions, executeChain]
   );

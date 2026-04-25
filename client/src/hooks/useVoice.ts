@@ -50,10 +50,10 @@ export function useVoice() {
         (window as any).webkitSpeechRecognition;
 
       const recognition: ISpeechRecognition = new SpeechRecognitionAPI();
-      recognition.continuous = false;
+      recognition.continuous = true; // Keep listening for better interactivity
       recognition.interimResults = true;
       recognition.lang = "en-US";
-      recognition.maxAlternatives = 1;
+      recognition.maxAlternatives = 3; // Better recognition accuracy
 
       recognition.onstart = () => {
         setVoiceState("listening");
@@ -122,16 +122,16 @@ export function useVoice() {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Sophisticated female AI voice profile
-    utterance.rate = 1.0; 
-    utterance.pitch = 1.15; // Slightly higher pitch for a sophisticated AI feel
+    // Confident tech-loving male voice profile
+    utterance.rate = 1.05; // Slightly faster for a more energetic feel
+    utterance.pitch = 1.0; 
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
-    // Prioritize sophisticated female voices
+    // Prioritize confident male voices
     const preferredVoice = 
-      voices.find(v => v.name.includes("Microsoft Zira") || v.name.includes("Samantha") || v.name.includes("Karen")) ||
-      voices.find(v => v.name.includes("Female") || v.name.includes("Google US English")) ||
+      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Alex") || v.name.includes("Daniel")) ||
+      voices.find(v => v.name.includes("Male") || v.name.includes("Google UK English Male")) ||
       voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
       voices.find(v => v.lang === "en-US");
       
