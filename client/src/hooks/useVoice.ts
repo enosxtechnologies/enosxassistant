@@ -122,18 +122,18 @@ export function useVoice() {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Confident tech-loving male voice profile
-    utterance.rate = 1.1; // Optimized for a more energetic, tech-savvy feel
-    utterance.pitch = 1.05; // Slightly higher pitch for better clarity and engagement
+    // Professional and fluent female voice profile
+    utterance.rate = 1.0; // Standard rate for natural flow
+    utterance.pitch = 1.1; // Slightly higher pitch for a clear, pleasant female tone
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
-    // Prioritize confident male voices
+    // Prioritize high-quality natural female voices
     const preferredVoice = 
-      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Alex") || v.name.includes("Daniel") || v.name.includes("Samantha")) ||
-      voices.find(v => v.name.includes("Male") || v.name.includes("Google UK English Male") || v.name.includes("Google US English")) ||
-      voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced") || v.name.includes("Natural")) ||
-      voices.find(v => v.lang === "en-US");
+      voices.find(v => v.name.includes("Google US English Female") || v.name.includes("Microsoft Zira") || v.name.includes("Samantha") || v.name.includes("Victoria") || v.name.includes("Karen")) ||
+      voices.find(v => v.name.includes("Female") || v.name.includes("Google UK English Female")) ||
+      voices.find(v => v.name.includes("Natural") || v.name.includes("Premium") || v.name.includes("Enhanced")) ||
+      voices.find(v => v.lang === "en-US" || v.lang === "en-GB");
       
     if (preferredVoice) utterance.voice = preferredVoice;
 
