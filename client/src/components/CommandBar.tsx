@@ -94,6 +94,8 @@ export default function CommandBar({
   };
 
   const canSend = value.trim().length > 0 && !disabled && !isLoading;
+  const hasText = value.trim().length > 0;
+  const shouldGlow = isListening || isLoading || isSpeaking || hasText;
 
   return (
     <>
@@ -184,14 +186,14 @@ export default function CommandBar({
                 : { duration: 0.3 }
             }
             className={`flex items-end gap-2 rounded-2xl px-4 py-3 ${
-              isListening || isLoading || isSpeaking ? "rainbow-glow-active" : ""
+              shouldGlow ? "rainbow-glow-active" : ""
             }`}
             style={{
               background: config.surface,
               backdropFilter: "blur(24px)",
               WebkitBackdropFilter: "blur(24px)",
               border:
-                isListening || isLoading || isSpeaking
+                shouldGlow
                   ? "none"
                   : `1px solid rgba(${config.accentRgb}, 0.15)`,
               transition: "border-color 0.3s ease",
