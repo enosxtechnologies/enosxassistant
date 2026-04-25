@@ -183,12 +183,17 @@ export default function CommandBar({
                 ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
                 : { duration: 0.3 }
             }
-            className="flex items-end gap-2 rounded-2xl px-4 py-3"
+            className={`flex items-end gap-2 rounded-2xl px-4 py-3 ${
+              isListening || isLoading || isSpeaking ? "rainbow-glow-active" : ""
+            }`}
             style={{
               background: config.surface,
               backdropFilter: "blur(24px)",
               WebkitBackdropFilter: "blur(24px)",
-              border: `1px solid rgba(${config.accentRgb}, ${isListening ? "0.4" : "0.15"})`,
+              border:
+                isListening || isLoading || isSpeaking
+                  ? "none"
+                  : `1px solid rgba(${config.accentRgb}, 0.15)`,
               transition: "border-color 0.3s ease",
             }}
           >

@@ -184,43 +184,59 @@ export default function ChatPage() {
       const contextEnrichedMessages = enrichMessageWithContext([...currentMessages, enrichedUserMessage], activeWindow);
       let fullResponse = "";
 
-      await sendMessage(
-        contextEnrichedMessages,
-        (chunk) => {
-          fullResponse += chunk;
-          setConversations((prev) =>
-            prev.map((c) => {
-              if (c.id !== targetConvId) return c;
-              return {
-                ...c,
-                messages: c.messages.map((m) =>
-                  m.id === assistantId ? { ...m, content: fullResponse } : m
-                ),
-              };
-            })
-          );
-        },
-        () => {
-          setConversations((prev) =>
-            prev.map((c) => {
-              if (c.id !== targetConvId) return c;
-              return {
-                ...c,
-                messages: c.messages.map((m) =>
-                  m.id === assistantId ? { ...m, isStreaming: false } : m
-                ),
-              };
-            })
-          );
-          playSound("receive");
-          executeAction(fullResponse);
+      try {
+        await sendMessage(
+          contextEnrichedMessages,
+          (chunk) => {
+            fullResponse += chunk;
+            setConversations((prev) =>
+              prev.map((c) => {
+                if (c.id !== targetConvId) return c;
+                return {
+                  ...c,
+                  messages: c.messages.map((m) =>
+                    m.id === assistantId ? { ...m, content: fullResponse } : m
+                  ),
+                };
+              })
+            );
+          },
+          () => {
+            setConversations((prev) =>
+              prev.map((c) => {
+                if (c.id !== targetConvId) return c;
+                return {
+                  ...c,
+                  messages: c.messages.map((m) =>
+                    m.id === assistantId ? { ...m, isStreaming: false } : m
+                  ),
+                };
+              })
+            );
+            playSound("receive");
+            executeAction(fullResponse);
 
-          if (autoSpeak && fullResponse) {
-            setSpeakingMessageId(assistantId);
-            speak(fullResponse, () => setSpeakingMessageId(null));
+            if (autoSpeak && fullResponse) {
+              setSpeakingMessageId(assistantId);
+              speak(fullResponse, () => setSpeakingMessageId(null));
+            }
           }
-        }
-      );
+        );
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Failed to fetch response";
+        toast.error(errorMsg);
+        
+        // Remove the empty assistant message on error
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.id !== targetConvId) return c;
+            return {
+              ...c,
+              messages: c.messages.filter((m) => m.id !== assistantId),
+            };
+          })
+        );
+      }
     },
     [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, getAutoContextMessage, enrichMessageWithContext, getContextInfo, activeWindow, executeAction]
   );

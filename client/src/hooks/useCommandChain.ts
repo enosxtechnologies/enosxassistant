@@ -2,9 +2,10 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 export interface SystemAction {
-  type: "open_url" | "launch_app" | "chain" | "delay";
+  type: "open_url" | "launch_app" | "chain" | "delay" | "search";
   url?: string;
   app?: string;
+  query?: string;
   delay?: number;
   sequence?: SystemAction[];
 }

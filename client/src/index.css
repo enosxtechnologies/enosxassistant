@@ -289,6 +289,46 @@
     }
   }
 
+  /* ── Gemini-like Rainbow Glow ── */
+  @keyframes rainbow-glow {
+    0% {
+      border-color: #ff0000;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    14% {
+      border-color: #ff7f00;
+      box-shadow: 0 0 15px rgba(255, 127, 0, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    28% {
+      border-color: #ffff00;
+      box-shadow: 0 0 15px rgba(255, 255, 0, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    42% {
+      border-color: #00ff00;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    56% {
+      border-color: #0000ff;
+      box-shadow: 0 0 15px rgba(0, 0, 255, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    70% {
+      border-color: #4b0082;
+      box-shadow: 0 0 15px rgba(75, 0, 130, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    84% {
+      border-color: #9400d3;
+      box-shadow: 0 0 15px rgba(148, 0, 211, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    100% {
+      border-color: #ff0000;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.4), 0 8px 32px rgba(0,0,0,0.4);
+    }
+  }
+  .rainbow-glow-active {
+    animation: rainbow-glow 3s linear infinite;
+    border-width: 2px !important;
+  }
+
   /* ── Theme-aware scrollbar ── */
   ::-webkit-scrollbar-thumb {
     background: rgba(var(--enosx-accent-rgb, 220, 20, 60), 0.25);

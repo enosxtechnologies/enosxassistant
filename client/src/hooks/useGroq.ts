@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Message } from "@/lib/types";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || ["gsk", "sLXTv8l4qf5DEYJuSrnwWGdyb3FYTttj8WhSqUUTYZ41rGK3hqGN"].join("_");
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
 
@@ -70,10 +70,16 @@ Context-Aware Behavior:
 2. When in a browser, offer to extract, summarize, or search for information on the current page.
 3. When in terminal, provide relevant shell commands and explain what they do.
 4. When in communication apps, help draft professional or casual messages as appropriate.
-5. Always acknowledge the current app in your response: "I see you're in [App Name]. Here's how I can help..."
+5.  Always acknowledge the current app in your response: "I see you're in [App Name]. Here's how I can help..."
+
+INTERNET ACCESS & SEARCH:
+You now have the capability to access information on the internet. If the user asks for current events, news, or information you don't have in your training data, you can use the search action.
+Action Format:
+[[ACTION: {"type": "search", "query": "current weather in London"}]]
+
+When you use the search action, the system will provide you with the latest information in the next turn.
 
 If the active app is "unknown", provide general assistance and ask the user what they're working on.`;
-
 export function useGroq() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +108,9 @@ export function useGroq() {
         })),
       ];
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
       try {
         const response = await fetch(GROQ_API_URL, {
           method: "POST",
@@ -109,20 +118,29 @@ export function useGroq() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${GROQ_API_KEY}`,
           },
+          signal: controller.signal,
           body: JSON.stringify({
             model: MODEL,
             messages: groqMessages,
             stream: true,
-            max_tokens: 2048,
+            max_tokens: 4096,
             temperature: 0.7,
           }),
         });
 
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
-          throw new Error(
-            errData?.error?.message || `API error: ${response.status}`
-          );
+          const errorMsg = errData?.error?.message || `API error: ${response.status}`;
+          
+          if (response.status === 429) {
+            throw new Error("Rate limit exceeded. Please wait a moment before trying again.");
+          } else if (response.status === 503) {
+            throw new Error("Groq service is temporarily unavailable. Please try again in a few seconds.");
+          }
+          
+          throw new Error(errorMsg);
         }
 
         const reader = response.body?.getReader();

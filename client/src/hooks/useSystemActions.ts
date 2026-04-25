@@ -52,6 +52,15 @@ export function useSystemActions() {
             if (!action.app) throw new Error("Missing app name");
             console.log(`LAUNCH_APP_INTENT: ${action.app}`);
             toast.info(`Launching: ${action.app}`);
+          } else if (action.type === "search") {
+            if (!action.query) throw new Error("Missing search query");
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(action.query)}`;
+            const newWindow = window.open(searchUrl, "_blank");
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+              toast.error("Popup blocked! Please allow popups to see search results.");
+            } else {
+              toast.success(`Searching: ${action.query}`);
+            }
           }
         } catch (e) {
           toast.error(`Action failed: ${e instanceof Error ? e.message : String(e)}`);
