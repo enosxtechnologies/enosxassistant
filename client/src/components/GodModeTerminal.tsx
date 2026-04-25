@@ -122,6 +122,16 @@ export default function GodModeTerminal({
       }
     }
 
+    // 3. SYSTEM OVERRIDES
+    if (cmdLower.startsWith("greeting ")) {
+      const newGreeting = cmd.substring(9).trim();
+      if (newGreeting) {
+        onAddMemory("system", `GREETING_OVERRIDE: ${newGreeting}`);
+        addLine("system", `SYSTEM GREETING UPDATED: "${newGreeting}"`);
+        return;
+      }
+    }
+
     if (cmdLower === "clear") {
       setHistory([{ id: "clear-" + Date.now(), type: "system", content: "Terminal buffer cleared. Secure session active.", timestamp: new Date() }]);
       return;
@@ -167,6 +177,7 @@ export default function GodModeTerminal({
   const quickActions = [
     { label: "Add Skill", cmd: "skill add ", icon: <PlusCircle size={14} /> },
     { label: "Spawn Agent", cmd: "spawn ", icon: <Users size={14} /> },
+    { label: "Set Greeting", cmd: "greeting ", icon: <Settings size={14} /> },
     { label: "Log Memo", cmd: "memo ", icon: <Brain size={14} /> },
     { label: "List Memos", cmd: "ls memo", icon: <Database size={14} /> },
     { label: "Clear", cmd: "clear", icon: <TerminalIcon size={14} /> },

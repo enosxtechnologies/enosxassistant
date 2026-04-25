@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from "react";
 
 export interface MemoryEntry {
   id: string;
-  category: "preference" | "project" | "fact" | "instruction" | "skill" | "agent";
+  category: "preference" | "project" | "fact" | "instruction" | "skill" | "agent" | "system";
   content: string;
   timestamp: Date;
   metadata?: Record<string, any>;

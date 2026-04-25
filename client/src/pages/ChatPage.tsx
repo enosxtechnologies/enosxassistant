@@ -274,9 +274,16 @@ Based on these search results, please provide a comprehensive and detailed answe
       setIsGodModeActive(false);
       setShowGodTerminal(true);
       setShowGlitch(true);
-      speak("Greetings, Enosh. How may I assist you today?");
+      
+      // Check for custom greeting in memories
+      const customGreeting = memories.find(m => m.category === 'system' && m.content.startsWith('GREETING_OVERRIDE:'));
+      const greetingText = customGreeting 
+        ? customGreeting.content.replace('GREETING_OVERRIDE:', '').trim()
+        : "Greetings, Enosh. How may I assist you today?";
+        
+      speak(greetingText);
     }, 3000);
-  }, [isGodModeActive, playSound, speak]);
+  }, [isGodModeActive, playSound, speak, memories]);
 
   useGodMode(triggerGodMode);
 
