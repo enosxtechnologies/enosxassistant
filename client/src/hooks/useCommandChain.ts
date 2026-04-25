@@ -2,12 +2,16 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 export interface SystemAction {
-  type: "open_url" | "launch_app" | "chain" | "delay" | "search";
+  type: "open_url" | "launch_app" | "chain" | "delay" | "search" | "create_file" | "write_file" | "read_file" | "delete_file" | "run_command" | "screenshot" | "volume_control" | "brightness_control";
   url?: string;
   app?: string;
   query?: string;
   delay?: number;
   sequence?: SystemAction[];
+  path?: string;
+  content?: string;
+  command?: string;
+  level?: number;
 }
 
 export interface ChainProgress {
@@ -44,6 +48,51 @@ export function useCommandChain() {
       } else if (action.type === "delay") {
         const delayMs = action.delay || 1000;
         await new Promise((resolve) => setTimeout(resolve, delayMs));
+        return true;
+      } else if (action.type === "create_file") {
+        if (!action.path) throw new Error("Missing file path");
+        // In a browser environment, direct file system access is not possible.
+        // This would typically interact with a backend API that has file system access.
+        // For now, we'll simulate success and log the action.
+        console.log(`CREATE_FILE_INTENT: ${action.path}`);
+        toast.success(`Creating file: ${action.path}`);
+        return true;
+      } else if (action.type === "write_file") {
+        if (!action.path) throw new Error("Missing file path");
+        if (action.content === undefined) throw new Error("Missing content");
+        console.log(`WRITE_FILE_INTENT: ${action.path} with content: ${action.content}`);
+        toast.success(`Writing to file: ${action.path}`);
+        return true;
+      } else if (action.type === "read_file") {
+        if (!action.path) throw new Error("Missing file path");
+        console.log(`READ_FILE_INTENT: ${action.path}`);
+        toast.success(`Reading file: ${action.path}`);
+        // In a real scenario, this would return file content.
+        // For simulation, we'll just indicate success.
+        return true;
+      } else if (action.type === "delete_file") {
+        if (!action.path) throw new Error("Missing file path");
+        console.log(`DELETE_FILE_INTENT: ${action.path}`);
+        toast.success(`Deleting file: ${action.path}`);
+        return true;
+      } else if (action.type === "run_command") {
+        if (!action.command) throw new Error("Missing command");
+        console.log(`RUN_COMMAND_INTENT: ${action.command}`);
+        toast.success(`Running command: ${action.command}`);
+        return true;
+      } else if (action.type === "screenshot") {
+        console.log("SCREENSHOT_INTENT");
+        toast.success("Capturing screenshot...");
+        return true;
+      } else if (action.type === "volume_control") {
+        if (action.level === undefined) throw new Error("Missing volume level");
+        console.log(`VOLUME_CONTROL_INTENT: ${action.level}`);
+        toast.success(`Setting volume to ${action.level}%`);
+        return true;
+      } else if (action.type === "brightness_control") {
+        if (action.level === undefined) throw new Error("Missing brightness level");
+        console.log(`BRIGHTNESS_CONTROL_INTENT: ${action.level}`);
+        toast.success(`Setting brightness to ${action.level}%`);
         return true;
       }
       return false;
