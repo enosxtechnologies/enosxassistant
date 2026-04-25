@@ -53,7 +53,7 @@ export function useVoice() {
       recognition.continuous = true; // Keep listening for better interactivity
       recognition.interimResults = true;
       recognition.lang = "en-US";
-      recognition.maxAlternatives = 3; // Better recognition accuracy
+      recognition.maxAlternatives = 5; // Increased for even better recognition accuracy
 
       recognition.onstart = () => {
         setVoiceState("listening");
@@ -123,16 +123,16 @@ export function useVoice() {
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
     // Confident tech-loving male voice profile
-    utterance.rate = 1.05; // Slightly faster for a more energetic feel
-    utterance.pitch = 1.0; 
+    utterance.rate = 1.1; // Optimized for a more energetic, tech-savvy feel
+    utterance.pitch = 1.05; // Slightly higher pitch for better clarity and engagement
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
     // Prioritize confident male voices
     const preferredVoice = 
-      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Alex") || v.name.includes("Daniel")) ||
-      voices.find(v => v.name.includes("Male") || v.name.includes("Google UK English Male")) ||
-      voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
+      voices.find(v => v.name.includes("Microsoft David") || v.name.includes("Alex") || v.name.includes("Daniel") || v.name.includes("Samantha")) ||
+      voices.find(v => v.name.includes("Male") || v.name.includes("Google UK English Male") || v.name.includes("Google US English")) ||
+      voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced") || v.name.includes("Natural")) ||
       voices.find(v => v.lang === "en-US");
       
     if (preferredVoice) utterance.voice = preferredVoice;
