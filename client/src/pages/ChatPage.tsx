@@ -32,6 +32,7 @@ import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
+import { useWebSearch } from "@/hooks/useWebSearch";
 import { useCommandChain } from "@/hooks/useCommandChain";
 import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
@@ -84,6 +85,7 @@ export default function ChatPage() {
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   const { sendMessage, isLoading, error } = useGroq();
+  const { performSearch } = useWebSearch();
   const {
     voiceState,
     transcript,
@@ -217,11 +219,25 @@ export default function ChatPage() {
             executeAction(fullResponse).then((actions) => {
               const searchAction = actions.find(a => a.type === 'search');
               if (searchAction && searchAction.query) {
-                // Simulate fetching search results and feeding them back
-                // In a real app, this would call a search API
-                setTimeout(() => {
-                  handleSend(`[SEARCH RESULTS for "${searchAction.query}"]: I've found some relevant information online. Please analyze it and provide a comprehensive answer to the user.`);
-                }, 2000);
+                performSearch(searchAction.query).then((results) => {
+                  const resultsText = results
+                    .map((r, i) => `${i + 1}. **${r.title}**
+   ${r.snippet}
+   [Link](${r.url})`)
+                    .join("
+
+");
+                  
+                  const searchResultsMessage = `[SEARCH RESULTS for "${searchAction.query}"]:
+
+${resultsText}
+
+Based on these search results, please provide a comprehensive and detailed answer to the user's question.`;
+                  
+                  setTimeout(() => {
+                    handleSend(searchResultsMessage);
+                  }, 1000);
+                });
               }
             });
 
