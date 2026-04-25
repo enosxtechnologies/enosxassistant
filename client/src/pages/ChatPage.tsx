@@ -26,6 +26,8 @@ import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
 import AutoContextIndicator from "@/components/AutoContextIndicator";
+import GlitchShader from "@/components/GlitchShader";
+import NeuralMesh from "@/components/NeuralMesh";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -41,7 +43,7 @@ import { useAutoContext } from "@/hooks/useAutoContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCompactMode } from "@/hooks/useCompactMode";
-import { ChevronDown, Info, Volume2, VolumeX, Minimize2, Maximize2 } from "lucide-react";
+import { ChevronDown, Info, Volume2, VolumeX, Minimize2, Maximize2, Wifi } from "lucide-react";
 import { createAdaptiveActionHandler, createClipboardSummarizeHandler } from "./ChatPage_handlers";
 
 const BG_URL =
@@ -110,6 +112,7 @@ export default function ChatPage() {
 
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
+  const [showGlitch, setShowGlitch] = useState(false);
   const { isCompactMode, toggleCompactMode } = useCompactMode();
 
   // handleSend defined early to avoid circular dependencies
@@ -231,6 +234,7 @@ export default function ChatPage() {
     setTimeout(() => {
       setIsGodModeActive(false);
       setShowGodTerminal(true);
+      setShowGlitch(true);
       speak("Greetings, Enosh. How may I assist you today?");
     }, 3000);
   }, [isGodModeActive, playSound, speak]);
@@ -240,8 +244,17 @@ export default function ChatPage() {
   const handleGodModeAnimationComplete = useCallback(() => {
     if (isGodModeActive) {
       setShowGodTerminal(true);
+      setShowGlitch(true);
     }
   }, [isGodModeActive]);
+
+  const handleScreenshot = useCallback(
+    (imageData: string) => {
+      const prompt = `[SCREENSHOT ANALYSIS]\n\nPlease analyze this screenshot and provide insights:\n\n<image>${imageData}</image>`;
+      handleSend(prompt);
+    },
+    [handleSend]
+  );
 
   const executeGodCommand = useCallback(async (command: string) => {
     const prompt = `[GOD MODE COMMAND] ${command}`;
@@ -340,8 +353,12 @@ export default function ChatPage() {
 
   return (
     <div
-      className="flex h-screen w-screen overflow-hidden"
-      style={{ background: config.bg, transition: "background 0.4s ease" }}
+      className={`flex h-screen w-screen overflow-hidden ${isCompactMode ? "rounded-3xl border-2 shadow-2xl" : ""}`}
+      style={{ 
+        background: config.bg, 
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        borderColor: isCompactMode ? `rgba(${config.accentRgb}, 0.3)` : "transparent"
+      }}
     >
       <div
         className="fixed inset-0 pointer-events-none"
@@ -353,19 +370,6 @@ export default function ChatPage() {
         }}
       />
 
-      <div
-        className="fixed pointer-events-none"
-        style={{
-          bottom: "-20%",
-          left: "10%",
-          width: "40vw",
-          height: "40vw",
-          borderRadius: "50%",
-          background: `radial-gradient(circle, rgba(${config.accentRgb},0.04) 0%, transparent 70%)`,
-          filter: "blur(60px)",
-        }}
-      />
-
       <FileDropZone onFileSelected={loadFile} isActive={true} />
       <CommandChainProgress progress={progress} />
       <ClipboardNotification
@@ -374,15 +378,17 @@ export default function ChatPage() {
         onDismiss={dismissClipboard}
       />
 
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        conversations={conversations}
-        activeId={activeId}
-        onSelect={setActiveId}
-        onNew={createNewChat}
-        onDelete={deleteConversation}
-      />
+      {!isCompactMode && (
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          conversations={conversations}
+          activeId={activeId}
+          onSelect={setActiveId}
+          onNew={createNewChat}
+          onDelete={deleteConversation}
+        />
+      )}
 
       <main className="flex-1 flex flex-col relative">
         <motion.div
@@ -406,13 +412,13 @@ export default function ChatPage() {
               style={{
                 color: config.text,
                 letterSpacing: "-0.02em",
-                maxWidth: 300,
+                maxWidth: isCompactMode ? 150 : 300,
                 transition: "color 0.3s ease",
               }}
             >
-              {activeConversation?.title ?? "ENOSX AI"}
+              {activeConversation?.title ?? "ENOSX XAI Assistant"}
             </span>
-            {activeConversation && (
+            {!isCompactMode && activeConversation && (
               <div className="flex items-center gap-1 ml-2">
                 <ContextIndicator />
                 <AutoContextIndicator data={autoContext} />
@@ -421,53 +427,67 @@ export default function ChatPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 pr-4 border-r border-white/5">
-              <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className="p-2 rounded-lg transition-all hover:bg-white/5"
-                style={{ color: soundEnabled ? `rgba(${config.accentRgb},0.8)` : config.textMuted }}
-              >
-                {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-              </button>
-              <ThemeSwitcher />
-            </div>
-
-            <div className="hidden md:flex flex-col items-end gap-0.5">
-              <span
-                className="font-black"
-                style={{
-                  color: isLoading ? `rgba(${config.accentRgb},1)` : config.text,
-                  fontSize: "10px",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                {isLoading ? "THINKING" : "READY"}
-              </span>
-            </div>
+            {!isCompactMode && (
+              <div className="flex items-center gap-3 pr-4 border-r border-white/5">
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  className="p-2 rounded-lg transition-all hover:bg-white/5"
+                  style={{ color: soundEnabled ? `rgba(${config.accentRgb},0.8)` : config.textMuted }}
+                >
+                  {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                </button>
+                <ThemeSwitcher />
+              </div>
+            )}
 
             <button
               onClick={toggleCompactMode}
               className="p-2 rounded-lg transition-all hover:bg-white/5"
               style={{ color: config.textMuted }}
-              title={isCompactMode ? "Maximize" : "Minimize to floating window"}
+              title={isCompactMode ? "Standard Mode" : "Compact Mode"}
             >
               {isCompactMode ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
             </button>
 
-            <motion.a
-              href="/about"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
-              style={{
-                background: "rgba(0, 242, 255, 0.07)",
-                border: "1px solid rgba(0, 242, 255, 0.18)",
-                color: "rgba(0, 242, 255, 0.6)",
-              }}
-            >
-              <Info size={12} />
-              <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
-            </motion.a>
+            {!isCompactMode && (
+              <>
+                <div className="hidden md:flex flex-col items-end gap-0.5">
+                  <span
+                    className="font-black"
+                    style={{
+                      color: isLoading ? `rgba(${config.accentRgb},1)` : config.text,
+                      fontSize: "10px",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    {isLoading ? "THINKING" : "READY"}
+                  </span>
+                </div>
+
+                <div
+                  className="flex items-center gap-1"
+                  style={{ color: config.textMuted }}
+                >
+                  <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
+                  <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
+                </div>
+
+                <motion.a
+                  href="/about"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
+                  style={{
+                    background: "rgba(0, 242, 255, 0.07)",
+                    border: "1px solid rgba(0, 242, 255, 0.18)",
+                    color: "rgba(0, 242, 255, 0.6)",
+                  }}
+                >
+                  <Info size={12} />
+                  <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
+                </motion.a>
+              </>
+            )}
           </div>
         </motion.div>
 
@@ -484,11 +504,15 @@ export default function ChatPage() {
               >
                 <div className="h-full flex flex-col">
                   <div className="px-5 pt-5">
-                    <AppAwareSuggestions onSuggestionClick={handleSend} />
-                    <AdaptiveActionButtons onActionClick={handleAdaptiveAction} />
+                    {!isCompactMode && (
+                      <>
+                        <AppAwareSuggestions onSuggestionClick={handleSend} />
+                        <AdaptiveActionButtons onActionClick={handleAdaptiveAction} />
+                      </>
+                    )}
                   </div>
                   <div className="flex-1">
-                    <WelcomeScreen onSuggestion={handleSend} />
+                    <WelcomeScreen onSuggestion={handleSend} isCompact={isCompactMode} />
                   </div>
                 </div>
               </motion.div>
@@ -502,9 +526,9 @@ export default function ChatPage() {
                 <div
                   ref={messagesContainerRef}
                   onScroll={handleScroll}
-                  className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"
+                  className={`flex-1 overflow-y-auto px-4 ${isCompactMode ? "" : "md:px-8"} py-6 scrollbar-thin`}
                 >
-                  <div className="max-w-3xl mx-auto space-y-6">
+                  <div className={`max-w-3xl mx-auto space-y-6 ${isCompactMode ? "px-2" : ""}`}>
                     {messages.map((m, idx) => (
                       <MessageBubble
                         key={m.id}
@@ -543,7 +567,7 @@ export default function ChatPage() {
           </AnimatePresence>
         </div>
 
-        <div className="p-4 md:p-6 z-20">
+        <div className={`p-4 ${isCompactMode ? "pb-6" : "md:p-6"} z-20`}>
           <div className="max-w-3xl mx-auto relative">
             <div className="absolute bottom-full left-0 right-0 mb-4 flex flex-col gap-2 pointer-events-none">
               <div className="pointer-events-auto">
@@ -551,16 +575,20 @@ export default function ChatPage() {
                   fileContext={fileContext} 
                   onClear={clearFile} 
                 />
-                <ClipboardBadge 
-                  copiedText={copiedText}
-                  isVisible={clipboardVisible}
-                  onSummarize={handleClipboardSummarize}
-                  onDismiss={dismissClipboard}
-                  onConsume={consumeClipboard}
-                />
-                <ContextualActionBar 
-                  onAction={handleAdaptiveAction}
-                />
+                {!isCompactMode && (
+                  <>
+                    <ClipboardBadge 
+                      copiedText={copiedText}
+                      isVisible={clipboardVisible}
+                      onSummarize={handleClipboardSummarize}
+                      onDismiss={dismissClipboard}
+                      onConsume={consumeClipboard}
+                    />
+                    <ContextualActionBar 
+                      onAction={handleAdaptiveAction}
+                    />
+                  </>
+                )}
               </div>
             </div>
             
@@ -571,11 +599,15 @@ export default function ChatPage() {
               onStartVoice={handleStartVoice}
               onStopVoice={stopListening}
               onStopSpeaking={handleStopSpeak}
+              onScreenshot={handleScreenshot}
               voiceState={voiceState}
               transcript={transcript}
             />
           </div>
         </div>
+
+        <GlitchShader isActive={showGlitch} intensity={0.8} />
+        <NeuralMesh isActive={isGodModeActive} complexity={0.7} color="rgba(0, 242, 255, 0.15)" />
 
         <AnimatePresence>
           {isGodModeActive && (
@@ -593,89 +625,13 @@ export default function ChatPage() {
               onClose={() => {
                 setShowGodTerminal(false);
                 setIsGodModeActive(false);
+                setShowGlitch(false);
               }}
               onExecute={executeGodCommand}
               memories={memories}
               onAddMemory={addMemory}
               onRemoveMemory={removeMemory}
             />
-          )}
-        </AnimatePresence>
-
-        {/* Mini Window Mode */}
-        <AnimatePresence>
-          {isCompactMode && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 20 }}
-              className="fixed bottom-6 right-6 z-40 rounded-2xl overflow-hidden"
-              style={{
-                width: "320px",
-                height: "384px",
-                background: config.surface,
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                border: `1px solid rgba(${config.accentRgb}, 0.2)`,
-                boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(${config.accentRgb}, 0.1)`,
-              }}
-            >
-              {/* Mini Header */}
-              <div
-                className="flex items-center justify-between px-3 py-2"
-                style={{
-                  background: `rgba(${config.accentRgb}, 0.05)`,
-                  borderBottom: `1px solid rgba(${config.accentRgb}, 0.1)`,
-                }}
-              >
-                <span
-                  className="text-xs font-bold"
-                  style={{ color: config.text, letterSpacing: "0.04em" }}
-                >
-                  COMPACT
-                </span>
-                <button
-                  onClick={toggleCompactMode}
-                  className="w-5 h-5 rounded flex items-center justify-center"
-                  style={{
-                    background: `rgba(${config.accentRgb}, 0.1)`,
-                    border: `1px solid rgba(${config.accentRgb}, 0.2)`,
-                    color: config.accent,
-                  }}
-                >
-                  <Maximize2 size={10} />
-                </button>
-              </div>
-              
-              {/* Mini Chat Area */}
-              <div className="h-[calc(100%-32px)] overflow-y-auto flex flex-col">
-                {messages.length > 0 ? (
-                  <div className="flex-1 px-2 py-2 space-y-2 overflow-y-auto">
-                    {messages.slice(-3).map((m) => (
-                      <div
-                        key={m.id}
-                        className="text-xs rounded-lg p-2"
-                        style={{
-                          background: m.role === "user" ? `rgba(${config.accentRgb}, 0.15)` : `rgba(${config.accentRgb}, 0.05)`,
-                          color: config.text,
-                        }}
-                      >
-                        <div className="font-semibold text-[10px] mb-1" style={{ color: config.accent }}>
-                          {m.role === "user" ? "You" : "ENOSX"}
-                        </div>
-                        <div className="line-clamp-2 text-[11px]">{m.content.substring(0, 80)}...</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-center px-2">
-                    <div className="text-[10px]" style={{ color: config.textMuted }}>
-                      Start a conversation
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
           )}
         </AnimatePresence>
       </main>

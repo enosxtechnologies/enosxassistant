@@ -16,6 +16,7 @@ import { VoiceState } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import VoiceVisualizer from "./VoiceVisualizer";
 import PulseOrb from "./PulseOrb";
+import ScreenshotCapture from "./ScreenshotCapture";
 
 interface CommandBarProps {
   onSend: (text: string) => void;
@@ -26,6 +27,7 @@ interface CommandBarProps {
   onStartVoice: () => void;
   onStopVoice: () => void;
   onStopSpeaking: () => void;
+  onScreenshot?: (imageData: string) => void;
   disabled?: boolean;
 }
 
@@ -38,6 +40,7 @@ export default function CommandBar({
   onStartVoice,
   onStopVoice,
   onStopSpeaking,
+  onScreenshot,
   disabled = false,
 }: CommandBarProps) {
   const { config } = useTheme();
@@ -215,6 +218,14 @@ export default function CommandBar({
 
             {/* Action buttons */}
             <div className="flex items-center gap-1.5 flex-shrink-0 pb-0.5">
+              {/* Screenshot button */}
+              {onScreenshot && (
+                <ScreenshotCapture
+                  onCapture={onScreenshot}
+                  isLoading={isLoading}
+                />
+              )}
+
               {/* Voice button */}
               {isVoiceSupported && (
                 <motion.button

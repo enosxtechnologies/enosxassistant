@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Copy, Volume2, VolumeX, Check, User, Bot } from "lucide-react";
 import { Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
+import EliteStreamingText from "./EliteStreamingText";
 
 interface MessageBubbleProps {
   message: Message;
@@ -183,13 +184,21 @@ export default function MessageBubble({
                   {message.content}
                 </p>
               ) : (
-                <div
-                  className="prose-crimson text-sm"
-                  style={{ color: config.text }}
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
-                />
+                <div className="prose-crimson text-sm" style={{ color: config.text }}>
+                  {isStreaming ? (
+                    <EliteStreamingText
+                      text={message.content}
+                      isStreaming={isStreaming}
+                      delay={0.05}
+                    />
+                  ) : (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+                    />
+                  )}
+                </div>
               )}
-              {isStreaming && message.content && (
+              {isStreaming && message.content && !isUser && (
                 <StreamingCursor color={config.accent} />
               )}
             </div>
@@ -197,7 +206,7 @@ export default function MessageBubble({
         </motion.div>
 
         {/* Action buttons */}
-        {!isStreaming && message.content && (
+        {!isStreaming && message.content && !isEmpty && (
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
