@@ -224,9 +224,7 @@ export default function ChatPage() {
                     .map((r, i) => `${i + 1}. **${r.title}**
    ${r.snippet}
    [Link](${r.url})`)
-                    .join("
-
-");
+                    .join("\n\n");
                   
                   const searchResultsMessage = `[SEARCH RESULTS for "${searchAction.query}"]:
 
