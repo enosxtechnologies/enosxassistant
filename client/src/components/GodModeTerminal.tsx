@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, Cpu, Database, Users, Zap, Brain, Terminal, Settings, Activity, Lock, Globe, Terminal as TerminalIcon, PlusCircle } from "lucide-react";
+import { X, ShieldAlert, Cpu, Database, Users, Zap, Brain, Terminal, Settings, Activity, Lock, Globe, Terminal as TerminalIcon, PlusCircle, Mic, MicOff, Send, MessageSquare } from "lucide-react";
 import { MemoryEntry } from "@/hooks/useMemoryBank";
 import MemoryBank from "./MemoryBank";
 
@@ -23,6 +23,13 @@ interface GodModeTerminalProps {
   memories: MemoryEntry[];
   onAddMemory: (category: MemoryEntry["category"], content: string, metadata?: any) => void;
   onRemoveMemory: (id: string) => void;
+  // Voice & Chat props
+  voiceState?: string;
+  transcript?: string;
+  onStartVoice?: () => void;
+  onStopVoice?: () => void;
+  onStopSpeaking?: () => void;
+  isLoading?: boolean;
 }
 
 export default function GodModeTerminal({ 
@@ -31,7 +38,13 @@ export default function GodModeTerminal({
   onExecute,
   memories,
   onAddMemory,
-  onRemoveMemory
+  onRemoveMemory,
+  voiceState = "idle",
+  transcript = "",
+  onStartVoice,
+  onStopVoice,
+  onStopSpeaking,
+  isLoading: isGlobalLoading = false,
 }: GodModeTerminalProps) {
   const [history, setHistory] = useState<TerminalLine[]>([
     {
@@ -50,6 +63,13 @@ export default function GodModeTerminal({
   const [input, setInput] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
   const [activeTab, setActiveTab] = useState<"terminal" | "system" | "network">("terminal");
+
+  // Sync transcript to input
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -132,6 +152,23 @@ export default function GodModeTerminal({
       }
     }
 
+    // 4. AI CHAT OVERRIDE
+    if (cmdLower.startsWith("chat ")) {
+      const chatMsg = cmd.substring(5).trim();
+      if (chatMsg) {
+        setIsExecuting(true);
+        try {
+          const result = await onExecute(chatMsg);
+          addLine("output", result);
+        } catch (err) {
+          addLine("error", err instanceof Error ? err.message : "Chat failed");
+        } finally {
+          setIsExecuting(false);
+        }
+        return;
+      }
+    }
+
     if (cmdLower === "clear") {
       setHistory([{ id: "clear-" + Date.now(), type: "system", content: "Terminal buffer cleared. Secure session active.", timestamp: new Date() }]);
       return;
@@ -175,6 +212,7 @@ export default function GodModeTerminal({
   };
 
   const quickActions = [
+    { label: "AI Chat", cmd: "chat ", icon: <MessageSquare size={14} /> },
     { label: "Add Skill", cmd: "skill add ", icon: <PlusCircle size={14} /> },
     { label: "Spawn Agent", cmd: "spawn ", icon: <Users size={14} /> },
     { label: "Set Greeting", cmd: "greeting ", icon: <Settings size={14} /> },
@@ -345,15 +383,31 @@ export default function GodModeTerminal({
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder="Enter command or override code..."
-                      className="w-full bg-white/5 border border-white/10 focus:border-cyan-400/50 rounded-2xl py-4 pl-24 pr-12 outline-none font-mono text-white transition-all placeholder:text-white/10"
+                      placeholder={voiceState === 'listening' ? "Listening..." : "Enter command or override code..."}
+                      className="w-full bg-white/5 border border-white/10 focus:border-cyan-400/50 rounded-2xl py-4 pl-24 pr-32 outline-none font-mono text-white transition-all placeholder:text-white/10"
                       autoFocus
                       spellCheck={false}
                       autoComplete="off"
                     />
-                    <div className="absolute right-4 flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${isExecuting ? 'bg-cyan-400 animate-ping' : 'bg-white/10'}`} />
-                      <Settings size={16} className="text-white/20" />
+                    <div className="absolute right-4 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (voiceState === 'speaking') onStopSpeaking?.();
+                          else if (voiceState === 'listening') onStopVoice?.();
+                          else onStartVoice?.();
+                        }}
+                        className={`p-2 rounded-xl transition-all ${voiceState === 'listening' ? 'bg-cyan-400 text-black shadow-[0_0_15px_rgba(0,242,255,0.5)]' : 'bg-white/5 text-white/40 hover:text-cyan-400'}`}
+                      >
+                        {voiceState === 'listening' ? <MicOff size={18} /> : <Mic size={18} />}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!input.trim() || isExecuting || isGlobalLoading}
+                        className={`p-2 rounded-xl transition-all ${input.trim() ? 'bg-cyan-400 text-black shadow-[0_0_15px_rgba(0,242,255,0.5)]' : 'bg-white/5 text-white/20'}`}
+                      >
+                        {isExecuting || isGlobalLoading ? <Cpu size={18} className="animate-spin" /> : <Send size={18} />}
+                      </button>
                     </div>
                   </form>
                 </div>

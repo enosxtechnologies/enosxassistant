@@ -677,6 +677,12 @@ Based on these search results, please provide a comprehensive and detailed answe
               memories={memories}
               onAddMemory={addMemory}
               onRemoveMemory={removeMemory}
+              voiceState={voiceState}
+              transcript={transcript}
+              onStartVoice={handleStartVoice}
+              onStopVoice={stopListening}
+              onStopSpeaking={handleStopSpeak}
+              isLoading={isLoading}
             />
           )}
         </AnimatePresence>
