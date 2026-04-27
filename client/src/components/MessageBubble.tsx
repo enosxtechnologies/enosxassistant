@@ -22,7 +22,17 @@ interface MessageBubbleProps {
 // Simple markdown renderer — handles bold, italic, code, headers, lists, links
 function renderMarkdown(text: string): string {
   return text
-    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, lang, code) => {
+      // Basic syntax highlighting for keywords (very simplified)
+      const highlighted = code
+        .replace(/\b(const|let|var|function|return|if|else|for|while|import|export|class|interface|type)\b/g, '<span class="token keyword">$1</span>')
+        .replace(/\b(string|number|boolean|any|void|null|undefined)\b/g, '<span class="token builtin">$1</span>')
+        .replace(/"([^"]*)"/g, '<span class="token string">"$1"</span>')
+        .replace(/'([^']*)'/g, '<span class="token string">\'$1\'</span>')
+        .replace(/\b(\d+)\b/g, '<span class="token number">$1</span>')
+        .replace(/\/\/.*/g, '<span class="token comment">$&</span>');
+      return `<pre><code class="language-${lang || 'text'}">${highlighted}</code></pre>`;
+    })
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -149,11 +159,11 @@ export default function MessageBubble({
       </motion.div>
 
       {/* Bubble */}
-      <div className={`flex flex-col gap-1 max-w-[80%] ${isUser ? "items-end" : "items-start"}`}>
+      <div className={`flex flex-col gap-1 ${isUser ? "max-w-[80%] items-end" : "max-w-full items-start flex-1"}`}>
         <motion.div
-          whileHover={{ scale: 1.005 }}
+          whileHover={isUser ? { scale: 1.005 } : {}}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="relative rounded-2xl px-4 py-3"
+          className={`relative ${isUser ? "rounded-2xl px-4 py-3" : "w-full pt-1 pb-2"}`}
           style={
             isUser
               ? {
@@ -164,11 +174,9 @@ export default function MessageBubble({
                   boxShadow: `0 4px 20px rgba(${config.accentRgb}, 0.08)`,
                 }
               : {
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                  background: "transparent",
+                  border: "none",
+                  boxShadow: "none",
                 }
           }
         >

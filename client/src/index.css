@@ -393,6 +393,44 @@
     color: #e0e0e0;
     font-size: 0.85em;
   }
+  
+  /* ── Syntax Highlighting Colors ── */
+  .prose-crimson .token.comment,
+  .prose-crimson .token.prolog,
+  .prose-crimson .token.doctype,
+  .prose-crimson .token.cdata { color: #6272a4; }
+  .prose-crimson .token.punctuation { color: #f8f8f2; }
+  .prose-crimson .token.namespace { opacity: .7; }
+  .prose-crimson .token.property,
+  .prose-crimson .token.tag,
+  .prose-crimson .token.constant,
+  .prose-crimson .token.symbol,
+  .prose-crimson .token.deleted { color: #ff79c6; }
+  .prose-crimson .token.boolean,
+  .prose-crimson .token.number { color: #bd93f9; }
+  .prose-crimson .token.selector,
+  .prose-crimson .token.attr-name,
+  .prose-crimson .token.string,
+  .prose-crimson .token.char,
+  .prose-crimson .token.builtin,
+  .prose-crimson .token.inserted { color: #f1fa8c; }
+  .prose-crimson .token.operator,
+  .prose-crimson .token.entity,
+  .prose-crimson .token.url,
+  .language-css .token.string,
+  .style .token.string { color: #f8f8f2; }
+  .prose-crimson .token.atrule,
+  .prose-crimson .token.attr-value,
+  .prose-crimson .token.function,
+  .prose-crimson .token.class-name { color: #50fa7b; }
+  .prose-crimson .token.keyword { color: #8be9fd; }
+  .prose-crimson .token.regex,
+  .prose-crimson .token.important,
+  .prose-crimson .token.variable { color: #ffb86c; }
+  .prose-crimson .token.important,
+  .prose-crimson .token.bold { font-weight: bold; }
+  .prose-crimson .token.italic { font-style: italic; }
+  .prose-crimson .token.entity { cursor: help; }
   .prose-crimson ul, .prose-crimson ol {
     padding-left: 1.4em;
     margin-bottom: 0.75em;
