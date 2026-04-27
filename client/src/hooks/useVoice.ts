@@ -53,7 +53,7 @@ export function useVoice() {
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = "en-US";
-      recognition.maxAlternatives = 1;
+      recognition.maxAlternatives = 3; // Improved accuracy with multiple alternatives
 
       recognition.onstart = () => {
         setVoiceState("listening");
@@ -66,14 +66,26 @@ export function useVoice() {
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
+          // Use the most confident result (highest confidence score)
+          let bestTranscript = result[0]?.transcript || "";
+          let bestConfidence = result[0]?.confidence || 0;
+
+          for (let j = 1; j < result.length; j++) {
+            if (result[j]?.confidence > bestConfidence) {
+              bestTranscript = result[j]?.transcript || "";
+              bestConfidence = result[j]?.confidence || 0;
+            }
+          }
+
           if (result.isFinal) {
-            finalTranscript += result[0].transcript;
+            finalTranscript += bestTranscript;
           } else {
-            interimTranscript += result[0].transcript;
+            interimTranscript += bestTranscript;
           }
         }
 
-        setTranscript(finalTranscript || interimTranscript);
+        const displayText = (finalTranscript || interimTranscript).trim();
+        setTranscript(displayText);
 
         if (finalTranscript) {
           onResult(finalTranscript.trim());
@@ -122,17 +134,22 @@ export function useVoice() {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Sophisticated female AI voice profile
+    // Confident, tech-loving male AI voice profile
     utterance.rate = 1.0; 
-    utterance.pitch = 1.15; // Slightly higher pitch for a sophisticated AI feel
+    utterance.pitch = 0.85; // Lower pitch for a confident male voice
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
-    // Prioritize sophisticated female voices
+    
+    // Prioritize confident male voices with multiple fallback options
     const preferredVoice = 
-      voices.find(v => v.name.includes("Microsoft Zira") || v.name.includes("Samantha") || v.name.includes("Karen")) ||
-      voices.find(v => v.name.includes("Female") || v.name.includes("Google US English")) ||
-      voices.find(v => v.name.includes("Premium") || v.name.includes("Enhanced")) ||
+      voices.find(v => v.name.includes("Microsoft David")) ||
+      voices.find(v => v.name.includes("Google US English Male")) ||
+      voices.find(v => v.name.includes("Aaron")) ||
+      voices.find(v => v.name.includes("Daniel")) ||
+      voices.find(v => v.name.includes("Male") && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Google US English")) ||
+      voices.find(v => v.lang === "en-US" && !v.name.includes("Female")) ||
       voices.find(v => v.lang === "en-US");
       
     if (preferredVoice) utterance.voice = preferredVoice;

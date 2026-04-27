@@ -211,7 +211,7 @@ export default function MessageBubble({
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={`flex items-center gap-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}
+            className={`flex items-center gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}
           >
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -243,7 +243,7 @@ export default function MessageBubble({
                     : "1px solid rgba(255,255,255,0.07)",
                   color: isSpeaking ? config.accent : config.textMuted,
                 }}
-                title={isSpeaking ? "Stop speaking" : "Speak"}
+                title={isSpeaking ? "Stop speaking" : "Speak response"}
               >
                 {isSpeaking ? <VolumeX size={10} /> : <Volume2 size={10} />}
               </motion.button>

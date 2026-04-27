@@ -216,6 +216,7 @@ export default function ChatPage() {
             playSound("receive");
             executeAction(fullResponse);
 
+            // Auto-speak responses for better interactivity
             if (autoSpeak && fullResponse) {
               setSpeakingMessageId(assistantId);
               speak(fullResponse, () => setSpeakingMessageId(null));
