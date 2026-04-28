@@ -153,7 +153,7 @@ export default function MessageBubble({
                 : {}
             }
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-full h-full rounded-xl flex items-center justify-center overflow-hidden p-1"
+            className="w-full h-full rounded-full flex items-center justify-center overflow-hidden p-1"
           >
             <img 
               src={EX_LOGO_URL} 

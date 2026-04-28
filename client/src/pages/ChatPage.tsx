@@ -422,17 +422,12 @@ export default function ChatPage() {
           animate={{ y: 0, opacity: 1 }}
           className="h-16 flex items-center justify-between px-6 z-10"
           style={{
-            background: "rgba(10, 10, 10, 0.4)",
+            background: theme === 'light' ? "rgba(255, 255, 255, 0.7)" : "rgba(10, 10, 10, 0.4)",
             backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            borderBottom: `1px solid ${config.border}`,
           }}
         >
           <div className="flex items-center gap-2.5">
-            <PulseOrb
-              voiceState={voiceState}
-              isLoading={isLoading}
-              size={32}
-            />
             <span
               className="text-sm font-semibold truncate"
               style={{
@@ -442,14 +437,8 @@ export default function ChatPage() {
                 transition: "color 0.3s ease",
               }}
             >
-              {activeConversation?.title ?? "ENOSX XAI Assistant"}
+              {activeConversation?.title ?? "ENOSX AI Assistant"}
             </span>
-            {!isCompactMode && activeConversation && (
-              <div className="flex items-center gap-1 ml-2">
-                <ContextIndicator />
-                <AutoContextIndicator data={autoContext} />
-              </div>
-            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -490,13 +479,7 @@ export default function ChatPage() {
                   </span>
                 </div>
 
-                <div
-                  className="flex items-center gap-1"
-                  style={{ color: config.textMuted }}
-                >
-                  <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
-                  <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
-                </div>
+
 
                 <motion.a
                   href="/about"

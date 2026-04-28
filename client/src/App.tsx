@@ -27,17 +27,7 @@ function App() {
         <FounderModeProvider>
           <WindowContextProvider>
             <TooltipProvider>
-          <Toaster
-            theme="dark"
-            toastOptions={{
-              style: {
-                background: "rgba(20, 10, 10, 0.95)",
-                border: "1px solid rgba(220, 20, 60, 0.3)",
-                color: "#f0f0f0",
-                backdropFilter: "blur(20px)",
-              },
-            }}
-          />
+          <Toaster />
           <Router />
             </TooltipProvider>
           </WindowContextProvider>

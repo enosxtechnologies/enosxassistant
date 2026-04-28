@@ -114,7 +114,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
               filter: `drop-shadow(0 0 20px rgba(${config.accentRgb}, 0.2))`,
             }}
           >
-            ENOSX XAI
+            ENOSX AI
           </h1>
           <div className="flex items-center justify-center gap-3 mb-1">
             <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/20" />
