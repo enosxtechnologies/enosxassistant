@@ -67,7 +67,7 @@ function generateTitle(firstMessage: string): string {
 }
 
 export default function ChatPage() {
-  const { config } = useTheme();
+  const { config, theme } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
