@@ -30,31 +30,35 @@ export default function MemoryBank({ memories, onRemove, onAdd }: MemoryBankProp
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
         <AnimatePresence mode="popLayout">
           {memories.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="py-8 text-center border border-dashed rounded-xl"
-              style={{ borderColor: "rgba(255,255,255,0.1)" }}
+              className="py-12 text-center border border-dashed rounded-2xl bg-white/[0.02]"
+              style={{ borderColor: "rgba(0,242,255,0.1)" }}
             >
-              <p className="text-xs opacity-40" style={{ color: config.text }}>No memories stored yet.</p>
+              <div className="w-10 h-10 rounded-full bg-cyan-400/5 flex items-center justify-center mx-auto mb-3 border border-cyan-400/10">
+                <Brain size={18} className="text-cyan-400/30" />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-30" style={{ color: config.text }}>Core Empty</p>
             </motion.div>
           ) : (
             memories.map((memory) => (
               <motion.div
                 key={memory.id}
                 layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="p-3 rounded-xl border group relative"
+                className="p-4 rounded-2xl border group relative overflow-hidden transition-all duration-300 hover:border-cyan-400/30"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  borderColor: "rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.02)",
+                  borderColor: "rgba(255,255,255,0.05)",
                 }}
               >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">

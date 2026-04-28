@@ -185,52 +185,62 @@ export default function GodModeTerminal({
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="w-full max-w-7xl h-full max-h-[900px] rounded-3xl border flex flex-col overflow-hidden shadow-[0_0_80px_rgba(0,242,255,0.2)]"
-            style={{ borderColor: "rgba(0, 242, 255, 0.3)", background: "rgba(5, 5, 5, 0.9)" }}
+            className="w-full max-w-7xl h-full max-h-[900px] rounded-3xl border flex flex-col overflow-hidden shadow-[0_0_120px_rgba(0,242,255,0.15)] relative"
+            style={{ borderColor: "rgba(0, 242, 255, 0.25)", background: "rgba(2, 4, 8, 0.95)" }}
           >
+            {/* Background Scanning Line */}
+            <motion.div 
+              animate={{ top: ["0%", "100%", "0%"] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              className="absolute left-0 right-0 h-[2px] bg-cyan-400/10 z-0 pointer-events-none blur-[1px]"
+            />
+            
             {/* Terminal Header */}
-            <div className="p-5 border-b flex items-center justify-between bg-black/60" style={{ borderColor: "rgba(0, 242, 255, 0.15)" }}>
+            <div className="p-5 border-b flex items-center justify-between bg-black/40 backdrop-blur-md z-10" style={{ borderColor: "rgba(0, 242, 255, 0.15)" }}>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20">
-                  <ShieldAlert size={22} className="text-cyan-400 animate-pulse" />
+                <div className="relative">
+                  <motion.div 
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 bg-cyan-400/20 blur-xl rounded-full"
+                  />
+                  <div className="w-12 h-12 rounded-xl bg-cyan-400/10 flex items-center justify-center border border-cyan-400/30 relative z-10">
+                    <ShieldAlert size={24} className="text-cyan-400" />
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-xs font-black tracking-[0.4em] text-cyan-400 uppercase">ENOSX GOD MODE</h2>
-                  <p className="text-[10px] text-cyan-400/40 font-mono">KERNEL_VERSION: 4.2.0-STABLE // ROOT_ACCESS: GRANTED</p>
+                  <h2 className="text-sm font-black tracking-[0.5em] text-cyan-400 uppercase drop-shadow-[0_0_8px_rgba(0,242,255,0.5)]">ENOSX GOD MODE</h2>
+                  <div className="flex items-center gap-3 mt-1">
+                    <p className="text-[9px] text-cyan-400/50 font-mono uppercase tracking-widest">Kernel v4.2.0-STABLE</p>
+                    <div className="w-1 h-1 rounded-full bg-cyan-400/30" />
+                    <p className="text-[9px] text-emerald-400/70 font-mono uppercase tracking-widest animate-pulse">Root Access: Verified</p>
+                  </div>
                 </div>
               </div>
               
-              <div className="hidden md:flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-cyan-400/20 shadow-[0_0_15px_rgba(0,242,255,0.05)]">
-                <button 
-                  onClick={() => setActiveTab("terminal")}
-                  className={`relative px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 overflow-hidden ${activeTab === 'terminal' ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400/70'}`}
-                >
-                  {activeTab === 'terminal' && (
-                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-cyan-400" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
-                  )}
-                  <Terminal size={14} className="relative z-10" /> 
-                  <span className="relative z-10">Terminal</span>
-                </button>
-                <button 
-                  onClick={() => setActiveTab("system")}
-                  className={`relative px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 overflow-hidden ${activeTab === 'system' ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400/70'}`}
-                >
-                  {activeTab === 'system' && (
-                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-cyan-400" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
-                  )}
-                  <Activity size={14} className="relative z-10" /> 
-                  <span className="relative z-10">System</span>
-                </button>
-                <button 
-                  onClick={() => setActiveTab("network")}
-                  className={`relative px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 overflow-hidden ${activeTab === 'network' ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400/70'}`}
-                >
-                  {activeTab === 'network' && (
-                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-cyan-400" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
-                  )}
-                  <Globe size={14} className="relative z-10" /> 
-                  <span className="relative z-10">Network</span>
-                </button>
+              <div className="hidden md:flex items-center gap-1 bg-black/60 p-1.5 rounded-2xl border border-cyan-400/20 shadow-[inset_0_0_20px_rgba(0,242,255,0.05)]">
+                {(['terminal', 'system', 'network'] as const).map((tab) => (
+                  <button 
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`relative px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-500 flex items-center gap-2.5 overflow-hidden group ${activeTab === tab ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400'}`}
+                  >
+                    {activeTab === tab && (
+                      <motion.div 
+                        layoutId="activeTab" 
+                        className="absolute inset-0 bg-cyan-400 shadow-[0_0_20px_rgba(0,242,255,0.4)]" 
+                        transition={{ type: "spring", bounce: 0.15, duration: 0.6 }} 
+                      />
+                    )}
+                    {tab === 'terminal' && <Terminal size={14} className="relative z-10" />}
+                    {tab === 'system' && <Activity size={14} className="relative z-10" />}
+                    {tab === 'network' && <Globe size={14} className="relative z-10" />}
+                    <span className="relative z-10">{tab}</span>
+                    {activeTab !== tab && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-cyan-400/0 group-hover:bg-cyan-400/30 transition-all" />
+                    )}
+                  </button>
+                ))}
               </div>
 
               <div className="flex items-center gap-4">
@@ -277,15 +287,19 @@ export default function GodModeTerminal({
                     <Lock size={12} />
                     <span className="text-[10px] font-bold uppercase tracking-tighter">Security Status</span>
                   </div>
-                  <div className="space-y-1">
-                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                      <motion.div 
-                        animate={{ width: ["20%", "80%", "40%", "90%"] }} 
-                        transition={{ duration: 10, repeat: Infinity }} 
-                        className="h-full bg-cyan-400" 
-                      />
-                    </div>
-                    <span className="text-[8px] text-cyan-400/40 font-mono uppercase">Encrypted Tunnel: Active</span>
+                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-cyan-400/10">
+                    <motion.div 
+                      animate={{ 
+                        width: ["20%", "80%", "40%", "90%", "60%", "95%"],
+                        backgroundColor: ["rgba(0,242,255,0.5)", "rgba(0,242,255,0.8)", "rgba(0,242,255,0.5)"]
+                      }} 
+                      transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} 
+                      className="h-full shadow-[0_0_10px_rgba(0,242,255,0.5)]"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[8px] text-cyan-400/40 font-mono uppercase tracking-tighter">Encrypted Tunnel</span>
+                    <span className="text-[8px] text-emerald-400/60 font-mono uppercase">Active</span>
                   </div>
                 </div>
               </div>
@@ -304,12 +318,12 @@ export default function GodModeTerminal({
                       </span>
                       <div className="flex-1">
                         <div 
-                          className={`px-3 py-1.5 rounded-lg inline-block ${
-                            line.type === "input" ? "bg-cyan-400/10 text-cyan-400 border border-cyan-400/20" :
-                            line.type === "error" ? "bg-red-400/10 text-red-400 border border-red-400/20" :
-                            line.type === "system" ? "text-white/30 italic" :
-                            line.type === "predictive" ? "bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-bold" :
-                            "text-white/80"
+                          className={`px-4 py-2 rounded-xl inline-block backdrop-blur-sm transition-all duration-300 hover:translate-x-1 ${
+                            line.type === "input" ? "bg-cyan-400/10 text-cyan-400 border border-cyan-400/30 shadow-[0_0_15px_rgba(0,242,255,0.05)]" :
+                            line.type === "error" ? "bg-red-400/10 text-red-400 border border-red-400/30 shadow-[0_0_15px_rgba(239,68,68,0.05)]" :
+                            line.type === "system" ? "text-white/30 italic border border-transparent" :
+                            line.type === "predictive" ? "bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 font-bold shadow-[0_0_15px_rgba(250,204,21,0.05)]" :
+                            "text-white/80 bg-white/5 border border-white/10"
                           }`}
                         >
                           {line.type === "input" && <span className="mr-2 opacity-50">$</span>}
