@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Message } from "@/lib/types";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "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";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
 
