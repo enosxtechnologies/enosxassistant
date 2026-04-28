@@ -1,6 +1,7 @@
 /*
  * ENOSX XAI Assistant — ChatPage (Enhanced)
- * Design: "Crimson Matrix" — Cyberpunk Glassmorphism
+ * Design: "Crimson Matrix" assistant shell with "Neo-Glass Corporate Ritualism" launch overlay.
+ * Launch reminder: the first impression is a cinematic EX glass mark with a handwritten Enosx Technologies sign-off before the chat shell appears.
  * Layout: Left floating acrylic sidebar + right bento chat area + floating pill command bar
  */
 
@@ -12,6 +13,7 @@ import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
+import LaunchSplash from "@/components/LaunchSplash";
 import PulseOrb from "@/components/PulseOrb";
 import AdaptiveActionButtons from "@/components/AdaptiveActionButtons";
 import ClipboardNotification from "@/components/ClipboardNotification";
@@ -73,6 +75,7 @@ export default function ChatPage() {
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showLaunchSplash, setShowLaunchSplash] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -386,6 +389,12 @@ export default function ChatPage() {
           opacity: 0.06,
         }}
       />
+
+      <AnimatePresence>
+        {showLaunchSplash && (
+          <LaunchSplash onComplete={() => setShowLaunchSplash(false)} />
+        )}
+      </AnimatePresence>
 
       <FileDropZone onFileSelected={loadFile} isActive={true} />
       <CommandChainProgress progress={progress} />
