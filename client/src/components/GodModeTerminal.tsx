@@ -200,24 +200,36 @@ export default function GodModeTerminal({
                 </div>
               </div>
               
-              <div className="hidden md:flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+              <div className="hidden md:flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-cyan-400/20 shadow-[0_0_15px_rgba(0,242,255,0.05)]">
                 <button 
                   onClick={() => setActiveTab("terminal")}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'terminal' ? 'bg-cyan-400 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`relative px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 overflow-hidden ${activeTab === 'terminal' ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400/70'}`}
                 >
-                  <Terminal size={14} /> Terminal
+                  {activeTab === 'terminal' && (
+                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-cyan-400" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <Terminal size={14} className="relative z-10" /> 
+                  <span className="relative z-10">Terminal</span>
                 </button>
                 <button 
                   onClick={() => setActiveTab("system")}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'system' ? 'bg-cyan-400 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`relative px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 overflow-hidden ${activeTab === 'system' ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400/70'}`}
                 >
-                  <Activity size={14} /> System
+                  {activeTab === 'system' && (
+                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-cyan-400" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <Activity size={14} className="relative z-10" /> 
+                  <span className="relative z-10">System</span>
                 </button>
                 <button 
                   onClick={() => setActiveTab("network")}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'network' ? 'bg-cyan-400 text-black' : 'text-white/40 hover:text-white'}`}
+                  className={`relative px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 overflow-hidden ${activeTab === 'network' ? 'text-black' : 'text-cyan-400/40 hover:text-cyan-400/70'}`}
                 >
-                  <Globe size={14} /> Network
+                  {activeTab === 'network' && (
+                    <motion.div layoutId="activeTab" className="absolute inset-0 bg-cyan-400" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <Globe size={14} className="relative z-10" /> 
+                  <span className="relative z-10">Network</span>
                 </button>
               </div>
 

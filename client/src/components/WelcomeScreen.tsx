@@ -95,25 +95,42 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-center"
+          className="text-center relative"
         >
+          <motion.div 
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute -inset-4 blur-2xl rounded-full opacity-30"
+            style={{ background: `radial-gradient(circle, ${config.accent} 0%, transparent 70%)` }}
+          />
           <h1
-            className="text-3xl font-black mb-2"
+            className="text-5xl font-black mb-3 relative z-10"
             style={{
-              background: `linear-gradient(135deg, ${config.text} 0%, ${config.accent} 100%)`,
+              background: `linear-gradient(to bottom, ${config.text} 20%, ${config.accent} 100%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.04em",
+              filter: `drop-shadow(0 0 20px rgba(${config.accentRgb}, 0.2))`,
             }}
           >
             ENOSX XAI
           </h1>
+          <div className="flex items-center justify-center gap-3 mb-1">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/20" />
+            <p
+              className="text-[10px] font-bold uppercase tracking-[0.4em]"
+              style={{ color: config.accent, opacity: 0.8 }}
+            >
+              Command Intelligence
+            </p>
+            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/20" />
+          </div>
           <p
-            className="text-sm"
-            style={{ color: config.textMuted, letterSpacing: "0.08em" }}
+            className="text-[9px] font-medium uppercase tracking-[0.2em]"
+            style={{ color: config.textMuted, opacity: 0.4 }}
           >
-            COMMAND INTELLIGENCE · BUILT BY ENOSH
+            Architected by Enosh Technologies
           </p>
         </motion.div>
 
@@ -136,14 +153,18 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
               }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSuggestion(s.text)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200"
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all duration-300 group relative overflow-hidden"
               style={{
-                background: `rgba(${config.accentRgb}, 0.05)`,
-                border: `1px solid rgba(${config.accentRgb}, 0.12)`,
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
+                background: `rgba(${config.accentRgb}, 0.03)`,
+                border: `1px solid rgba(${config.accentRgb}, 0.1)`,
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
               }}
             >
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ background: `linear-gradient(45deg, transparent, rgba(${config.accentRgb}, 0.05), transparent)` }}
+              />
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                 style={{

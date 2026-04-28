@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Copy, Volume2, VolumeX, Check, User, Bot } from "lucide-react";
+import { Copy, Volume2, VolumeX, Check, User } from "lucide-react";
 import { Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import EliteStreamingText from "./EliteStreamingText";
@@ -97,6 +97,7 @@ export default function MessageBubble({
   const isUser = message.role === "user";
   const isStreaming = message.isStreaming;
   const isEmpty = !message.content && isStreaming;
+  const EX_LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663607664316/2uPer27yLAeEX6GEKFYHir/ex-glass-logo-wide-5A34YpjqXNUDGUwKtW47vj.webp";
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message.content);
@@ -147,13 +148,18 @@ export default function MessageBubble({
                       `0 0 0 4px rgba(${config.accentRgb}, 0.2)`,
                       `0 0 0 0 rgba(${config.accentRgb}, 0)`,
                     ],
+                    scale: [1, 1.05, 1],
                   }
                 : {}
             }
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-full h-full rounded-xl flex items-center justify-center"
+            className="w-full h-full rounded-xl flex items-center justify-center overflow-hidden p-1"
           >
-            <Bot size={14} style={{ color: config.textMuted }} />
+            <img 
+              src={EX_LOGO_URL} 
+              alt="EX" 
+              className="w-full h-full object-contain filter brightness-110 contrast-125"
+            />
           </motion.div>
         )}
       </motion.div>
