@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 const EX_LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663607664316/2uPer27yLAeEX6GEKFYHir/ex-glass-logo-wide-5A34YpjqXNUDGUwKtW47vj.webp";
 
+const GLITCH_OVERLAY = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E";
+
 interface LaunchSplashProps {
   onComplete: () => void;
 }
@@ -31,10 +33,10 @@ export default function LaunchSplash({ onComplete }: LaunchSplashProps) {
 
         .ex-launch-grain {
           background-image:
-            radial-gradient(circle at 20% 20%, rgba(68, 183, 255, 0.13), transparent 28%),
-            radial-gradient(circle at 78% 72%, rgba(0, 105, 255, 0.16), transparent 34%),
-            radial-gradient(circle at 50% 52%, rgba(255, 255, 255, 0.08), transparent 22%),
-            linear-gradient(135deg, rgba(0,0,0,0.85), rgba(2,7,18,0.94));
+            radial-gradient(circle at 20% 20%, rgba(0, 242, 255, 0.1), transparent 28%),
+            radial-gradient(circle at 78% 72%, rgba(0, 242, 255, 0.12), transparent 34%),
+            radial-gradient(circle at 50% 52%, rgba(0, 242, 255, 0.05), transparent 22%),
+            linear-gradient(135deg, #02040a, #050a14);
         }
 
         .ex-launch-grain::before {
@@ -48,7 +50,7 @@ export default function LaunchSplash({ onComplete }: LaunchSplashProps) {
         }
 
         .ex-launch-logo {
-          filter: drop-shadow(0 0 28px rgba(80, 196, 255, 0.55)) drop-shadow(0 0 94px rgba(43, 130, 255, 0.34));
+          filter: drop-shadow(0 0 28px rgba(0, 242, 255, 0.4)) drop-shadow(0 0 94px rgba(0, 242, 255, 0.2));
         }
 
         .ex-launch-signature {
@@ -93,6 +95,14 @@ export default function LaunchSplash({ onComplete }: LaunchSplashProps) {
           <p className="ex-launch-technical text-[10px] uppercase text-cyan-100/50 md:text-xs">
             Enosx Intelligent Systems
           </p>
+          <motion.p 
+            className="mt-1 text-[8px] font-mono text-cyan-400/40 uppercase tracking-[0.5em]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0.5] }}
+            transition={{ duration: 2, delay: 0.5 }}
+          >
+            Securing the Digital Frontier
+          </motion.p>
         </motion.div>
 
         <motion.div
@@ -122,9 +132,19 @@ export default function LaunchSplash({ onComplete }: LaunchSplashProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="ex-launch-display text-xs uppercase text-white/55 md:text-sm">
-            XAI Assistant
+          <p className="ex-launch-display text-xs uppercase text-cyan-400/70 md:text-sm font-bold tracking-[0.4em]">
+            Ethical Hacking Mentor
           </p>
+          <motion.div 
+            className="mt-4 flex justify-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.6 }}
+          >
+            <div className="h-1 w-1 rounded-full bg-cyan-400 animate-pulse" />
+            <div className="h-1 w-1 rounded-full bg-cyan-400 animate-pulse delay-75" />
+            <div className="h-1 w-1 rounded-full bg-cyan-400 animate-pulse delay-150" />
+          </motion.div>
         </motion.div>
       </div>
 
