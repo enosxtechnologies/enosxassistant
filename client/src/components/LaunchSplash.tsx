@@ -5,8 +5,7 @@
 
 import { motion } from "framer-motion";
 
-const EX_LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663607664316/2uPer27yLAeEX6GEKFYHir/ex-glass-logo-wide-5A34YpjqXNUDGUwKtW47vj.webp";
+const EX_LOGO_URL = "/hacking_mentor_splash.png";
 
 const GLITCH_OVERLAY = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E";
 
@@ -50,7 +49,8 @@ export default function LaunchSplash({ onComplete }: LaunchSplashProps) {
         }
 
         .ex-launch-logo {
-          filter: drop-shadow(0 0 28px rgba(0, 242, 255, 0.4)) drop-shadow(0 0 94px rgba(0, 242, 255, 0.2));
+          filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.2));
+          border-radius: 24px;
         }
 
         .ex-launch-signature {
@@ -106,45 +106,50 @@ export default function LaunchSplash({ onComplete }: LaunchSplashProps) {
         </motion.div>
 
         <motion.div
-          className="relative w-full max-w-[42rem]"
-          initial={{ opacity: 0, y: 26, scale: 0.92, filter: "blur(18px)" }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          transition={{ duration: 1.55, delay: 0.38, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-[50rem]"
+          initial={{ opacity: 0, scale: 1.05, filter: "blur(20px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <motion.div
-            className="absolute -inset-10 rounded-[44%] bg-cyan-400/10 blur-3xl"
-            animate={{ opacity: [0.28, 0.62, 0.28], scale: [0.96, 1.05, 0.96] }}
-            transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -inset-4 rounded-3xl bg-cyan-400/5 blur-2xl"
+            animate={{ opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.img
             src={EX_LOGO_URL}
-            alt="Glowing glass EX logo"
-            className="ex-launch-logo relative mx-auto block w-full select-none object-contain"
+            alt="ENOSX Ethical Hacking Mentor Splash"
+            className="ex-launch-logo relative mx-auto block w-full select-none object-cover shadow-2xl border border-cyan-400/10"
             draggable={false}
-            animate={{ y: [0, -7, 0] }}
-            transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
           />
         </motion.div>
 
         <motion.div
-          className="mt-2 text-center"
+          className="mt-6 text-center"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.45, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, delay: 1.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="ex-launch-display text-xs uppercase text-cyan-400/70 md:text-sm font-bold tracking-[0.4em]">
-            Ethical Hacking Mentor
-          </p>
-          <motion.div 
-            className="mt-4 flex justify-center gap-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.6 }}
-          >
-            <div className="h-1 w-1 rounded-full bg-cyan-400 animate-pulse" />
-            <div className="h-1 w-1 rounded-full bg-cyan-400 animate-pulse delay-75" />
-            <div className="h-1 w-1 rounded-full bg-cyan-400 animate-pulse delay-150" />
-          </motion.div>
+          <div className="flex flex-col items-center gap-2">
+            <p className="ex-launch-display text-[10px] uppercase text-cyan-400/40 tracking-[0.6em]">
+              System Status: Optimal
+            </p>
+            <motion.div 
+              className="flex justify-center gap-1.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+            >
+              <div className="h-1 w-8 rounded-full bg-cyan-400/20 overflow-hidden">
+                <motion.div 
+                  className="h-full bg-cyan-400"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "100%" }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
 
