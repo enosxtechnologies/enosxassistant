@@ -255,7 +255,7 @@ export default function ChatPage() {
       setIsGodModeActive(false);
       setShowGodTerminal(true);
       setShowGlitch(true);
-      speak("Greetings, Enosh. How may I assist you today?");
+      speak("Greetings, Enosh. Ethical Hacking Mentor is now online. What are we auditing today?");
     }, 3000);
   }, [isGodModeActive, playSound, speak]);
 

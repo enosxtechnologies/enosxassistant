@@ -43,7 +43,7 @@ export default function GodModeTerminal({
     {
       id: "auth",
       type: "system",
-      content: "Authentication successful. Welcome, Root User Enosh.",
+      content: "Authentication successful. Welcome, Root User Enosh. Ethical Hacking Mentor initialized.",
       timestamp: new Date(),
     }
   ]);
@@ -70,9 +70,8 @@ export default function GodModeTerminal({
     if (isOpen && history.length === 2) {
       const hour = new Date().getHours();
       let suggestion = "";
-      if (hour >= 9 && hour <= 11) suggestion = "Enosh, it's morning. Shall I initialize your dev environment?";
-      else if (hour >= 22 || hour <= 4) suggestion = "Late night session detected. Optimization mode recommended.";
-      else suggestion = "System ready for deployment. What's the focus today?";
+      if (hour >= 22 || hour <= 4) suggestion = "Late night audit session detected. Shall we analyze some network traffic?";
+      else suggestion = "Ethical Hacking Mentor active. Ready to explore wireless security or system vulnerabilities?";
 
       setTimeout(() => {
         addLine("predictive", `[PROACTIVE SUGGESTION] ${suggestion}`);
