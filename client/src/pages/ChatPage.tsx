@@ -26,11 +26,13 @@ import FileContextBadge from "@/components/FileContextBadge";
 import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
+import GodModeTerminalWithChat from "@/components/GodModeTerminalWithChat";
 import CircuitDoor from "@/components/CircuitDoor";
 import AutoContextIndicator from "@/components/AutoContextIndicator";
 import GlitchShader from "@/components/GlitchShader";
 import NeuralMesh from "@/components/NeuralMesh";
 import { useGroq } from "@/hooks/useGroq";
+import { useAI } from "@/hooks/useAI";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
@@ -629,7 +631,7 @@ export default function ChatPage() {
 
         <AnimatePresence>
           {showGodTerminal && (
-            <GodModeTerminal 
+            <GodModeTerminalWithChat 
               isOpen={showGodTerminal}
               onClose={() => {
                 setShowGodTerminal(false);
@@ -640,6 +642,12 @@ export default function ChatPage() {
               memories={memories}
               onAddMemory={addMemory}
               onRemoveMemory={removeMemory}
+              voiceState={voiceState}
+              transcript={transcript}
+              onStartVoice={handleStartVoice}
+              onStopVoice={stopListening}
+              onStopSpeaking={handleStopSpeak}
+              isLoading={isLoading}
             />
           )}
         </AnimatePresence>

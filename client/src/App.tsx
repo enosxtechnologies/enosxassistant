@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { FounderModeProvider } from "./contexts/FounderModeContext";
 import { WindowContextProvider } from "./contexts/WindowContext";
+import { EnoshLearningProvider } from "./contexts/EnoshLearningContext";
 import ChatPage from "./pages/ChatPage";
 import AboutPage from "./pages/AboutPage";
 
@@ -25,12 +26,14 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <FounderModeProvider>
-          <WindowContextProvider>
+          <EnoshLearningProvider>
+            <WindowContextProvider>
             <TooltipProvider>
           <Toaster />
           <Router />
             </TooltipProvider>
-          </WindowContextProvider>
+            </WindowContextProvider>
+          </EnoshLearningProvider>
         </FounderModeProvider>
       </ThemeProvider>
     </ErrorBoundary>
