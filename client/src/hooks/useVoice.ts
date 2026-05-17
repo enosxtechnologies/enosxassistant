@@ -135,24 +135,37 @@ export function useVoice() {
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
     // Confident, tech-loving male AI voice profile
-    utterance.rate = 1.0; 
-    utterance.pitch = 0.85; // Lower pitch for a confident male voice
+    // Optimized for a more natural, human-like cadence
+    utterance.rate = 0.95; // Slightly slower for better clarity and "human" feel
+    utterance.pitch = 0.9;  // Slightly lower than default for a more mature, confident tone
     utterance.volume = 1;
 
     const voices = synthRef.current.getVoices();
     
-    // Prioritize confident male voices with multiple fallback options
+    // Prioritize high-quality, natural-sounding voices
     const preferredVoice = 
+      // Premium/Natural voices first
+      voices.find(v => v.name.includes("Natural") && v.name.includes("Male")) ||
+      voices.find(v => v.name.includes("Premium") && v.name.includes("Male")) ||
+      // Specific high-quality system voices
       voices.find(v => v.name.includes("Microsoft David")) ||
       voices.find(v => v.name.includes("Google US English Male")) ||
-      voices.find(v => v.name.includes("Aaron")) ||
-      voices.find(v => v.name.includes("Daniel")) ||
-      voices.find(v => v.name.includes("Male") && v.lang === "en-US") ||
-      voices.find(v => v.name.includes("Google US English")) ||
-      voices.find(v => v.lang === "en-US" && !v.name.includes("Female")) ||
-      voices.find(v => v.lang === "en-US");
+      voices.find(v => v.name.includes("Apple Daniel")) ||
+      voices.find(v => v.name.includes("Samantha")) || // High quality female fallback if no good male
+      voices.find(v => v.name.includes("Alex")) ||
+      // General language matches
+      voices.find(v => v.lang.startsWith("en-US") && v.name.includes("Male")) ||
+      voices.find(v => v.lang.startsWith("en-GB") && v.name.includes("Male")) ||
+      voices.find(v => v.lang.startsWith("en") && !v.name.toLowerCase().includes("female")) ||
+      voices.find(v => v.lang.startsWith("en"));
       
-    if (preferredVoice) utterance.voice = preferredVoice;
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+      // Adjust pitch/rate based on specific voice characteristics if needed
+      if (preferredVoice.name.includes("Google")) {
+        utterance.rate = 1.0; // Google voices are already quite natural at 1.0
+      }
+    }
 
     utterance.onstart = () => setVoiceState("speaking");
     utterance.onend = () => {
