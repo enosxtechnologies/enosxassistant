@@ -1,4 +1,5 @@
 import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
+import { VitePWA } from "vite-plugin-pwa";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
@@ -58,7 +59,41 @@ function vitePluginStorageProxy(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginStorageProxy()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginStorageProxy(),
+  VitePWA({
+    registerType: "autoUpdate",
+    includeAssets: ["favicon.png", "logo192.png", "logo512.png"],
+    manifest: {
+      name: "ENOSX XAI Assistant",
+      short_name: "ENOSX AI",
+      description: "Advanced AI Assistant powered by ENOSX",
+      theme_color: "#0a0a0a",
+      background_color: "#0a0a0a",
+      display: "standalone",
+      icons: [
+        {
+          src: "favicon.png",
+          sizes: "64x64 32x32 24x24 16x16",
+          type: "image/x-icon",
+        },
+        {
+          src: "logo192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+        {
+          src: "logo512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
+    },
+  }),
+];
 
 export default defineConfig({
   plugins,
