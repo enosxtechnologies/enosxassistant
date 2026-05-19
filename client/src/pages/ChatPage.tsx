@@ -1,7 +1,6 @@
 /*
  * ENOSX XAI Assistant — ChatPage (Enhanced)
- * Design: "Crimson Matrix" assistant shell with "Neo-Glass Corporate Ritualism" launch overlay.
- * Launch reminder: the first impression is a cinematic EX glass mark with a handwritten Enosx Technologies sign-off before the chat shell appears.
+ * Design: "Crimson Matrix" — Cyberpunk Glassmorphism
  * Layout: Left floating acrylic sidebar + right bento chat area + floating pill command bar
  */
 
@@ -13,7 +12,6 @@ import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
-import LaunchSplash from "@/components/LaunchSplash";
 import PulseOrb from "@/components/PulseOrb";
 import AdaptiveActionButtons from "@/components/AdaptiveActionButtons";
 import ClipboardNotification from "@/components/ClipboardNotification";
@@ -26,16 +24,15 @@ import FileContextBadge from "@/components/FileContextBadge";
 import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
-import GodModeTerminalWithChat from "@/components/GodModeTerminalWithChat";
 import CircuitDoor from "@/components/CircuitDoor";
 import AutoContextIndicator from "@/components/AutoContextIndicator";
 import GlitchShader from "@/components/GlitchShader";
 import NeuralMesh from "@/components/NeuralMesh";
 import { useGroq } from "@/hooks/useGroq";
-import { useAI } from "@/hooks/useAI";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
+import { useWebSearch } from "@/hooks/useWebSearch";
 import { useCommandChain } from "@/hooks/useCommandChain";
 import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
@@ -69,7 +66,7 @@ function generateTitle(firstMessage: string): string {
 }
 
 export default function ChatPage() {
-  const { config, theme } = useTheme();
+  const { config } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -77,7 +74,6 @@ export default function ChatPage() {
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [showLaunchSplash, setShowLaunchSplash] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -89,6 +85,7 @@ export default function ChatPage() {
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   const { sendMessage, isLoading, error } = useGroq();
+  const { performSearch } = useWebSearch();
   const {
     voiceState,
     transcript,
@@ -219,9 +216,29 @@ export default function ChatPage() {
               })
             );
             playSound("receive");
-            executeAction(fullResponse);
+            executeAction(fullResponse).then((actions) => {
+              const searchAction = actions.find(a => a.type === 'search');
+              if (searchAction && searchAction.query) {
+                performSearch(searchAction.query).then((results) => {
+                  const resultsText = results
+                    .map((r, i) => `${i + 1}. **${r.title}**
+   ${r.snippet}
+   [Link](${r.url})`)
+                    .join("\n\n");
+                  
+                  const searchResultsMessage = `[SEARCH RESULTS for "${searchAction.query}"]:
 
-            // Auto-speak responses for better interactivity
+${resultsText}
+
+Based on these search results, please provide a comprehensive and detailed answer to the user's question.`;
+                  
+                  setTimeout(() => {
+                    handleSend(searchResultsMessage);
+                  }, 1000);
+                });
+              }
+            });
+
             if (autoSpeak && fullResponse) {
               setSpeakingMessageId(assistantId);
               speak(fullResponse, () => setSpeakingMessageId(null));
@@ -257,9 +274,16 @@ export default function ChatPage() {
       setIsGodModeActive(false);
       setShowGodTerminal(true);
       setShowGlitch(true);
-      speak("Greetings, Enosh. Ethical Hacking Mentor is now online. What are we auditing today?");
+      
+      // Check for custom greeting in memories
+      const customGreeting = memories.find(m => m.category === 'system' && m.content.startsWith('GREETING_OVERRIDE:'));
+      const greetingText = customGreeting 
+        ? customGreeting.content.replace('GREETING_OVERRIDE:', '').trim()
+        : "Greetings, Enosh. How may I assist you today?";
+        
+      speak(greetingText);
     }, 3000);
-  }, [isGodModeActive, playSound, speak]);
+  }, [isGodModeActive, playSound, speak, memories]);
 
   useGodMode(triggerGodMode);
 
@@ -392,12 +416,6 @@ export default function ChatPage() {
         }}
       />
 
-      <AnimatePresence>
-        {showLaunchSplash && (
-          <LaunchSplash onComplete={() => setShowLaunchSplash(false)} />
-        )}
-      </AnimatePresence>
-
       <FileDropZone onFileSelected={loadFile} isActive={true} />
       <CommandChainProgress progress={progress} />
       <ClipboardNotification
@@ -424,12 +442,17 @@ export default function ChatPage() {
           animate={{ y: 0, opacity: 1 }}
           className="h-16 flex items-center justify-between px-6 z-10"
           style={{
-            background: theme === 'light' ? "rgba(255, 255, 255, 0.7)" : "rgba(10, 10, 10, 0.4)",
+            background: "rgba(10, 10, 10, 0.4)",
             backdropFilter: "blur(20px)",
-            borderBottom: `1px solid ${config.border}`,
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
           }}
         >
           <div className="flex items-center gap-2.5">
+            <PulseOrb
+              voiceState={voiceState}
+              isLoading={isLoading}
+              size={32}
+            />
             <span
               className="text-sm font-semibold truncate"
               style={{
@@ -439,8 +462,14 @@ export default function ChatPage() {
                 transition: "color 0.3s ease",
               }}
             >
-              {activeConversation?.title ?? "ENOSX AI Assistant"}
+              {activeConversation?.title ?? "ENOSX XAI Assistant"}
             </span>
+            {!isCompactMode && activeConversation && (
+              <div className="flex items-center gap-1 ml-2">
+                <ContextIndicator />
+                <AutoContextIndicator data={autoContext} />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -481,7 +510,13 @@ export default function ChatPage() {
                   </span>
                 </div>
 
-
+                <div
+                  className="flex items-center gap-1"
+                  style={{ color: config.textMuted }}
+                >
+                  <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
+                  <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
+                </div>
 
                 <motion.a
                   href="/about"
@@ -631,7 +666,7 @@ export default function ChatPage() {
 
         <AnimatePresence>
           {showGodTerminal && (
-            <GodModeTerminalWithChat 
+            <GodModeTerminal 
               isOpen={showGodTerminal}
               onClose={() => {
                 setShowGodTerminal(false);
