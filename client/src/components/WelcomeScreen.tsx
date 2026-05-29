@@ -100,7 +100,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           className="text-center"
         >
           <h1
-            className="text-3xl font-black mb-2"
+            className="text-5xl font-black mb-2"
             style={{
               background: `linear-gradient(135deg, ${config.text} 0%, ${config.accent} 100%)`,
               WebkitBackgroundClip: "text",
@@ -109,7 +109,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
               letterSpacing: "-0.03em",
             }}
           >
-            ENOSX XAI
+            ENOSX AI
           </h1>
           <p
             className="text-sm"
