@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Copy, Volume2, VolumeX, Check, User, Bot } from "lucide-react";
+import { Copy, Volume2, VolumeX, Check } from "lucide-react";
 import { Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
@@ -108,49 +108,10 @@ export default function MessageBubble({
       }}
       className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
     >
-      {/* Avatar */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.05 }}
-        className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
-        style={
-          isUser
-            ? {
-                background: `rgba(${config.accentRgb}, 0.15)`,
-                border: `1px solid rgba(${config.accentRgb}, 0.3)`,
-              }
-            : {
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }
-        }
-      >
-        {isUser ? (
-          <User size={14} style={{ color: config.accent }} />
-        ) : (
-          <motion.div
-            animate={
-              isStreaming
-                ? {
-                    boxShadow: [
-                      `0 0 0 0 rgba(${config.accentRgb}, 0)`,
-                      `0 0 0 4px rgba(${config.accentRgb}, 0.2)`,
-                      `0 0 0 0 rgba(${config.accentRgb}, 0)`,
-                    ],
-                  }
-                : {}
-            }
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-full h-full rounded-xl flex items-center justify-center"
-          >
-            <Bot size={14} style={{ color: config.textMuted }} />
-          </motion.div>
-        )}
-      </motion.div>
+      {/* Avatar removed - no icons for user/bot */}
 
       {/* Bubble */}
-      <div className={`flex flex-col gap-1 max-w-[80%] ${isUser ? "items-end" : "items-start"}`}>
+      <div className={`flex flex-col gap-1 max-w-[90%] ${isUser ? "items-end" : "items-start"}`}>
         <motion.div
           whileHover={{ scale: 1.005 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}

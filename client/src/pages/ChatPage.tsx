@@ -48,9 +48,8 @@ import { useGodMode } from "@/hooks/useGodMode";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
-import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX, Minimize2, Maximize2, Wallpaper } from "lucide-react";
+import { Wifi, ChevronDown, Mic, Volume2, VolumeX } from "lucide-react";
 import WallpaperBackground from "@/components/WallpaperBackground";
-import WallpaperPicker from "@/components/WallpaperPicker";
 
 const BG_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
@@ -80,8 +79,7 @@ export default function ChatPage() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isPro] = useState(false);
-  const [isMiniMode, setIsMiniMode] = useState(false);
-  const [showWallpaperPicker, setShowWallpaperPicker] = useState(false);
+
   const { settings: wallpaperSettings } = useWallpaper();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -348,24 +346,16 @@ export default function ChatPage() {
 
   return (
     <motion.div
-      className={`flex overflow-hidden ${
-        isMiniMode 
-          ? "fixed bottom-4 right-4 w-80 h-96 rounded-2xl shadow-2xl z-50" 
-          : "h-screen w-screen"
-      }`}
+      className="flex overflow-hidden h-screen w-screen"
       style={{ 
         background: "transparent", 
         transition: "background 0.4s ease",
-        ...(isMiniMode && {
-          border: `1px solid rgba(${config.accentRgb}, 0.3)`,
-          boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(${config.accentRgb}, 0.1)`,
-        })
       }}
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       {/* Wallpaper Background */}
-      {!isMiniMode && <WallpaperBackground />}
+      <WallpaperBackground />
 
       {/* File Drop Zone */}
       <FileDropZone onFileSelected={loadFile} isActive={true} />
@@ -373,19 +363,17 @@ export default function ChatPage() {
       {/* Command Chain Progress Indicator */}
       <CommandChainProgress progress={progress} />
 
-      {/* Sidebar - hidden in mini mode */}
-      {!isMiniMode && (
-        <Sidebar
-          conversations={conversations}
-          activeId={activeId}
-          onSelect={setActiveId}
-          onNew={createNewChat}
-          onDelete={deleteConversation}
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-          isPro={isPro}
-        />
-      )}
+      {/* Sidebar */}
+      <Sidebar
+        conversations={conversations}
+        activeId={activeId}
+        onSelect={setActiveId}
+        onNew={createNewChat}
+        onDelete={deleteConversation}
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        isPro={isPro}
+      />
 
       {/* Main area */}
       <motion.div
@@ -449,45 +437,7 @@ export default function ChatPage() {
 
           {/* Right: controls */}
           <div className="flex items-center gap-2">
-            {/* Mini mode toggle */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsMiniMode((v) => !v)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
-              style={{
-                background: isMiniMode
-                  ? `rgba(${config.accentRgb},0.15)`
-                  : "rgba(255,255,255,0.04)",
-                border: isMiniMode
-                  ? `1px solid rgba(${config.accentRgb},0.3)`
-                  : "1px solid rgba(255,255,255,0.07)",
-                color: isMiniMode ? config.accent : config.textMuted,
-              }}
-              title={isMiniMode ? "Expand to full screen" : "Minimize to mini window"}
-            >
-              {isMiniMode ? <Maximize2 size={11} /> : <Minimize2 size={11} />}
-            </motion.button>
-
-            {/* Wallpaper / Appearance button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowWallpaperPicker(true)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
-              style={{
-                background: showWallpaperPicker
-                  ? `rgba(${config.accentRgb},0.15)`
-                  : "rgba(255,255,255,0.04)",
-                border: showWallpaperPicker
-                  ? `1px solid rgba(${config.accentRgb},0.3)`
-                  : "1px solid rgba(255,255,255,0.07)",
-                color: showWallpaperPicker ? config.accent : config.textMuted,
-              }}
-              title="Wallpaper & appearance"
-            >
-              <Wallpaper size={11} />
-            </motion.button>
+            {/* Waste buttons removed for cleaner UI */}
 
             {/* Theme switcher */}
             <ThemeSwitcher />
@@ -618,20 +568,7 @@ export default function ChatPage() {
               <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
             </div>
 
-            <motion.a
-              href="/about"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
-              style={{
-                background: "rgba(0, 242, 255, 0.07)",
-                border: "1px solid rgba(0, 242, 255, 0.18)",
-                color: "rgba(0, 242, 255, 0.6)",
-              }}
-            >
-              <Info size={12} />
-              <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
-            </motion.a>
+            {/* About button removed for cleaner UI */}
           </div>
         </motion.div>
 
@@ -766,11 +703,7 @@ export default function ChatPage() {
         onExecute={executeGodCommand}
       />
 
-      {/* Wallpaper & Appearance Picker */}
-      <WallpaperPicker
-        isOpen={showWallpaperPicker}
-        onClose={() => setShowWallpaperPicker(false)}
-      />
+
     </motion.div>
   );
 }

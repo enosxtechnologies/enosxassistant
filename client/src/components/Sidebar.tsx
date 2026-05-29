@@ -86,10 +86,10 @@ export default function Sidebar({
                 </motion.div>
               </div>
               <span
-                className="text-sm font-bold truncate"
-                style={{ color: config.text, letterSpacing: "-0.02em" }}
+                className="text-lg font-black truncate"
+                style={{ color: config.accent, letterSpacing: "-0.03em", fontWeight: 900 }}
               >
-                ENOSX TECHNOLOGIES
+                ENOSX AI
               </span>
               {isPro && (
                 <span
