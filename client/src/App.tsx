@@ -7,23 +7,43 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { FounderModeProvider } from "./contexts/FounderModeContext";
 import { WindowContextProvider } from "./contexts/WindowContext";
 import { WallpaperProvider } from "./contexts/WallpaperContext";
-import ChatPage from "./pages/ChatPage";
-import AboutPage from "./pages/AboutPage";
-import SplashPage from "./components/SplashPage";
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
+
+// Lazy load route components to enable code-splitting
+const ChatPage = lazy(() => import("./pages/ChatPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const SplashPage = lazy(() => import("./components/SplashPage"));
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center w-full h-screen bg-background">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function Router() {
   const [showSplash, setShowSplash] = useState(true);
   if (showSplash) {
-    return <SplashPage onComplete={() => setShowSplash(false)} />;
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <SplashPage onComplete={() => setShowSplash(false)} />
+      </Suspense>
+    );
   }
   return (
-    <Switch>
-      <Route path={"/"} component={ChatPage} />
-      <Route path={"/about"} component={AboutPage} />
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<LoadingFallback />}>
+      <Switch>
+        <Route path={"/"} component={ChatPage} />
+        <Route path={"/about"} component={AboutPage} />
+        <Route path={"/404"} component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
