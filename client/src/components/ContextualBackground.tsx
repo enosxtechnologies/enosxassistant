@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ContextualBackground
+ * ENOSX AI — ContextualBackground
  * Dynamically shifts background colors based on conversation sentiment/topic
  * Features: sentiment detection, smooth color transitions, glow intensity
  */

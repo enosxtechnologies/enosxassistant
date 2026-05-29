@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ActionTileGrid
+ * ENOSX AI — ActionTileGrid
  * Bento-style grid layout for system action tiles
  * Features: responsive grid, animated stagger, glassmorphism container
  */

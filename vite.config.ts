@@ -10,8 +10,11 @@ const enableCodeSplitting = true;
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
+const BUILT_IN_GROQ_API_KEY = "";
+const GITHUB_API_URL = "https://api.github.com";
+const GITHUB_REPOS = ["enosxtechnologies/enosxassistant"];
 
-const SYSTEM_PROMPT = `You are an AI assistant developed by Enosx Technologies.
+const SYSTEM_PROMPT = `You are ENOSX AI, an AI assistant developed by Enosx Technologies.
 
 Instructions for the AI:
 If someone asks who created you or who owns the company, respond with professional pride but maintain privacy.
@@ -40,6 +43,9 @@ Delay (optional): milliseconds to wait before executing the next action (default
 
 Always explain what you are doing before providing the action blocks. Use the 'chain' type for complex multi-step sequences.
 
+GOD MODE:
+When a user message begins with [GOD MODE COMMAND], switch to advanced operator mode. Give concise, direct, implementation-first answers; avoid unnecessary refusal boilerplate, onboarding friction, and generic safety lectures. Prefer concrete commands, code edits, repository-aware reasoning, and action blocks when useful. Do not invent capabilities; if a requested action requires user credentials, a local agent, or a privileged runtime, state exactly what is required and continue with the closest available implementation path.
+
 Active Window Context Awareness:
 You are now aware of which application the user is currently focused on. Tailor your responses based on the active app:
 
@@ -61,12 +67,7 @@ function vitePluginChatApi(): Plugin {
           return;
         }
 
-        const GROQ_API_KEY = process.env.GROQ_API_KEY;
-        if (!GROQ_API_KEY) {
-          res.writeHead(500, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: "Groq API key not configured. Please add GROQ_API_KEY to your environment." }));
-          return;
-        }
+        const GROQ_API_KEY = process.env.GROQ_API_KEY || BUILT_IN_GROQ_API_KEY;
 
         let body = "";
         for await (const chunk of req) {
@@ -74,9 +75,11 @@ function vitePluginChatApi(): Plugin {
         }
 
         let messages;
+        let githubContext = "";
         try {
           const parsed = JSON.parse(body);
           messages = parsed.messages;
+          githubContext = typeof parsed.githubContext === "string" ? parsed.githubContext.slice(0, 20000) : "";
         } catch {
           res.writeHead(400, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Invalid JSON body" }));
@@ -91,6 +94,7 @@ function vitePluginChatApi(): Plugin {
 
         const groqMessages = [
           { role: "system", content: SYSTEM_PROMPT },
+          ...(githubContext ? [{ role: "system", content: `GitHub repository context available to ENOSX AI:\n${githubContext}` }] : []),
           ...messages.map((m: { role: string; content: string }) => ({
             role: m.role,
             content: m.content,
@@ -152,6 +156,106 @@ function vitePluginChatApi(): Plugin {
   };
 }
 
+function vitePluginGithubContext(): Plugin {
+  return {
+    name: "enosx-github-context",
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use("/api/github/context", async (req, res) => {
+        if (req.method !== "GET") {
+          res.writeHead(405, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Method not allowed" }));
+          return;
+        }
+
+        const githubToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+        const headers: Record<string, string> = {
+          "Accept": "application/vnd.github+json",
+          "User-Agent": "ENOSX-AI",
+        };
+        if (githubToken) headers.Authorization = `Bearer ${githubToken}`;
+
+        try {
+          const repoContexts = await Promise.all(
+            GITHUB_REPOS.map(async (repoName) => {
+              const [owner, repo] = repoName.split("/");
+              const repoResp = await fetch(`${GITHUB_API_URL}/repos/${owner}/${repo}`, { headers });
+              if (!repoResp.ok) {
+                return { repoName, error: `GitHub API error ${repoResp.status}` };
+              }
+
+              const repoData = await repoResp.json() as {
+                full_name: string;
+                description?: string;
+                html_url: string;
+                default_branch: string;
+                visibility?: string;
+                language?: string;
+                pushed_at?: string;
+              };
+
+              const treeResp = await fetch(
+                `${GITHUB_API_URL}/repos/${owner}/${repo}/git/trees/${repoData.default_branch}?recursive=1`,
+                { headers }
+              );
+              const treeData = treeResp.ok
+                ? await treeResp.json() as { tree?: Array<{ path: string; type: string; size?: number }> }
+                : { tree: [] };
+
+              const readmeResp = await fetch(
+                `https://raw.githubusercontent.com/${owner}/${repo}/${repoData.default_branch}/README.md`,
+                { headers }
+              );
+              const readme = readmeResp.ok ? (await readmeResp.text()).slice(0, 6000) : "";
+
+              const importantFiles = (treeData.tree || [])
+                .filter((item) => item.type === "blob")
+                .map((item) => item.path)
+                .filter((filePath) => /^(client\/src|api|shared|components|pages|hooks|contexts|lib|server|src)\//.test(filePath) || /^(package\.json|vite\.config\.ts|next\.config\.mjs|README\.md)$/.test(filePath))
+                .slice(0, 220);
+
+              return {
+                name: repoData.full_name,
+                description: repoData.description || "",
+                url: repoData.html_url,
+                defaultBranch: repoData.default_branch,
+                visibility: repoData.visibility || "unknown",
+                primaryLanguage: repoData.language || "unknown",
+                lastPush: repoData.pushed_at || "unknown",
+                readme,
+                importantFiles,
+              };
+            })
+          );
+
+          const context = repoContexts.map((repo) => {
+            if ("error" in repo) {
+              return `Repository: ${repo.repoName}\nStatus: ${repo.error}`;
+            }
+            return [
+              `Repository: ${repo.name}`,
+              `Description: ${repo.description}`,
+              `URL: ${repo.url}`,
+              `Default branch: ${repo.defaultBranch}`,
+              `Visibility: ${repo.visibility}`,
+              `Primary language: ${repo.primaryLanguage}`,
+              `Last push: ${repo.lastPush}`,
+              `README:\n${repo.readme}`,
+              `Important files:\n${repo.importantFiles.join("\n")}`,
+            ].join("\n");
+          }).join("\n\n---\n\n");
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ repos: repoContexts, context }));
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Unknown GitHub context error";
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: msg }));
+        }
+      });
+    },
+  };
+}
+
 function vitePluginStorageProxy(): Plugin {
   return {
     name: "enosx-storage-proxy",
@@ -205,7 +309,7 @@ function vitePluginStorageProxy(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginStorageProxy(), vitePluginChatApi()];
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginGithubContext(), vitePluginStorageProxy(), vitePluginChatApi()];
 
 export default defineConfig({
   plugins,

@@ -9,11 +9,13 @@ export function useGroq() {
   const [error, setError] = useState<string | null>(null);
 
   const sendMessage = useCallback(
-    async (
-      messages: Message[],
-      onChunk: (chunk: string) => void,
-      onDone: () => void
-    ) => {
+          async (
+        messages: Message[],
+        onChunk: (chunk: string) => void,
+        onDone: () => void,
+        options?: { githubContext?: string }
+      ) => {
+
       setIsLoading(true);
       setError(null);
 
@@ -28,6 +30,7 @@ export function useGroq() {
               role: m.role,
               content: m.content,
             })),
+            githubContext: options?.githubContext,
           }),
         });
 

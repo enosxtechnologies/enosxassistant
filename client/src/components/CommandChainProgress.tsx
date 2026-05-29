@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — CommandChainProgress
+ * ENOSX AI — CommandChainProgress
  * Real-time visualization of command chain execution
  * Features: step counter, progress bar, action details, glassmorphism
  */

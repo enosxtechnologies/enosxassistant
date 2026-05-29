@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — AppAwareSuggestions
+ * ENOSX AI — AppAwareSuggestions
  * Displays app-specific suggestion chips and action tiles
  * Features: dynamic suggestions based on active window, glassmorphism, smooth animations
  */

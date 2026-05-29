@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — FileContextBadge
+ * ENOSX AI — FileContextBadge
  * Displays loaded file information with clear button
  * Features: glassmorphism, file icon, size info, smooth animations
  */

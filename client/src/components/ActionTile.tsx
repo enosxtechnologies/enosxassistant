@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ActionTile
+ * ENOSX AI — ActionTile
  * Interactive bento-style card for system actions and stats
  * Features: glassmorphism, real-time data, toggles, graphs
  */

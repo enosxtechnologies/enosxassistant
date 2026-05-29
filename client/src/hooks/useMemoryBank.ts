@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — useMemoryBank
+ * ENOSX AI — useMemoryBank
  * Manages persistent long-term memory for the AI.
  * Stores user preferences, project details, and key facts in localStorage.
  * Provides a "Memory Context" that is automatically injected into AI prompts.

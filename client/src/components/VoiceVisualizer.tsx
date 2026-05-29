@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — VoiceVisualizer
+ * ENOSX AI — VoiceVisualizer
  * Real-time audio visualization with animated bars
  * Features: FFT audio analysis, animated bars, pulsing circle, wave effect
  */

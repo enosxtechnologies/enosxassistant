@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — BentoDashboard
+ * ENOSX AI — BentoDashboard
  * Glassmorphism bento grid showing AI insights and stats
  * Features: token usage, conversation summary, quick actions, theme-aware
  */

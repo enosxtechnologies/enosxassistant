@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ContextIndicator
+ * ENOSX AI — ContextIndicator
  * Displays the currently active application and provides context awareness feedback
  * Features: app icon, real-time detection, glassmorphism badge
  */

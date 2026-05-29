@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI Assistant — ChatPage (Enhanced)
+ * ENOSX AI Assistant — ChatPage (Enhanced)
  * Design: "Crimson Matrix" — Cyberpunk Glassmorphism
  * Layout: Left floating acrylic sidebar + right bento chat area + floating pill command bar
  *
@@ -25,7 +25,6 @@ import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import FloatingOrb from "@/components/FloatingOrb";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
 import CommandChainProgress from "@/components/CommandChainProgress";
 import ContextIndicator from "@/components/ContextIndicator";
 import AppAwareSuggestions from "@/components/AppAwareSuggestions";
@@ -48,7 +47,7 @@ import { useGodMode } from "@/hooks/useGodMode";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
-import { Wifi, ChevronDown, Mic, Volume2, VolumeX } from "lucide-react";
+import { Wifi, ChevronDown } from "lucide-react";
 import WallpaperBackground from "@/components/WallpaperBackground";
 
 const BG_URL =
@@ -77,7 +76,8 @@ export default function ChatPage() {
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [githubContext, setGithubContext] = useState("");
+  const [githubConnected, setGithubConnected] = useState(false);
   const [isPro] = useState(false);
 
   const { settings: wallpaperSettings } = useWallpaper();
@@ -102,7 +102,7 @@ export default function ChatPage() {
     stopSpeaking,
   } = useVoice();
 
-  const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
+  const { play: playSound } = useSoundEffects();
   const { executeAction } = useSystemActions();
   const { progress } = useCommandChain();
   const { enrichMessageWithContext } = useContextAwareMessages();
@@ -137,11 +137,6 @@ export default function ChatPage() {
       setShowGodTerminal(true);
     }
   }, [isGodModeActive]);
-
-  // Sync sound enabled state
-  useEffect(() => {
-    setSoundFn(soundEnabled);
-  }, [soundEnabled, setSoundFn]);
 
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
 
@@ -193,7 +188,7 @@ export default function ChatPage() {
   );
 
   const handleSend = useCallback(
-    async (text: string) => {
+    async (text: string, githubContextOverride?: string) => {
       let convId = activeIdRef.current;
 
       // Create new conversation if none active
@@ -293,11 +288,29 @@ export default function ChatPage() {
             setSpeakingMessageId(assistantId);
             speak(fullResponse, () => setSpeakingMessageId(null));
           }
-        }
+        },
+        { githubContext: githubContextOverride ?? githubContext }
       );
     },
-    [sendMessage, speak, autoSpeak, playSound, executeAction, enrichMessageWithContext, activeWindow, fileContext.isLoaded, getFileContextMessage, clearFile]
+    [sendMessage, speak, autoSpeak, playSound, executeAction, enrichMessageWithContext, activeWindow, fileContext.isLoaded, getFileContextMessage, clearFile, githubContext]
   );
+
+  const connectGitHubRepos = useCallback(async () => {
+    playSound("click");
+    try {
+      toast.info("Connecting ENOSX AI to GitHub repositories...");
+      const response = await fetch("/api/github/context");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Unable to load GitHub context");
+      const context = String(data?.context || "");
+      setGithubContext(context);
+      setGithubConnected(true);
+      await handleSend("GitHub repositories are connected. Summarize the available repositories, identify the main project structure, and tell me what repo-aware functions you can perform.", context);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "GitHub connection failed";
+      toast.error(message);
+    }
+  }, [handleSend, playSound]);
 
   const executeGodCommand = useCallback(async (command: string) => {
     // Forward command to AI for processing
@@ -372,6 +385,8 @@ export default function ChatPage() {
         onDelete={deleteConversation}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onGitHubConnect={connectGitHubRepos}
+        onGodMode={triggerGodMode}
         isPro={isPro}
       />
 
@@ -412,7 +427,7 @@ export default function ChatPage() {
                 transition: "color 0.3s ease",
               }}
             >
-              {activeConversation?.title ?? "ENOSX XAI Assistant"}
+              {activeConversation?.title ?? "ENOSX AI Assistant"}
             </span>
             {activeConversation && (
               <motion.span
@@ -438,58 +453,6 @@ export default function ChatPage() {
           {/* Right: controls */}
           <div className="flex items-center gap-2">
             {/* Waste buttons removed for cleaner UI */}
-
-            {/* Theme switcher */}
-            <ThemeSwitcher />
-
-            {/* Sound toggle */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSoundEnabled((v) => !v)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
-              style={{
-                background: soundEnabled
-                  ? `rgba(${config.accentRgb},0.1)`
-                  : "rgba(255,255,255,0.04)",
-                border: soundEnabled
-                  ? `1px solid rgba(${config.accentRgb},0.25)`
-                  : "1px solid rgba(255,255,255,0.07)",
-                color: soundEnabled ? config.accent : config.textMuted,
-              }}
-              title={soundEnabled ? "Mute sounds" : "Enable sounds"}
-            >
-              {soundEnabled ? <Volume2 size={11} /> : <VolumeX size={11} />}
-            </motion.button>
-
-            {/* Voice mode toggle */}
-            {isVoiceSupported && (
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setAutoSpeak((v) => !v)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
-                style={
-                  autoSpeak
-                    ? {
-                        background: `rgba(${config.accentRgb},0.15)`,
-                        border: `1px solid rgba(${config.accentRgb},0.3)`,
-                        color: config.accent,
-                        boxShadow: `0 0 10px rgba(${config.accentRgb},0.2)`,
-                      }
-                    : {
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        color: config.textMuted,
-                      }
-                }
-              >
-                <Mic size={10} />
-                <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>
-                  {autoSpeak ? "VOICE ON" : "VOICE"}
-                </span>
-              </motion.button>
-            )}
 
             {/* Voice state indicator */}
             <AnimatePresence>
@@ -565,7 +528,7 @@ export default function ChatPage() {
               style={{ color: config.textMuted }}
             >
               <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
-              <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
+              <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>{githubConnected ? "GROQ + GITHUB" : "GROQ"}</span>
             </div>
 
             {/* About button removed for cleaner UI */}

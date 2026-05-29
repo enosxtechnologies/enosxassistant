@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — useSoundEffects
+ * ENOSX AI — useSoundEffects
  * Subtle UI sound effects using Web Audio API
  * Sounds: click, send, receive, listen-start, listen-stop
  * All sounds are synthesized — no external files needed

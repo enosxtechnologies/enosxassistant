@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — PulseOrb
+ * ENOSX AI — PulseOrb
  * "The Pulse" — a glowing, morphing sphere that serves as the signature voice
  * interaction visualizer. It changes color and shape based on the AI's state.
  *

@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — WelcomeScreen
+ * ENOSX AI — WelcomeScreen
  * Animated welcome with floating orb avatar, suggestion chips
  * Features: breathing orb, staggered fade-in, glassmorphism cards
  */

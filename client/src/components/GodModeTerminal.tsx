@@ -1,12 +1,12 @@
 /*
- * ENOSX XAI — GodModeTerminal
- * A specialized developer console accessible only via the GOD MODE sequence.
- * Features: custom command input, terminal history, simulated system access,
+ * ENOSX AI — GodModeTerminal
+ * Advanced operator console for GOD MODE commands.
+ * Features: custom command input, terminal history, repo-aware command dispatch,
  * and high-end cyberpunk styling.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, X, Zap, ShieldAlert, Cpu } from "lucide-react";
+import { X, ShieldOff, Cpu } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface TerminalLine {
@@ -28,13 +28,13 @@ export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeT
     {
       id: "init",
       type: "system",
-      content: "ENOSX OS [Version 1.0.42] - SECURE KERNEL LOADED",
+      content: "ENOSX OS [Version 2.0.00] - GOD CORE LOADED",
       timestamp: new Date(),
     },
     {
       id: "auth",
       type: "system",
-      content: "AUTHENTICATION: ENOSH (LEVEL 10 - GOD MODE)",
+      content: "OPERATOR: ENOSH (LEVEL 10 - GOD MODE DIRECT)",
       timestamp: new Date(),
     },
   ]);
@@ -123,9 +123,9 @@ export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeT
                   <div className="w-3 h-3 rounded-full bg-green-500/50" />
                 </div>
                 <div className="flex items-center gap-2 ml-4">
-                  <ShieldAlert size={14} className="text-cyan-400" />
+                  <ShieldOff size={14} className="text-cyan-400" />
                   <span className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase">
-                    Secure Root Console — ENOSH@ENOSX-CORE
+                    GOD MODE ROOT CONSOLE — ENOSH@ENOSX-CORE
                   </span>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function GodModeTerminal({ isOpen, onClose, onExecute }: GodModeT
                     transition={{ duration: 1, repeat: Infinity }}
                     className="text-cyan-400"
                   >
-                    Processing command...
+                    Executing GOD MODE command...
                   </motion.div>
                 </div>
               )}

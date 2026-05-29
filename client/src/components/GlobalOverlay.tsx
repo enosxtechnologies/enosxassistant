@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — GlobalOverlay
+ * ENOSX AI — GlobalOverlay
  * Full-screen blurred overlay with search/command palette
  * Features: keyboard shortcut (Alt+Space), animated backdrop, search input
  */

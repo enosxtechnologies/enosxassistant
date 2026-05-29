@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — CommandBar
+ * ENOSX AI — CommandBar
  * Floating pill command bar with voice visualization, micro-interactions
  * Features: auto-resize textarea, voice input, animated send button, glassmorphism
  *

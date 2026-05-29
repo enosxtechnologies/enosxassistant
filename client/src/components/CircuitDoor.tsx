@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — CircuitDoor
+ * ENOSX AI — CircuitDoor
  * A dramatic transition component that simulates opening high-tech circuit doors.
  * Used when entering "GOD MODE".
  */

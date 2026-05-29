@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ClipboardBadge
+ * ENOSX AI — ClipboardBadge
  * A subtle, glowing badge that appears in the bottom-right corner of the app
  * whenever the user copies text. Clicking it sends the copied text to the AI
  * for instant summarization.

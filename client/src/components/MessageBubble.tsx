@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — MessageBubble
+ * ENOSX AI — MessageBubble
  * Animated message bubbles with streaming text, markdown, voice playback
  * Features: fade-in spring, streaming cursor, copy, speak, glassmorphism
  */

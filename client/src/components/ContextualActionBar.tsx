@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ContextualActionBar
+ * ENOSX AI — ContextualActionBar
  * Renders context-sensitive action buttons based on the currently focused app.
  *
  * Rules:

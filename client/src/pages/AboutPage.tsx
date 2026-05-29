@@ -1,12 +1,12 @@
 /*
- * ENOSX XAI Assistant — AboutPage
+ * ENOSX AI Assistant — AboutPage
  * Vision Manifesto: "Redefining the boundary between Human and OS"
  * Design: Vertical scroll reveals, ghosted E background, premium animations
  */
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Zap, Cpu, Palette, Mail, ArrowRight } from "lucide-react";
+import { Zap, Cpu, Palette, Mail, ArrowRight, ArrowLeft, Bot } from "lucide-react";
 
 const BG_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
@@ -51,6 +51,44 @@ export default function AboutPage() {
         backgroundAttachment: "fixed",
       }}
     >
+      <div className="fixed left-0 right-0 top-0 z-30 px-5 py-4 pointer-events-none">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <motion.a
+            href="/"
+            whileHover={{ scale: 1.03, x: -2 }}
+            whileTap={{ scale: 0.96 }}
+            className="pointer-events-auto inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold"
+            style={{
+              background: "rgba(5, 8, 14, 0.72)",
+              borderColor: "rgba(0, 242, 255, 0.22)",
+              color: "rgba(255,255,255,0.9)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
+          >
+            <ArrowLeft size={16} />
+            Back to Chat
+          </motion.a>
+          <motion.a
+            href="/"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            className="pointer-events-auto inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-black"
+            style={{
+              background: "rgba(5, 8, 14, 0.72)",
+              borderColor: "rgba(112, 0, 255, 0.24)",
+              color: "#00F2FF",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            <Bot size={16} />
+            ENOSX AI
+          </motion.a>
+        </div>
+      </div>
+
       {/* Ghosted E Background */}
       <motion.div
         className="fixed inset-0 flex items-center justify-center pointer-events-none"
@@ -105,7 +143,7 @@ export default function AboutPage() {
               lineHeight: 1.6,
             }}
           >
-            Redefining the boundary between Human and OS.
+            ENOSX AI: redefining the boundary between Human and OS.
           </motion.p>
         </motion.div>
 
@@ -319,7 +357,7 @@ export default function AboutPage() {
             className="text-sm"
             style={{ color: "rgba(255,255,255,0.4)" }}
           >
-            © 2026 Enosx Technologies. All rights reserved.
+            © 2026 Enosx Technologies. ENOSX AI is online.
           </p>
         </motion.div>
       </div>

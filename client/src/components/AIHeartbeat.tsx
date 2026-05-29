@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — AIHeartbeat
+ * ENOSX AI — AIHeartbeat
  * Real-time SVG frequency visualizer (7 bars) synced to audio
  * Features: Web Audio API AnalyserNode, smooth Framer Motion scaling, Enosx Red glow
  */

@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — ThemeSwitcher
+ * ENOSX AI — ThemeSwitcher
  * Animated theme selector panel with live preview swatches
  * Themes: Dark, Light, Neon, Cyberpunk, Minimal
  */

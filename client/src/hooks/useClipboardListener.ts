@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — useClipboardListener
+ * ENOSX AI — useClipboardListener
  * Monitors clipboard copy events and exposes the latest copied text.
  * When the user copies text, a glowing icon appears in the UI.
  * Clicking it triggers AI summarization of the clipboard content.

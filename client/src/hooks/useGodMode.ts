@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — useGodMode
+ * ENOSX AI — useGodMode
  * Custom hook to detect the "GOD MODE" key sequences.
  * 
  * Supported Sequences:

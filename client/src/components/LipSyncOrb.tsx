@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — LipSyncOrb
+ * ENOSX AI — LipSyncOrb
  * Enhanced FloatingOrb with lip-sync wave animation
  * Features: frequency-reactive mouth wave, breathing glow, state colors
  */

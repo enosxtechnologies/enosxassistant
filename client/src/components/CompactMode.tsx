@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — CompactMode
+ * ENOSX AI — CompactMode
  * Draggable floating window that snaps to screen edges
  * Features: drag constraints, snap-to-edge, minimize/maximize, always-on-top
  */

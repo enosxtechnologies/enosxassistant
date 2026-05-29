@@ -1,5 +1,5 @@
 /*
- * ENOSX XAI — FloatingOrb
+ * ENOSX AI — FloatingOrb
  * Reactive AI avatar orb that responds to voice and AI state
  * Features: breathing animation, voice reactive glow, color shifts by state
  */
