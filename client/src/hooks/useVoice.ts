@@ -42,7 +42,7 @@ export function useVoice() {
     ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
   const startListening = useCallback(
-    (onResult: (text: string) => void) => {
+    (onResult: (text: string) => void, language: string = "en-US") => {
       if (!isSupported) return;
 
       const SpeechRecognitionAPI =
@@ -52,7 +52,7 @@ export function useVoice() {
       const recognition: ISpeechRecognition = new SpeechRecognitionAPI();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = "en-US";
+      recognition.lang = language; // Support multilingual input
       recognition.maxAlternatives = 1;
 
       recognition.onstart = () => {
@@ -96,6 +96,13 @@ export function useVoice() {
     [isSupported]
   );
 
+  const setLanguage = useCallback((lang: string) => {
+    // Supported languages: en-US, es-ES, fr-FR, de-DE, it-IT, pt-BR, ja-JP, zh-CN, etc.
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = lang;
+    }
+  }, []);
+
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -136,6 +143,9 @@ export function useVoice() {
     // Wait for voices to load
     const voices = synthRef.current.getVoices();
     
+    // Detect language from utterance and select appropriate voice
+    const textLang = utterance.lang || "en-US";
+    
     // Prioritize premium female voices for a sophisticated AI assistant feel
     const preferredVoice = 
       // Microsoft premium female voices (best quality on Windows)
@@ -151,6 +161,8 @@ export function useVoice() {
       // Generic female voice fallbacks
       voices.find(v => v.name.toLowerCase().includes("female") && v.lang.startsWith("en")) ||
       voices.find(v => (v.name.includes("Fiona") || v.name.includes("Moira")) && v.lang.startsWith("en")) ||
+      // Match language for multilingual support
+      voices.find(v => v.lang.startsWith(textLang.split("-")[0])) ||
       // Any English voice as last resort
       voices.find(v => v.lang === "en-US") ||
       voices.find(v => v.lang.startsWith("en"));
@@ -186,5 +198,6 @@ export function useVoice() {
     stopListening,
     speak,
     stopSpeaking,
+    setLanguage,
   };
 }

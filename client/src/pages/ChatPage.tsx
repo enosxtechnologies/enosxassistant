@@ -34,6 +34,7 @@ import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
+import MultimodalPanel from "@/components/MultimodalPanel";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -79,6 +80,8 @@ export default function ChatPage() {
   const [githubContext, setGithubContext] = useState("");
   const [githubConnected, setGithubConnected] = useState(false);
   const [isPro] = useState(false);
+  const [showMultimodal, setShowMultimodal] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const { settings: wallpaperSettings } = useWallpaper();
 
@@ -355,6 +358,26 @@ export default function ChatPage() {
     [handleSend]
   );
 
+  const handleImageCapture = useCallback(
+    (imageData: string) => {
+      setCapturedImage(imageData);
+      const prompt = `I have captured an image from my camera. Please analyze it and describe what you see.`;
+      handleSend(prompt);
+    },
+    [handleSend]
+  );
+
+  const handleVoiceInput = useCallback(
+    (text: string) => {
+      handleSend(text);
+    },
+    [handleSend]
+  );
+
+  const toggleMultimodal = useCallback(() => {
+    setShowMultimodal(!showMultimodal);
+  }, [showMultimodal]);
+
   const messages = activeConversation?.messages ?? [];
 
   return (
@@ -626,6 +649,48 @@ export default function ChatPage() {
         <div className="px-5 pt-2">
           <ContextualActionBar onAction={handleSend} />
         </div>
+
+        {/* Multimodal Panel — Camera, Voice, AI Face */}
+        <AnimatePresence>
+          {showMultimodal && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="px-5 py-4 border-t"
+              style={{
+                borderColor: `rgba(${config.accentRgb},0.1)`,
+                background: `rgba(${config.accentRgb},0.02)`,
+              }}
+            >
+              <MultimodalPanel
+                onVoiceInput={handleVoiceInput}
+                onImageCapture={handleImageCapture}
+                aiResponse={messages.length > 0 ? messages[messages.length - 1]?.content : ""}
+                isAISpeaking={speakingMessageId !== null}
+                accentColor={config.accent}
+                accentRgb={config.accentRgb}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Multimodal Toggle Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={toggleMultimodal}
+          className="absolute bottom-4 right-4 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+          style={{
+            background: showMultimodal ? `rgba(${config.accentRgb},0.2)` : `rgba(${config.accentRgb},0.1)`,
+            border: `1px solid ${config.accent}`,
+            color: config.accent,
+            zIndex: 10,
+          }}
+        >
+          {showMultimodal ? "Hide Multimodal" : "Show Multimodal"}
+        </motion.button>
 
         {/* Command bar */}
         <CommandBar
