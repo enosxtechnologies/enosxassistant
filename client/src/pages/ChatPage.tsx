@@ -2,6 +2,18 @@
  * ENOSX XAI Assistant — ChatPage (Enhanced)
  * Design: "Crimson Matrix" — Cyberpunk Glassmorphism
  * Layout: Left floating acrylic sidebar + right bento chat area + floating pill command bar
+ *
+ * Enhancements:
+ * 1. Smooth animations (Framer Motion spring physics everywhere)
+ * 2. Glassmorphism / Acrylic Blur (backdrop-filter on all panels)
+ * 3. Floating assistant UI (draggable, snap-to-edge capable)
+ * 4. Voice visualization (real-time FFT audio bars)
+ * 5. Typing + AI "Thinking" feedback (animated dots, streaming cursor)
+ * 6. Dark Mode + Theme Engine (5 themes: Dark, Light, Neon, Cyberpunk, Minimal)
+ * 7. Animated orb avatar (reacts to voice/loading state)
+ * 8. Sound design (subtle Web Audio API tones)
+ * 9. Transparency + always-visible top bar
+ * 10. Performance optimized (300ms max animations, memoized callbacks)
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -12,9 +24,7 @@ import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
-import PulseOrb from "@/components/PulseOrb";
-import AdaptiveActionButtons from "@/components/AdaptiveActionButtons";
-import ClipboardNotification from "@/components/ClipboardNotification";
+import FloatingOrb from "@/components/FloatingOrb";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import CommandChainProgress from "@/components/CommandChainProgress";
 import ContextIndicator from "@/components/ContextIndicator";
@@ -25,27 +35,22 @@ import ClipboardBadge from "@/components/ClipboardBadge";
 import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
-import AutoContextIndicator from "@/components/AutoContextIndicator";
-import GlitchShader from "@/components/GlitchShader";
-import NeuralMesh from "@/components/NeuralMesh";
 import { useGroq } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
-import { useWebSearch } from "@/hooks/useWebSearch";
 import { useCommandChain } from "@/hooks/useCommandChain";
 import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
 import { useFileContext } from "@/hooks/useFileContext";
 import { useClipboardListener } from "@/hooks/useClipboardListener";
 import { useGodMode } from "@/hooks/useGodMode";
-import { useMemoryBank } from "@/hooks/useMemoryBank";
-import { useAutoContext } from "@/hooks/useAutoContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useCompactMode } from "@/hooks/useCompactMode";
-import { ChevronDown, Info, Volume2, VolumeX, Minimize2, Maximize2, Wifi } from "lucide-react";
-import { createAdaptiveActionHandler, createClipboardSummarizeHandler } from "./ChatPage_handlers";
+import { useWallpaper } from "@/contexts/WallpaperContext";
+import { Wifi, ChevronDown, Mic, Info, Volume2, VolumeX, Minimize2, Maximize2, Wallpaper } from "lucide-react";
+import WallpaperBackground from "@/components/WallpaperBackground";
+import WallpaperPicker from "@/components/WallpaperPicker";
 
 const BG_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
@@ -74,6 +79,10 @@ export default function ChatPage() {
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isPro] = useState(false);
+  const [isMiniMode, setIsMiniMode] = useState(false);
+  const [showWallpaperPicker, setShowWallpaperPicker] = useState(false);
+  const { settings: wallpaperSettings } = useWallpaper();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -85,7 +94,6 @@ export default function ChatPage() {
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   const { sendMessage, isLoading, error } = useGroq();
-  const { performSearch } = useWebSearch();
   const {
     voiceState,
     transcript,
@@ -99,7 +107,7 @@ export default function ChatPage() {
   const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
   const { executeAction } = useSystemActions();
   const { progress } = useCommandChain();
-  const { enrichMessageWithContext, getContextInfo } = useContextAwareMessages();
+  const { enrichMessageWithContext } = useContextAwareMessages();
   const { activeWindow } = useActiveWindow();
   const { fileContext, loadFile, clearFile, getFileContextMessage } = useFileContext();
   const {
@@ -109,19 +117,88 @@ export default function ChatPage() {
     consume: consumeClipboard,
   } = useClipboardListener();
 
-  const { memories, addMemory, removeMemory, getMemoryContext } = useMemoryBank();
-  const { autoContext, getAutoContextMessage } = useAutoContext();
-
+  // GOD MODE state
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
-  const [showGlitch, setShowGlitch] = useState(false);
-  const { isCompactMode, toggleCompactMode } = useCompactMode();
 
-  // handleSend defined early to avoid circular dependencies
+  const triggerGodMode = useCallback(() => {
+    if (isGodModeActive) return;
+    setIsGodModeActive(true);
+    playSound("godMode"); // High-tech system override sound
+    
+    // Voice greeting for Enosh
+    setTimeout(() => {
+      speak("Greetings, Enosh. How may I assist you today?");
+    }, 1500);
+  }, [isGodModeActive, playSound, speak]);
+
+  useGodMode(triggerGodMode);
+
+  const handleGodModeAnimationComplete = useCallback(() => {
+    if (isGodModeActive) {
+      setShowGodTerminal(true);
+    }
+  }, [isGodModeActive]);
+
+  // Sync sound enabled state
+  useEffect(() => {
+    setSoundFn(soundEnabled);
+  }, [soundEnabled, setSoundFn]);
+
+  const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
+
+  // Scroll to bottom
+  const scrollToBottom = useCallback((smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (activeConversation?.messages.length) {
+      scrollToBottom();
+    }
+  }, [activeConversation?.messages.length, scrollToBottom]);
+
+  // Track scroll for scroll-to-bottom button
+  const handleScroll = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollBtn(distFromBottom > 200);
+  };
+
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast.error(`API Error: ${error}`);
+      playSound("error");
+    }
+  }, [error, playSound]);
+
+  const createNewChat = useCallback(() => {
+    const conv = createConversation();
+    setConversations((prev) => [conv, ...prev]);
+    setActiveId(conv.id);
+    playSound("click");
+  }, [playSound]);
+
+  const deleteConversation = useCallback(
+    (id: string) => {
+      setConversations((prev) => prev.filter((c) => c.id !== id));
+      if (activeId === id) {
+        setActiveId(null);
+      }
+      playSound("click");
+    },
+    [activeId, playSound]
+  );
+
   const handleSend = useCallback(
     async (text: string) => {
       let convId = activeIdRef.current;
 
+      // Create new conversation if none active
       if (!convId) {
         const conv = createConversation();
         conv.title = generateTitle(text);
@@ -132,6 +209,8 @@ export default function ChatPage() {
       }
 
       const targetConvId = convId;
+
+      // Append file context if available
       let messageContent = text;
       if (fileContext.isLoaded) {
         messageContent += getFileContextMessage();
@@ -170,193 +249,64 @@ export default function ChatPage() {
 
       playSound("send");
 
+      // Clear file context after sending
       if (fileContext.isLoaded) {
         clearFile();
       }
 
-      const memoryContext = getMemoryContext();
-      const autoAppContext = getAutoContextMessage();
-      const contextInfo = getContextInfo(activeWindow);
-      
-      const enrichedUserMessage = {
-        ...userMessage,
-        content: userMessage.content + memoryContext + autoAppContext + contextInfo
-      };
-
-      const contextEnrichedMessages = enrichMessageWithContext([...currentMessages, enrichedUserMessage], activeWindow);
+      const allMessages = [...currentMessages, userMessage];
+      const contextEnrichedMessages = enrichMessageWithContext(allMessages, activeWindow);
       let fullResponse = "";
 
-      try {
-        await sendMessage(
-          contextEnrichedMessages,
-          (chunk) => {
-            fullResponse += chunk;
-            setConversations((prev) =>
-              prev.map((c) => {
-                if (c.id !== targetConvId) return c;
-                return {
-                  ...c,
-                  messages: c.messages.map((m) =>
-                    m.id === assistantId ? { ...m, content: fullResponse } : m
-                  ),
-                };
-              })
-            );
-          },
-          () => {
-            setConversations((prev) =>
-              prev.map((c) => {
-                if (c.id !== targetConvId) return c;
-                return {
-                  ...c,
-                  messages: c.messages.map((m) =>
-                    m.id === assistantId ? { ...m, isStreaming: false } : m
-                  ),
-                };
-              })
-            );
-            playSound("receive");
-            executeAction(fullResponse).then((actions) => {
-              const searchAction = actions.find(a => a.type === 'search');
-              if (searchAction && searchAction.query) {
-                performSearch(searchAction.query).then((results) => {
-                  const resultsText = results
-                    .map((r, i) => `${i + 1}. **${r.title}**
-   ${r.snippet}
-   [Link](${r.url})`)
-                    .join("\n\n");
-                  
-                  const searchResultsMessage = `[SEARCH RESULTS for "${searchAction.query}"]:
+      await sendMessage(
+        contextEnrichedMessages,
+        (chunk) => {
+          fullResponse += chunk;
+          setConversations((prev) =>
+            prev.map((c) => {
+              if (c.id !== targetConvId) return c;
+              return {
+                ...c,
+                messages: c.messages.map((m) =>
+                  m.id === assistantId ? { ...m, content: fullResponse } : m
+                ),
+              };
+            })
+          );
+        },
+        () => {
+          setConversations((prev) =>
+            prev.map((c) => {
+              if (c.id !== targetConvId) return c;
+              return {
+                ...c,
+                messages: c.messages.map((m) =>
+                  m.id === assistantId ? { ...m, isStreaming: false } : m
+                ),
+              };
+            })
+          );
+          playSound("receive");
+          
+          // Execute any system actions found in the response
+          executeAction(fullResponse);
 
-${resultsText}
-
-Based on these search results, please provide a comprehensive and detailed answer to the user's question.`;
-                  
-                  setTimeout(() => {
-                    handleSend(searchResultsMessage);
-                  }, 1000);
-                });
-              }
-            });
-
-            if (autoSpeak && fullResponse) {
-              setSpeakingMessageId(assistantId);
-              speak(fullResponse, () => setSpeakingMessageId(null));
-            }
+          if (autoSpeak && fullResponse) {
+            setSpeakingMessageId(assistantId);
+            speak(fullResponse, () => setSpeakingMessageId(null));
           }
-        );
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to fetch response";
-        toast.error(errorMsg);
-        
-        // Remove the empty assistant message on error
-        setConversations((prev) =>
-          prev.map((c) => {
-            if (c.id !== targetConvId) return c;
-            return {
-              ...c,
-              messages: c.messages.filter((m) => m.id !== assistantId),
-            };
-          })
-        );
-      }
+        }
+      );
     },
-    [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, getAutoContextMessage, enrichMessageWithContext, getContextInfo, activeWindow, executeAction]
-  );
-
-  const triggerGodMode = useCallback(() => {
-    if (isGodModeActive) return;
-    setIsGodModeActive(true);
-    playSound("godMode");
-    
-    // Auto-transition to terminal after animation completes (3s total duration)
-    setTimeout(() => {
-      setIsGodModeActive(false);
-      setShowGodTerminal(true);
-      setShowGlitch(true);
-      
-      // Check for custom greeting in memories
-      const customGreeting = memories.find(m => m.category === 'system' && m.content.startsWith('GREETING_OVERRIDE:'));
-      const greetingText = customGreeting 
-        ? customGreeting.content.replace('GREETING_OVERRIDE:', '').trim()
-        : "Greetings, Enosh. How may I assist you today?";
-        
-      speak(greetingText);
-    }, 3000);
-  }, [isGodModeActive, playSound, speak, memories]);
-
-  useGodMode(triggerGodMode);
-
-  const handleGodModeAnimationComplete = useCallback(() => {
-    if (isGodModeActive) {
-      setShowGodTerminal(true);
-      setShowGlitch(true);
-    }
-  }, [isGodModeActive]);
-
-  const handleScreenshot = useCallback(
-    (imageData: string) => {
-      const prompt = `[SCREENSHOT ANALYSIS]\n\nPlease analyze this screenshot and provide insights:\n\n<image>${imageData}</image>`;
-      handleSend(prompt);
-    },
-    [handleSend]
+    [sendMessage, speak, autoSpeak, playSound, executeAction, enrichMessageWithContext, activeWindow, fileContext.isLoaded, getFileContextMessage, clearFile]
   );
 
   const executeGodCommand = useCallback(async (command: string) => {
+    // Forward command to AI for processing
     const prompt = `[GOD MODE COMMAND] ${command}`;
     await handleSend(prompt);
     return "Command executed via ENOSX Core.";
   }, [handleSend]);
-
-  useEffect(() => {
-    setSoundFn(soundEnabled);
-  }, [soundEnabled, setSoundFn]);
-
-  const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
-
-  const scrollToBottom = useCallback((smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: smooth ? "smooth" : "auto",
-    });
-  }, []);
-
-  useEffect(() => {
-    if (activeConversation?.messages.length) {
-      scrollToBottom();
-    }
-  }, [activeConversation?.messages.length, scrollToBottom]);
-
-  const handleScroll = () => {
-    const el = messagesContainerRef.current;
-    if (!el) return;
-    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    setShowScrollBtn(distFromBottom > 200);
-  };
-
-  useEffect(() => {
-    if (error) {
-      toast.error(`API Error: ${error}`);
-      playSound("error");
-    }
-  }, [error, playSound]);
-
-  const createNewChat = useCallback(() => {
-    const conv = createConversation();
-    setConversations((prev) => [conv, ...prev]);
-    setActiveId(conv.id);
-    playSound("click");
-  }, [playSound]);
-
-  const deleteConversation = useCallback(
-    (id: string) => {
-      setConversations((prev) => prev.filter((c) => c.id !== id));
-      if (activeId === id) {
-        setActiveId(null);
-      }
-      playSound("click");
-    },
-    [activeId, playSound]
-  );
 
   const handleVoiceResult = useCallback(
     (text: string) => {
@@ -385,158 +335,307 @@ Based on these search results, please provide a comprehensive and detailed answe
     playSound("listenStop");
   }, [stopSpeaking, playSound]);
 
-  const handleAdaptiveAction = useCallback(
-    (action: string) => createAdaptiveActionHandler(handleSend)(action),
-    [handleSend]
-  );
-
+  // Summarize clipboard content via AI — defined after handleSend
   const handleClipboardSummarize = useCallback(
-    async (text: string) => createClipboardSummarizeHandler(handleSend)(text),
+    async (text: string) => {
+      const prompt = `Please summarize the following text concisely:\n\n${text}`;
+      await handleSend(prompt);
+    },
     [handleSend]
   );
 
   const messages = activeConversation?.messages ?? [];
 
   return (
-    <div
-      className={`flex h-screen w-screen overflow-hidden ${isCompactMode ? "rounded-3xl border-2 shadow-2xl" : ""}`}
+    <motion.div
+      className={`flex overflow-hidden ${
+        isMiniMode 
+          ? "fixed bottom-4 right-4 w-80 h-96 rounded-2xl shadow-2xl z-50" 
+          : "h-screen w-screen"
+      }`}
       style={{ 
-        background: config.bg, 
-        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-        borderColor: isCompactMode ? `rgba(${config.accentRgb}, 0.3)` : "transparent"
+        background: "transparent", 
+        transition: "background 0.4s ease",
+        ...(isMiniMode && {
+          border: `1px solid rgba(${config.accentRgb}, 0.3)`,
+          boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(${config.accentRgb}, 0.1)`,
+        })
       }}
+      layout
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `url(${BG_URL})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: 0.06,
-        }}
-      />
+      {/* Wallpaper Background */}
+      {!isMiniMode && <WallpaperBackground />}
 
+      {/* File Drop Zone */}
       <FileDropZone onFileSelected={loadFile} isActive={true} />
-      <CommandChainProgress progress={progress} />
-      <ClipboardNotification
-        clipboardData={copiedText}
-        onSummarize={handleClipboardSummarize}
-        onDismiss={dismissClipboard}
-      />
 
-      {!isCompactMode && (
+      {/* Command Chain Progress Indicator */}
+      <CommandChainProgress progress={progress} />
+
+      {/* Sidebar - hidden in mini mode */}
+      {!isMiniMode && (
         <Sidebar
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
           conversations={conversations}
           activeId={activeId}
           onSelect={setActiveId}
           onNew={createNewChat}
           onDelete={deleteConversation}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isPro={isPro}
         />
       )}
 
-      <main className="flex-1 flex flex-col relative">
+      {/* Main area */}
+      <motion.div
+        className="flex-1 flex flex-col min-w-0 relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        {/* Top bar */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="h-16 flex items-center justify-between px-6 z-10"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="flex items-center justify-between px-5 py-2.5 flex-shrink-0"
           style={{
-            background: "rgba(10, 10, 10, 0.4)",
-            backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            background: `rgba(10,10,14,${wallpaperSettings.panelOpacity * 0.85})`,
+            backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+            WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+            borderBottom: `1px solid rgba(${config.accentRgb},0.08)`,
+            minHeight: 48,
           }}
         >
+          {/* Left: orb + title */}
           <div className="flex items-center gap-2.5">
-            <PulseOrb
+            <FloatingOrb
               voiceState={voiceState}
               isLoading={isLoading}
-              size={32}
+              size={28}
             />
             <span
               className="text-sm font-semibold truncate"
               style={{
                 color: config.text,
                 letterSpacing: "-0.02em",
-                maxWidth: isCompactMode ? 150 : 300,
+                maxWidth: 300,
                 transition: "color 0.3s ease",
               }}
             >
               {activeConversation?.title ?? "ENOSX XAI Assistant"}
             </span>
-            {!isCompactMode && activeConversation && (
-              <div className="flex items-center gap-1 ml-2">
-                <ContextIndicator />
-                <AutoContextIndicator data={autoContext} />
-              </div>
+            {activeConversation && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                style={{
+                  background: `rgba(${config.accentRgb},0.08)`,
+                  border: `1px solid rgba(${config.accentRgb},0.18)`,
+                  color: `rgba(${config.accentRgb},0.7)`,
+                  fontSize: "10px",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                {activeConversation.messages.filter((m) => m.role === "user").length} msgs
+              </motion.span>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
-            {!isCompactMode && (
-              <div className="flex items-center gap-3 pr-4 border-r border-white/5">
-                <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  className="p-2 rounded-lg transition-all hover:bg-white/5"
-                  style={{ color: soundEnabled ? `rgba(${config.accentRgb},0.8)` : config.textMuted }}
-                >
-                  {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                </button>
-                <ThemeSwitcher />
-              </div>
+          {/* Center: Context Indicator */}
+          <ContextIndicator />
+
+          {/* Right: controls */}
+          <div className="flex items-center gap-2">
+            {/* Mini mode toggle */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsMiniMode((v) => !v)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
+              style={{
+                background: isMiniMode
+                  ? `rgba(${config.accentRgb},0.15)`
+                  : "rgba(255,255,255,0.04)",
+                border: isMiniMode
+                  ? `1px solid rgba(${config.accentRgb},0.3)`
+                  : "1px solid rgba(255,255,255,0.07)",
+                color: isMiniMode ? config.accent : config.textMuted,
+              }}
+              title={isMiniMode ? "Expand to full screen" : "Minimize to mini window"}
+            >
+              {isMiniMode ? <Maximize2 size={11} /> : <Minimize2 size={11} />}
+            </motion.button>
+
+            {/* Wallpaper / Appearance button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowWallpaperPicker(true)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
+              style={{
+                background: showWallpaperPicker
+                  ? `rgba(${config.accentRgb},0.15)`
+                  : "rgba(255,255,255,0.04)",
+                border: showWallpaperPicker
+                  ? `1px solid rgba(${config.accentRgb},0.3)`
+                  : "1px solid rgba(255,255,255,0.07)",
+                color: showWallpaperPicker ? config.accent : config.textMuted,
+              }}
+              title="Wallpaper & appearance"
+            >
+              <Wallpaper size={11} />
+            </motion.button>
+
+            {/* Theme switcher */}
+            <ThemeSwitcher />
+
+            {/* Sound toggle */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSoundEnabled((v) => !v)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
+              style={{
+                background: soundEnabled
+                  ? `rgba(${config.accentRgb},0.1)`
+                  : "rgba(255,255,255,0.04)",
+                border: soundEnabled
+                  ? `1px solid rgba(${config.accentRgb},0.25)`
+                  : "1px solid rgba(255,255,255,0.07)",
+                color: soundEnabled ? config.accent : config.textMuted,
+              }}
+              title={soundEnabled ? "Mute sounds" : "Enable sounds"}
+            >
+              {soundEnabled ? <Volume2 size={11} /> : <VolumeX size={11} />}
+            </motion.button>
+
+            {/* Voice mode toggle */}
+            {isVoiceSupported && (
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setAutoSpeak((v) => !v)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all duration-200"
+                style={
+                  autoSpeak
+                    ? {
+                        background: `rgba(${config.accentRgb},0.15)`,
+                        border: `1px solid rgba(${config.accentRgb},0.3)`,
+                        color: config.accent,
+                        boxShadow: `0 0 10px rgba(${config.accentRgb},0.2)`,
+                      }
+                    : {
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.07)",
+                        color: config.textMuted,
+                      }
+                }
+              >
+                <Mic size={10} />
+                <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>
+                  {autoSpeak ? "VOICE ON" : "VOICE"}
+                </span>
+              </motion.button>
             )}
 
-            <button
-              onClick={toggleCompactMode}
-              className="p-2 rounded-lg transition-all hover:bg-white/5"
-              style={{ color: config.textMuted }}
-              title={isCompactMode ? "Standard Mode" : "Compact Mode"}
-            >
-              {isCompactMode ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
-            </button>
-
-            {!isCompactMode && (
-              <>
-                <div className="hidden md:flex flex-col items-end gap-0.5">
-                  <span
-                    className="font-black"
+            {/* Voice state indicator */}
+            <AnimatePresence>
+              {voiceState !== "idle" && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 10 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
+                  style={{
+                    background: `rgba(${config.accentRgb},0.1)`,
+                    border: `1px solid rgba(${config.accentRgb},0.25)`,
+                  }}
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                    className="w-1.5 h-1.5 rounded-full"
                     style={{
-                      color: isLoading ? `rgba(${config.accentRgb},1)` : config.text,
+                      background: config.accent,
+                      boxShadow: `0 0 6px ${config.accent}`,
+                    }}
+                  />
+                  <span
+                    style={{
+                      color: config.accent,
                       fontSize: "10px",
                       letterSpacing: "0.06em",
                     }}
                   >
-                    {isLoading ? "THINKING" : "READY"}
+                    {voiceState === "listening"
+                      ? "LISTENING"
+                      : voiceState === "speaking"
+                      ? "SPEAKING"
+                      : "PROCESSING"}
                   </span>
-                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                <div
-                  className="flex items-center gap-1"
-                  style={{ color: config.textMuted }}
-                >
-                  <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
-                  <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
-                </div>
+            {/* Status indicator */}
+            <div className="flex items-center gap-1.5">
+              <motion.div
+                animate={{
+                  scale: isLoading ? [1, 1.3, 1] : 1,
+                  opacity: isLoading ? [1, 0.6, 1] : 1,
+                }}
+                transition={
+                  isLoading
+                    ? { duration: 1, repeat: Infinity }
+                    : { duration: 0.3 }
+                }
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: isLoading ? "#f59e0b" : "#22c55e",
+                  boxShadow: `0 0 6px ${isLoading ? "rgba(245,158,11,0.6)" : "rgba(34,197,94,0.5)"}`,
+                }}
+              />
+              <span
+                style={{
+                  color: config.textMuted,
+                  fontSize: "10px",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                {isLoading ? "THINKING" : "READY"}
+              </span>
+            </div>
 
-                <motion.a
-                  href="/about"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
-                  style={{
-                    background: "rgba(0, 242, 255, 0.07)",
-                    border: "1px solid rgba(0, 242, 255, 0.18)",
-                    color: "rgba(0, 242, 255, 0.6)",
-                  }}
-                >
-                  <Info size={12} />
-                  <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
-                </motion.a>
-              </>
-            )}
+            <div
+              className="flex items-center gap-1"
+              style={{ color: config.textMuted }}
+            >
+              <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
+              <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
+            </div>
+
+            <motion.a
+              href="/about"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
+              style={{
+                background: "rgba(0, 242, 255, 0.07)",
+                border: "1px solid rgba(0, 242, 255, 0.18)",
+                color: "rgba(0, 242, 255, 0.6)",
+              }}
+            >
+              <Info size={12} />
+              <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
+            </motion.a>
           </div>
         </motion.div>
 
+        {/* Messages area */}
         <div className="flex-1 relative overflow-hidden">
           <AnimatePresence mode="wait">
             {messages.length === 0 ? (
@@ -550,143 +649,128 @@ Based on these search results, please provide a comprehensive and detailed answe
               >
                 <div className="h-full flex flex-col">
                   <div className="px-5 pt-5">
-                    {!isCompactMode && (
-                      <>
-                        <AppAwareSuggestions onSuggestionClick={handleSend} />
-                        <AdaptiveActionButtons onActionClick={handleAdaptiveAction} />
-                      </>
-                    )}
+                    <AppAwareSuggestions onSuggestionClick={handleSend} />
                   </div>
                   <div className="flex-1">
-                    <WelcomeScreen onSuggestion={handleSend} isCompact={isCompactMode} />
+                    <WelcomeScreen onSuggestion={handleSend} />
                   </div>
                 </div>
               </motion.div>
             ) : (
               <motion.div
-                key="chat"
+                key="messages"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="h-full flex flex-col"
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                ref={messagesContainerRef}
+                onScroll={handleScroll}
+                className="h-full overflow-y-auto px-5 py-5"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: `rgba(${config.accentRgb},0.2) transparent`,
+                }}
               >
-                <div
-                  ref={messagesContainerRef}
-                  onScroll={handleScroll}
-                  className={`flex-1 overflow-y-auto px-4 ${isCompactMode ? "" : "md:px-8"} py-6 scrollbar-thin`}
-                >
-                  <div className={`max-w-3xl mx-auto space-y-6 ${isCompactMode ? "px-2" : ""}`}>
-                    {messages.map((m, idx) => (
+                <div className="max-w-3xl mx-auto flex flex-col gap-4">
+                  <AnimatePresence initial={false}>
+                    {messages.map((msg, i) => (
                       <MessageBubble
-                        key={m.id}
-                        message={m}
-                        index={idx}
-                        onSpeak={() => handleSpeak(m.content, m.id)}
+                        key={msg.id}
+                        message={msg}
+                        index={i}
+                        onSpeak={(text) => handleSpeak(text, msg.id)}
                         onStopSpeak={handleStopSpeak}
-                        isSpeaking={speakingMessageId === m.id}
+                        isSpeaking={speakingMessageId === msg.id}
                       />
                     ))}
-                    <div ref={messagesEndRef} className="h-4" />
-                  </div>
+                  </AnimatePresence>
+                  <div ref={messagesEndRef} />
                 </div>
-
-                <AnimatePresence>
-                  {showScrollBtn && (
-                    <motion.button
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      onClick={() => scrollToBottom()}
-                      className="absolute bottom-4 right-8 p-2 rounded-full shadow-lg z-20 border"
-                      style={{
-                        background: "rgba(20, 20, 20, 0.8)",
-                        backdropFilter: "blur(10px)",
-                        borderColor: `rgba(${config.accentRgb}, 0.2)`,
-                        color: config.text,
-                      }}
-                    >
-                      <ChevronDown size={20} />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
               </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Scroll to bottom button */}
+          <AnimatePresence>
+            {showScrollBtn && (
+              <motion.button
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => scrollToBottom()}
+                className="absolute bottom-4 right-6 w-8 h-8 rounded-full flex items-center justify-center"
+                style={{
+                  background: `rgba(${config.accentRgb},0.18)`,
+                  border: `1px solid rgba(${config.accentRgb},0.3)`,
+                  color: config.accent,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                <ChevronDown size={14} />
+              </motion.button>
             )}
           </AnimatePresence>
         </div>
 
-        <div className={`p-4 ${isCompactMode ? "pb-6" : "md:p-6"} z-20`}>
-          <div className="max-w-3xl mx-auto relative">
-            <div className="absolute bottom-full left-0 right-0 mb-4 flex flex-col gap-2 pointer-events-none">
-              <div className="pointer-events-auto">
-                <FileContextBadge 
-                  fileContext={fileContext} 
-                  onClear={clearFile} 
-                />
-                {!isCompactMode && (
-                  <>
-                    <ClipboardBadge 
-                      copiedText={copiedText}
-                      isVisible={clipboardVisible}
-                      onSummarize={handleClipboardSummarize}
-                      onDismiss={dismissClipboard}
-                      onConsume={consumeClipboard}
-                    />
-                    <ContextualActionBar 
-                      onAction={handleAdaptiveAction}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-            
-            <CommandBar
-              onSend={handleSend}
-              isLoading={isLoading}
-              isVoiceSupported={isVoiceSupported}
-              onStartVoice={handleStartVoice}
-              onStopVoice={stopListening}
-              onStopSpeaking={handleStopSpeak}
-              onScreenshot={handleScreenshot}
-              voiceState={voiceState}
-              transcript={transcript}
-            />
+        {/* File Context Badge */}
+        {fileContext.isLoaded && (
+          <div className="px-5 pb-2">
+            <FileContextBadge fileContext={fileContext} onClear={clearFile} />
           </div>
+        )}
+
+        {/* Contextual Action Bar — context-aware quick-action buttons */}
+        <div className="px-5 pt-2">
+          <ContextualActionBar onAction={handleSend} />
         </div>
 
-        <GlitchShader isActive={showGlitch} intensity={0.8} />
-        <NeuralMesh isActive={isGodModeActive} complexity={0.7} color="rgba(0, 242, 255, 0.15)" />
+        {/* Command bar */}
+        <CommandBar
+          onSend={handleSend}
+          isLoading={isLoading}
+          voiceState={voiceState}
+          transcript={transcript}
+          isVoiceSupported={isVoiceSupported}
+          onStartVoice={handleStartVoice}
+          onStopVoice={stopListening}
+          onStopSpeaking={handleStopSpeak}
+          disabled={isLoading}
+        />
+      </motion.div>
 
-        <AnimatePresence>
-          {isGodModeActive && (
-            <CircuitDoor 
-              isActive={isGodModeActive} 
-              onAnimationComplete={handleGodModeAnimationComplete}
-            />
-          )}
-        </AnimatePresence>
+      {/* Clipboard Badge — glowing Enosx icon when text is copied */}
+      <ClipboardBadge
+        copiedText={copiedText}
+        isVisible={clipboardVisible}
+        onDismiss={dismissClipboard}
+        onConsume={consumeClipboard}
+        onSummarize={handleClipboardSummarize}
+      />
 
-        <AnimatePresence>
-          {showGodTerminal && (
-            <GodModeTerminal 
-              isOpen={showGodTerminal}
-              onClose={() => {
-                setShowGodTerminal(false);
-                setIsGodModeActive(false);
-                setShowGlitch(false);
-              }}
-              onExecute={executeGodCommand}
-              memories={memories}
-              onAddMemory={addMemory}
-              onRemoveMemory={removeMemory}
-              voiceState={voiceState}
-              transcript={transcript}
-              onStartVoice={handleStartVoice}
-              onStopVoice={stopListening}
-              onStopSpeaking={handleStopSpeak}
-              isLoading={isLoading}
-            />
-          )}
-        </AnimatePresence>
-      </main>
-    </div>
+      {/* GOD MODE — Transition Doors */}
+      <CircuitDoor 
+        isActive={isGodModeActive} 
+        onAnimationComplete={handleGodModeAnimationComplete} 
+      />
+
+      {/* GOD MODE — Developer Terminal */}
+      <GodModeTerminal
+        isOpen={showGodTerminal}
+        onClose={() => {
+          setShowGodTerminal(false);
+          setIsGodModeActive(false);
+        }}
+        onExecute={executeGodCommand}
+      />
+
+      {/* Wallpaper & Appearance Picker */}
+      <WallpaperPicker
+        isOpen={showWallpaperPicker}
+        onClose={() => setShowWallpaperPicker(false)}
+      />
+    </motion.div>
   );
 }

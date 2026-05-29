@@ -14,9 +14,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Mic, MicOff, Square, Loader2 } from "lucide-react";
 import { VoiceState } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useWallpaper } from "@/contexts/WallpaperContext";
 import VoiceVisualizer from "./VoiceVisualizer";
 import PulseOrb from "./PulseOrb";
-import ScreenshotCapture from "./ScreenshotCapture";
 
 interface CommandBarProps {
   onSend: (text: string) => void;
@@ -27,7 +27,6 @@ interface CommandBarProps {
   onStartVoice: () => void;
   onStopVoice: () => void;
   onStopSpeaking: () => void;
-  onScreenshot?: (imageData: string) => void;
   disabled?: boolean;
 }
 
@@ -40,10 +39,10 @@ export default function CommandBar({
   onStartVoice,
   onStopVoice,
   onStopSpeaking,
-  onScreenshot,
   disabled = false,
 }: CommandBarProps) {
   const { config } = useTheme();
+  const { settings: wallpaperSettings } = useWallpaper();
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isListening = voiceState === "listening";
@@ -94,8 +93,6 @@ export default function CommandBar({
   };
 
   const canSend = value.trim().length > 0 && !disabled && !isLoading;
-  const hasText = value.trim().length > 0;
-  const shouldGlow = isListening || isLoading || isSpeaking || hasText;
 
   return (
     <>
@@ -185,17 +182,12 @@ export default function CommandBar({
                 ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
                 : { duration: 0.3 }
             }
-            className={`flex items-end gap-2 rounded-2xl px-4 py-3 ${
-              shouldGlow ? "rainbow-glow-active" : ""
-            }`}
+            className="flex items-end gap-2 rounded-2xl px-4 py-3"
             style={{
-              background: config.surface,
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-              border:
-                shouldGlow
-                  ? "none"
-                  : `1px solid rgba(${config.accentRgb}, 0.15)`,
+              background: `rgba(12,12,16,${wallpaperSettings.panelOpacity})`,
+              backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+              WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+              border: `1px solid rgba(${config.accentRgb}, ${isListening ? "0.4" : "0.15"})`,
               transition: "border-color 0.3s ease",
             }}
           >
@@ -225,14 +217,6 @@ export default function CommandBar({
 
             {/* Action buttons */}
             <div className="flex items-center gap-1.5 flex-shrink-0 pb-0.5">
-              {/* Screenshot button */}
-              {onScreenshot && (
-                <ScreenshotCapture
-                  onCapture={onScreenshot}
-                  isLoading={isLoading}
-                />
-              )}
-
               {/* Voice button */}
               {isVoiceSupported && (
                 <motion.button

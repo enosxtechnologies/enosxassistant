@@ -50,10 +50,10 @@ export function useVoice() {
         (window as any).webkitSpeechRecognition;
 
       const recognition: ISpeechRecognition = new SpeechRecognitionAPI();
-      recognition.continuous = true; // Keep listening for better interactivity
+      recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = "en-US";
-      recognition.maxAlternatives = 5; // Increased for even better recognition accuracy
+      recognition.maxAlternatives = 1;
 
       recognition.onstart = () => {
         setVoiceState("listening");
@@ -118,22 +118,42 @@ export function useVoice() {
       .replace(/>\s/g, "")
       .trim();
 
+    // Skip empty text
+    if (!cleanText) {
+      onEnd?.();
+      return;
+    }
+
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    // Professional and fluent female voice profile
-    utterance.rate = 1.0; // Standard rate for natural flow
-    utterance.pitch = 1.1; // Slightly higher pitch for a clear, pleasant female tone
+    // Female AI assistant voice profile (Jarvis-like but feminine)
+    utterance.rate = 1.0; // Natural speaking pace
+    utterance.pitch = 1.15; // Slightly higher for feminine tone
     utterance.volume = 1;
 
+    // Wait for voices to load
     const voices = synthRef.current.getVoices();
-    // Prioritize high-quality natural female voices
+    
+    // Prioritize premium female voices for a sophisticated AI assistant feel
     const preferredVoice = 
-      voices.find(v => v.name.includes("Google US English Female") || v.name.includes("Microsoft Zira") || v.name.includes("Samantha") || v.name.includes("Victoria") || v.name.includes("Karen")) ||
-      voices.find(v => v.name.includes("Female") || v.name.includes("Google UK English Female")) ||
-      voices.find(v => v.name.includes("Natural") || v.name.includes("Premium") || v.name.includes("Enhanced")) ||
-      voices.find(v => v.lang === "en-US" || v.lang === "en-GB");
+      // Microsoft premium female voices (best quality on Windows)
+      voices.find(v => v.name.includes("Microsoft Zira")) ||
+      voices.find(v => v.name.includes("Microsoft Eva")) ||
+      voices.find(v => v.name.includes("Microsoft Aria")) ||
+      // Google female voices
+      voices.find(v => v.name.includes("Google US English") && !v.name.includes("Male")) ||
+      // Apple female voices (macOS/iOS)
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.name.includes("Karen")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      // Generic female voice fallbacks
+      voices.find(v => v.name.toLowerCase().includes("female") && v.lang.startsWith("en")) ||
+      voices.find(v => (v.name.includes("Fiona") || v.name.includes("Moira")) && v.lang.startsWith("en")) ||
+      // Any English voice as last resort
+      voices.find(v => v.lang === "en-US") ||
+      voices.find(v => v.lang.startsWith("en"));
       
     if (preferredVoice) utterance.voice = preferredVoice;
 

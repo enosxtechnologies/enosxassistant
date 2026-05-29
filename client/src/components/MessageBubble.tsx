@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { Copy, Volume2, VolumeX, Check, User, Bot } from "lucide-react";
 import { Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
-import EliteStreamingText from "./EliteStreamingText";
+import { useWallpaper } from "@/contexts/WallpaperContext";
 
 interface MessageBubbleProps {
   message: Message;
@@ -22,17 +22,7 @@ interface MessageBubbleProps {
 // Simple markdown renderer — handles bold, italic, code, headers, lists, links
 function renderMarkdown(text: string): string {
   return text
-    .replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, lang, code) => {
-      // Basic syntax highlighting for keywords (very simplified)
-      const highlighted = code
-        .replace(/\b(const|let|var|function|return|if|else|for|while|import|export|class|interface|type)\b/g, '<span class="token keyword">$1</span>')
-        .replace(/\b(string|number|boolean|any|void|null|undefined)\b/g, '<span class="token builtin">$1</span>')
-        .replace(/"([^"]*)"/g, '<span class="token string">"$1"</span>')
-        .replace(/'([^']*)'/g, '<span class="token string">\'$1\'</span>')
-        .replace(/\b(\d+)\b/g, '<span class="token number">$1</span>')
-        .replace(/\/\/.*/g, '<span class="token comment">$&</span>');
-      return `<pre><code class="language-${lang || 'text'}">${highlighted}</code></pre>`;
-    })
+    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -93,6 +83,7 @@ export default function MessageBubble({
   isSpeaking,
 }: MessageBubbleProps) {
   const { config } = useTheme();
+  const { settings: wallpaperSettings } = useWallpaper();
   const [copied, setCopied] = useState(false);
   const isUser = message.role === "user";
   const isStreaming = message.isStreaming;
@@ -159,24 +150,26 @@ export default function MessageBubble({
       </motion.div>
 
       {/* Bubble */}
-      <div className={`flex flex-col gap-1 ${isUser ? "max-w-[80%] items-end" : "max-w-full items-start flex-1"}`}>
+      <div className={`flex flex-col gap-1 max-w-[80%] ${isUser ? "items-end" : "items-start"}`}>
         <motion.div
-          whileHover={isUser ? { scale: 1.005 } : {}}
+          whileHover={{ scale: 1.005 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={`relative ${isUser ? "rounded-2xl px-4 py-3" : "w-full pt-1 pb-2"}`}
+          className="relative rounded-2xl px-4 py-3"
           style={
             isUser
               ? {
                   background: `rgba(${config.accentRgb}, 0.12)`,
                   border: `1px solid rgba(${config.accentRgb}, 0.25)`,
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
+                  backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+                  WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
                   boxShadow: `0 4px 20px rgba(${config.accentRgb}, 0.08)`,
                 }
               : {
-                  background: "transparent",
-                  border: "none",
-                  boxShadow: "none",
+                  background: `rgba(18,18,24,${wallpaperSettings.panelOpacity * 0.7})`,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+                  WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
                 }
           }
         >
@@ -192,21 +185,13 @@ export default function MessageBubble({
                   {message.content}
                 </p>
               ) : (
-                <div className="prose-crimson text-sm" style={{ color: config.text }}>
-                  {isStreaming ? (
-                    <EliteStreamingText
-                      text={message.content}
-                      isStreaming={isStreaming}
-                      delay={0.05}
-                    />
-                  ) : (
-                    <div
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
-                    />
-                  )}
-                </div>
+                <div
+                  className="prose-crimson text-sm"
+                  style={{ color: config.text }}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+                />
               )}
-              {isStreaming && message.content && !isUser && (
+              {isStreaming && message.content && (
                 <StreamingCursor color={config.accent} />
               )}
             </div>
@@ -214,12 +199,12 @@ export default function MessageBubble({
         </motion.div>
 
         {/* Action buttons */}
-        {!isStreaming && message.content && !isEmpty && (
+        {!isStreaming && message.content && (
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={`flex items-center gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}
+            className={`flex items-center gap-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}
           >
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -251,7 +236,7 @@ export default function MessageBubble({
                     : "1px solid rgba(255,255,255,0.07)",
                   color: isSpeaking ? config.accent : config.textMuted,
                 }}
-                title={isSpeaking ? "Stop speaking" : "Speak response"}
+                title={isSpeaking ? "Stop speaking" : "Speak"}
               >
                 {isSpeaking ? <VolumeX size={10} /> : <Volume2 size={10} />}
               </motion.button>
