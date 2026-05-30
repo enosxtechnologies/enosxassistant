@@ -111,10 +111,9 @@ export default function Sidebar({
                   className="text-2xl font-black tracking-tight leading-none"
                   style={{
                     color: config.text,
-                    textShadow: `0 0 22px rgba(${config.accentRgb},0.35)`,
                   }}
                 >
-                  ENOSX AI
+                  ENOSX
                 </span>
                 {isPro && (
                   <span

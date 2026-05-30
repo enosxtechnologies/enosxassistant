@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile"; // Ensuring correct model name
+const OPENROUTER_API_URL = "https://openrouter.io/api/v1/chat/completions";
+const MODEL = "openai/gpt-3.5-turbo";
 
 const SYSTEM_PROMPT = `You are an AI assistant developed by Enosx Technologies.
 
@@ -70,10 +70,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-  if (!GROQ_API_KEY) {
-    return res.status(500).json({ error: "Groq API key not configured" });
+  if (!OPENROUTER_API_KEY) {
+    return res.status(500).json({ error: "OpenRouter API key not configured" });
   }
 
   const { messages } = req.body;
@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Messages array is required" });
   }
 
-  const groqMessages = [
+  const openrouterMessages = [
     { role: "system", content: SYSTEM_PROMPT },
     ...messages.map((m: { role: string; content: string }) => ({
       role: m.role,
@@ -91,15 +91,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   ];
 
   try {
-    const response = await fetch(GROQ_API_URL, {
+    const response = await fetch(OPENROUTER_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${GROQ_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
         model: MODEL,
-        messages: groqMessages,
+        messages: openrouterMessages,
         stream: true,
         max_tokens: 2048,
         temperature: 0.7,

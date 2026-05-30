@@ -1,17 +1,6 @@
-/*
- * ENOSX AI — CommandBar
- * Floating pill command bar with voice visualization, micro-interactions
- * Features: auto-resize textarea, voice input, animated send button, glassmorphism
- *
- * Voice interaction now uses the "Pulse" orb overlay:
- *   Cyan/Blue  → Listening
- *   Purple/Pink → Processing
- *   White Sparkle → Completed
- */
-
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Mic, MicOff, Square, Loader2 } from "lucide-react";
+import { Send, Mic, MicOff, Square, Loader2, Zap } from "lucide-react";
 import { VoiceState } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
@@ -27,6 +16,7 @@ interface CommandBarProps {
   onStartVoice: () => void;
   onStopVoice: () => void;
   onStopSpeaking: () => void;
+  onToggleMultimodal?: () => void;
   disabled?: boolean;
 }
 
@@ -39,11 +29,13 @@ export default function CommandBar({
   onStartVoice,
   onStopVoice,
   onStopSpeaking,
+  onToggleMultimodal,
   disabled = false,
 }: CommandBarProps) {
   const { config } = useTheme();
   const { settings: wallpaperSettings } = useWallpaper();
   const [value, setValue] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isListening = voiceState === "listening";
   const isSpeaking = voiceState === "speaking";
@@ -70,6 +62,7 @@ export default function CommandBar({
     if (!text || disabled || isLoading) return;
     onSend(text);
     setValue("");
+    setShowSuggestions(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
@@ -94,6 +87,15 @@ export default function CommandBar({
 
   const canSend = value.trim().length > 0 && !disabled && !isLoading;
 
+  // Sample suggestions that appear as you type
+  const suggestions = value.length > 0 ? [
+    "Expand on this idea",
+    "Give me examples",
+    "Simplify this",
+    "Add more details",
+    "Rephrase clearly"
+  ] : [];
+
   return (
     <>
       {/* ── Pulse Orb full-screen overlay (voice active) ── */}
@@ -111,7 +113,6 @@ export default function CommandBar({
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
             }}
-            // Clicking the backdrop stops voice
             onClick={voiceActive ? handleVoiceClick : undefined}
           >
             {/* Stop-click hint */}
@@ -162,6 +163,46 @@ export default function CommandBar({
           transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.1 }}
           className="max-w-3xl mx-auto"
         >
+          {/* Suggestions that appear as you type */}
+          <AnimatePresence>
+            {showSuggestions && suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="mb-3 flex flex-wrap gap-2"
+              >
+                {suggestions.map((suggestion, i) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setValue(value + " - " + suggestion);
+                      setShowSuggestions(false);
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                    style={{
+                      background: `rgba(${config.accentRgb}, 0.1)`,
+                      border: `1px solid rgba(${config.accentRgb}, 0.2)`,
+                      color: config.text,
+                      backdropFilter: "blur(12px)",
+                      WebkitBackdropFilter: "blur(12px)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Zap size={10} className="inline mr-1" />
+                    {suggestion}
+                  </motion.button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Main input container */}
           <motion.div
             animate={
@@ -195,14 +236,17 @@ export default function CommandBar({
             <textarea
               ref={textareaRef}
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => {
+                setValue(e.target.value);
+                setShowSuggestions(e.target.value.length > 0);
+              }}
               onKeyDown={handleKeyDown}
               placeholder={
                 isListening
                   ? "Listening..."
                   : isSpeaking
                   ? "Speaking..."
-                  : "Ask ENOSX AI anything..."
+                  : "Ask ENOSX anything..."
               }
               rows={1}
               disabled={disabled && !isListening}
@@ -217,6 +261,24 @@ export default function CommandBar({
 
             {/* Action buttons */}
             <div className="flex items-center gap-1.5 flex-shrink-0 pb-0.5">
+              {/* Multimodal toggle button */}
+              {onToggleMultimodal && (
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={onToggleMultimodal}
+                  className="relative w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: config.textMuted,
+                  }}
+                  title="Multimodal mode"
+                >
+                  <Zap size={13} />
+                </motion.button>
+              )}
+
               {/* Voice button */}
               {isVoiceSupported && (
                 <motion.button

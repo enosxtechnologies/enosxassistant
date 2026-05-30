@@ -406,11 +406,12 @@ export default function ChatPage() {
         onSelect={setActiveId}
         onNew={createNewChat}
         onDelete={deleteConversation}
-        collapsed={sidebarCollapsed}
+        collapsed={true}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         onGitHubConnect={connectGitHubRepos}
         onGodMode={triggerGodMode}
         isPro={isPro}
+        style={{ display: "none" }}
       />
 
       {/* Main area */}
@@ -450,7 +451,7 @@ export default function ChatPage() {
                 transition: "color 0.3s ease",
               }}
             >
-              {activeConversation?.title ?? "ENOSX AI Assistant"}
+              {activeConversation?.title ?? "ENOSX Assistant"}
             </span>
             {activeConversation && (
               <motion.span
@@ -551,7 +552,7 @@ export default function ChatPage() {
               style={{ color: config.textMuted }}
             >
               <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
-              <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>{githubConnected ? "GROQ + GITHUB" : "GROQ"}</span>
+              <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>OPENROUTER + ENOSX</span>
             </div>
 
             {/* About button removed for cleaner UI */}
@@ -676,22 +677,6 @@ export default function ChatPage() {
           )}
         </AnimatePresence>
 
-        {/* Multimodal Toggle Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={toggleMultimodal}
-          className="absolute bottom-4 right-4 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-          style={{
-            background: showMultimodal ? `rgba(${config.accentRgb},0.2)` : `rgba(${config.accentRgb},0.1)`,
-            border: `1px solid ${config.accent}`,
-            color: config.accent,
-            zIndex: 10,
-          }}
-        >
-          {showMultimodal ? "Hide Multimodal" : "Show Multimodal"}
-        </motion.button>
-
         {/* Command bar */}
         <CommandBar
           onSend={handleSend}
@@ -702,6 +687,7 @@ export default function ChatPage() {
           onStartVoice={handleStartVoice}
           onStopVoice={stopListening}
           onStopSpeaking={handleStopSpeak}
+          onToggleMultimodal={toggleMultimodal}
           disabled={isLoading}
         />
       </motion.div>
