@@ -61,7 +61,6 @@ export default function CommandBar({
     if (!text || disabled || isLoading) return;
     onSend(text);
     setValue("");
-    setShowSuggestions(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
