@@ -85,10 +85,6 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
                 background: `conic-gradient(from 0deg, transparent 60%, rgba(${config.accentRgb},0.6) 100%)`,
               }}
             />
-            <Zap
-              size={28}
-              style={{ color: "#fff", position: "relative", zIndex: 1 }}
-            />
           </motion.div>
         </motion.div>
 
