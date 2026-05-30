@@ -5,7 +5,7 @@
  */
 
 import { motion } from "framer-motion";
-import { Zap, Code, Globe, Brain, Cpu, Sparkles } from "lucide-react";
+import { Code, Globe, Brain, Cpu, Sparkles } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 
@@ -109,14 +109,8 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
               letterSpacing: "-0.03em",
             }}
           >
-            ENOSX AI
+            ENOSX
           </h1>
-          <p
-            className="text-sm"
-            style={{ color: config.textMuted, letterSpacing: "0.08em" }}
-          >
-            COMMAND INTELLIGENCE · BUILT BY ENOSH
-          </p>
         </motion.div>
 
         {/* Suggestion grid */}

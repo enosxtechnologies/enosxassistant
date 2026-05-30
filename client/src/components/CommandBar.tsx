@@ -218,7 +218,6 @@ export default function CommandBar({
                   }}
                   title="Multimodal mode"
                 >
-                  <Zap size={13} />
                 </motion.button>
               )}
 
