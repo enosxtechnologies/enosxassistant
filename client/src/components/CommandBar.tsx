@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Mic, MicOff, Square, Loader2, Zap } from "lucide-react";
+import { Send, Mic, MicOff, Square, Loader2 } from "lucide-react";
 import { VoiceState } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
@@ -35,7 +35,6 @@ export default function CommandBar({
   const { config } = useTheme();
   const { settings: wallpaperSettings } = useWallpaper();
   const [value, setValue] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isListening = voiceState === "listening";
   const isSpeaking = voiceState === "speaking";
@@ -86,15 +85,6 @@ export default function CommandBar({
   };
 
   const canSend = value.trim().length > 0 && !disabled && !isLoading;
-
-  // Sample suggestions that appear as you type
-  const suggestions = value.length > 0 ? [
-    "Expand on this idea",
-    "Give me examples",
-    "Simplify this",
-    "Add more details",
-    "Rephrase clearly"
-  ] : [];
 
   return (
     <>
@@ -163,46 +153,6 @@ export default function CommandBar({
           transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.1 }}
           className="max-w-3xl mx-auto"
         >
-          {/* Suggestions that appear as you type */}
-          <AnimatePresence>
-            {showSuggestions && suggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className="mb-3 flex flex-wrap gap-2"
-              >
-                {suggestions.map((suggestion, i) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.05 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setValue(value + " - " + suggestion);
-                      setShowSuggestions(false);
-                    }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
-                    style={{
-                      background: `rgba(${config.accentRgb}, 0.1)`,
-                      border: `1px solid rgba(${config.accentRgb}, 0.2)`,
-                      color: config.text,
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Zap size={10} className="inline mr-1" />
-                    {suggestion}
-                  </motion.button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* Main input container */}
           <motion.div
             animate={
@@ -238,16 +188,9 @@ export default function CommandBar({
               value={value}
               onChange={(e) => {
                 setValue(e.target.value);
-                setShowSuggestions(e.target.value.length > 0);
               }}
               onKeyDown={handleKeyDown}
-              placeholder={
-                isListening
-                  ? "Listening..."
-                  : isSpeaking
-                  ? "Speaking..."
-                  : "Ask ENOSX anything..."
-              }
+              placeholder="Ask ENOSX anything..."
               rows={1}
               disabled={disabled && !isListening}
               className="flex-1 bg-transparent outline-none resize-none text-sm leading-relaxed"
@@ -372,9 +315,7 @@ export default function CommandBar({
             className="text-center mt-1.5"
             style={{ color: config.textMuted, fontSize: "10px", letterSpacing: "0.04em" }}
           >
-            {isListening
-              ? "Speak now — tap orb or mic to stop"
-              : "Enter to send · Shift+Enter for new line"}
+            Enter to send · Shift+Enter for new line
           </motion.p>
         </motion.div>
       </div>
