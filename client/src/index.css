@@ -386,6 +386,25 @@
     }
   }
 
+  /* ── Redesign Variables ── */
+  :root {
+    --bg-base: #0a0a0f;
+    --bg-surface: #111118;
+    --bg-elevated: #18181f;
+    --bg-hover: #1e1e28;
+    --border-new: #2a2a38;
+    --border-subtle: #1e1e2a;
+    --accent-new: #7c6ff7;
+    --accent-dim: rgba(124, 111, 247, 0.15);
+    --accent-glow: rgba(124, 111, 247, 0.35);
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a8;
+    --text-muted-new: #55556a;
+    --user-bubble: #1e1a3a;
+    --user-border: #3d3680;
+    --ai-bubble: #15151e;
+  }
+
   /* ── Prose markdown styles for AI responses ── */
   .prose-crimson {
     color: #e8e8e8;

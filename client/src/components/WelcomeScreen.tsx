@@ -29,67 +29,26 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
       <div className="max-w-2xl w-full flex flex-col items-center gap-8">
-        {/* Animated orb avatar */}
+        {/* Glass EX Logo */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="relative"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
+          className="relative w-24 h-24 mb-4 flex items-center justify-center rounded-2xl border border-white/10 shadow-[0_0_40px_rgba(124,111,247,0.3)] overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
         >
-          {/* Outer pulse ring */}
+          <span className="text-4xl font-black tracking-tighter text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+            EX
+          </span>
           <motion.div
-            animate={{
-              scale: [1, 1.4, 1],
-              opacity: [0.3, 0, 0.3],
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: `radial-gradient(circle, rgba(${config.accentRgb},0.3) 0%, transparent 70%)`,
-            }}
+            animate={{ left: ["-100%", "200%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+            className="absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12"
           />
-          {/* Middle ring */}
-          <motion.div
-            animate={{
-              scale: [1, 1.25, 1],
-              opacity: [0.4, 0.1, 0.4],
-            }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: `radial-gradient(circle, rgba(${config.accentRgb},0.2) 0%, transparent 70%)`,
-            }}
-          />
-          {/* Core orb */}
-          <motion.div
-            animate={{
-              boxShadow: [
-                `0 0 20px rgba(${config.accentRgb},0.4), 0 0 60px rgba(${config.accentRgb},0.15)`,
-                `0 0 40px rgba(${config.accentRgb},0.7), 0 0 80px rgba(${config.accentRgb},0.3)`,
-                `0 0 20px rgba(${config.accentRgb},0.4), 0 0 60px rgba(${config.accentRgb},0.15)`,
-              ],
-            }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            className="relative w-20 h-20 rounded-full flex items-center justify-center"
-            style={{
-              background: `radial-gradient(circle at 35% 35%, rgba(${config.accentRgb},0.9) 0%, rgba(${config.accentRgb},0.4) 50%, rgba(${config.accentRgb},0.1) 100%)`,
-              border: `1px solid rgba(${config.accentRgb},0.4)`,
-            }}
-          >
-            {/* Inner glow */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-2 rounded-full"
-              style={{
-                background: `conic-gradient(from 0deg, transparent 60%, rgba(${config.accentRgb},0.6) 100%)`,
-              }}
-            />
-            <Zap
-              size={28}
-              style={{ color: "#fff", position: "relative", zIndex: 1 }}
-            />
-          </motion.div>
         </motion.div>
 
         {/* Title */}
@@ -99,23 +58,17 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="text-center"
         >
-          <h1
-            className="text-5xl font-black mb-2"
-            style={{
-              background: `linear-gradient(135deg, ${config.text} 0%, ${config.accent} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              letterSpacing: "-0.03em",
-            }}
+          <h2
+            className="text-4xl font-semibold tracking-tight mb-3"
+            style={{ color: config.text }}
           >
-            ENOSX AI
-          </h1>
+            What can I help with?
+          </h2>
           <p
-            className="text-sm"
-            style={{ color: config.textMuted, letterSpacing: "0.08em" }}
+            className="text-base opacity-50 max-w-lg mx-auto leading-relaxed"
+            style={{ color: config.textMuted }}
           >
-            COMMAND INTELLIGENCE · BUILT BY ENOSH
+            Ask me anything — I can see your Windows screen, open apps, write code, manage files, and more.
           </p>
         </motion.div>
 
@@ -165,16 +118,21 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           ))}
         </motion.div>
 
-        {/* Footer hint */}
-        <motion.p
+        {/* Footer Branding */}
+        <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
-          className="text-xs text-center"
-          style={{ color: config.textMuted, opacity: 0.5, letterSpacing: "0.04em" }}
+          animate={{ opacity: 0.4 }}
+          transition={{ delay: 0.8 }}
+          className="mt-8 flex flex-col items-center gap-1"
         >
-          ENOSX TECHNOLOGIES · PROPRIETARY SYSTEM
-        </motion.p>
+          <span className="text-[9px] uppercase tracking-[0.4em] text-white/30 font-bold">from</span>
+          <span 
+            className="text-2xl text-white/60"
+            style={{ fontFamily: "'Dancing Script', cursive" }}
+          >
+            Enosx Technologies
+          </span>
+        </motion.div>
       </div>
     </div>
   );

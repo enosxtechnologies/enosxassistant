@@ -107,15 +107,22 @@ export default function Sidebar({
               className="flex-1 min-w-0"
             >
               <div className="flex items-center gap-2">
-                <span
-                  className="text-2xl font-black tracking-tight leading-none"
-                  style={{
-                    color: config.text,
-                    textShadow: `0 0 22px rgba(${config.accentRgb},0.35)`,
-                  }}
-                >
-                  ENOSX AI
-                </span>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(124,111,247,0.5)]"
+                    style={{ background: 'linear-gradient(135deg, #7c6ff7, #a78bfa)' }}
+                  >
+                    EX
+                  </div>
+                  <span
+                    className="text-lg font-bold tracking-tight leading-none"
+                    style={{
+                      color: config.text,
+                    }}
+                  >
+                    EnosX <span style={{ color: '#7c6ff7' }}>AI</span>
+                  </span>
+                </div>
                 {isPro && (
                   <span
                     className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs flex-shrink-0"
@@ -326,29 +333,15 @@ export default function Sidebar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="px-3 py-3 flex-shrink-0"
-            style={{ borderTop: `1px solid rgba(${config.accentRgb}, 0.08)` }}
+            className="px-4 py-6 flex-shrink-0 flex flex-col items-center border-t border-white/5"
           >
-            <div
-              className="rounded-2xl px-3 py-2"
-              style={{
-                background: `rgba(${config.accentRgb},0.06)`,
-                border: `1px solid rgba(${config.accentRgb},0.12)`,
-              }}
+            <span className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-bold mb-1">from</span>
+            <span 
+              className="text-xl text-white/60"
+              style={{ fontFamily: "'Dancing Script', cursive" }}
             >
-              <div className="flex items-center gap-2">
-                <Sparkles size={13} style={{ color: config.accent }} />
-                <p
-                  className="text-[10px] uppercase"
-                  style={{ color: config.text, letterSpacing: "0.12em" }}
-                >
-                  ENOSX Core Online
-                </p>
-              </div>
-              <p className="mt-1 text-[10px]" style={{ color: config.textMuted }}>
-                Groq, GitHub, and GOD MODE controls are unified here.
-              </p>
-            </div>
+              Enosx Technologies
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
