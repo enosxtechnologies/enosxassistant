@@ -13,29 +13,15 @@ import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import PulseOrb from "@/components/PulseOrb";
-import AdaptiveActionButtons from "@/components/AdaptiveActionButtons";
-import ClipboardNotification from "@/components/ClipboardNotification";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import CommandChainProgress from "@/components/CommandChainProgress";
-import ContextIndicator from "@/components/ContextIndicator";
-import AppAwareSuggestions from "@/components/AppAwareSuggestions";
 import FileDropZone from "@/components/FileDropZone";
-import FileContextBadge from "@/components/FileContextBadge";
-import ClipboardBadge from "@/components/ClipboardBadge";
-import ContextualActionBar from "@/components/ContextualActionBar";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
-import AutoContextIndicator from "@/components/AutoContextIndicator";
-import GlitchShader from "@/components/GlitchShader";
-import NeuralMesh from "@/components/NeuralMesh";
-import ParentalControlsButton from "@/components/ParentalControlsButton";
-import GodModeAIChat from "@/components/GodModeAIChat";
 import { GlobalLayout } from "@/components/GlobalLayout";
-import { useAI } from "@/hooks/useAI";
+import { useGroq as useAI } from "@/hooks/useGroq";
 import { useVoice } from "@/hooks/useVoice";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useSystemActions } from "@/hooks/useSystemActions";
-import { useWebSearch } from "@/hooks/useWebSearch";
 import { useCommandChain } from "@/hooks/useCommandChain";
 import { useContextAwareMessages } from "@/hooks/useContextAwareMessages";
 import { useActiveWindow } from "@/contexts/WindowContext";
@@ -43,12 +29,18 @@ import { useFileContext } from "@/hooks/useFileContext";
 import { useClipboardListener } from "@/hooks/useClipboardListener";
 import { useGodMode } from "@/hooks/useGodMode";
 import { useMemoryBank } from "@/hooks/useMemoryBank";
-import { useAutoContext } from "@/hooks/useAutoContext";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCompactMode } from "@/hooks/useCompactMode";
 import { ChevronDown, Info, Volume2, VolumeX, Minimize2, Maximize2, Wifi } from "lucide-react";
-import { createAdaptiveActionHandler, createClipboardSummarizeHandler } from "./ChatPage_handlers";
+
+const createAdaptiveActionHandler = (handleSend: (msg: string) => void) => (action: string) => {
+  handleSend(action);
+};
+
+const createClipboardSummarizeHandler = (handleSend: (msg: string) => void) => (text: string) => {
+  handleSend(`Summarize this clipboard content: ${text}`);
+};
 
 const BG_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
@@ -77,7 +69,6 @@ export default function ChatPage() {
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [showGodModeAIChat, setShowGodModeAIChat] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -89,22 +80,7 @@ export default function ChatPage() {
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   const { sendMessage, isLoading, error, currentProvider, currentModel } = useAI();
-  const { performSearch } = useWebSearch();
 
-  // Handle God Mode AI Chat execution
-  const handleGodModeAIChatExecute = useCallback(async (message: string): Promise<string> => {
-    try {
-      const response = await sendMessage(message);
-      return response || 'No response received';
-    } catch (err) {
-      return 'Error processing request';
-    }
-  }, [sendMessage]);
-
-  // Toggle God Mode AI Chat
-  const toggleGodModeAIChat = useCallback(() => {
-    setShowGodModeAIChat(prev => !prev);
-  }, []);
   const {
     voiceState,
     transcript,
@@ -117,23 +93,17 @@ export default function ChatPage() {
 
   const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
   const { executeAction } = useSystemActions();
-  const { progress } = useCommandChain();
   const { enrichMessageWithContext, getContextInfo } = useContextAwareMessages();
   const { activeWindow } = useActiveWindow();
   const { fileContext, loadFile, clearFile, getFileContextMessage } = useFileContext();
   const {
     copiedText,
-    isVisible: clipboardVisible,
-    dismiss: dismissClipboard,
-    consume: consumeClipboard,
   } = useClipboardListener();
 
   const { memories, addMemory, removeMemory, getMemoryContext } = useMemoryBank();
-  const { autoContext, getAutoContextMessage } = useAutoContext();
 
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
-  const [showGlitch, setShowGlitch] = useState(false);
   const { isCompactMode, toggleCompactMode } = useCompactMode();
 
   // handleSend defined early to avoid circular dependencies
@@ -194,12 +164,11 @@ export default function ChatPage() {
       }
 
       const memoryContext = getMemoryContext();
-      const autoAppContext = getAutoContextMessage();
       const contextInfo = getContextInfo(activeWindow);
       
       const enrichedUserMessage = {
         ...userMessage,
-        content: userMessage.content + memoryContext + autoAppContext + contextInfo
+        content: userMessage.content + memoryContext + contextInfo
       };
 
       const contextEnrichedMessages = enrichMessageWithContext([...currentMessages, enrichedUserMessage], activeWindow);
@@ -235,28 +204,7 @@ export default function ChatPage() {
               })
             );
             playSound("receive");
-            executeAction(fullResponse).then((actions) => {
-              const searchAction = actions.find(a => a.type === 'search');
-              if (searchAction && searchAction.query) {
-                performSearch(searchAction.query).then((results) => {
-                  const resultsText = results
-                    .map((r, i) => `${i + 1}. **${r.title}**
-   ${r.snippet}
-   [Link](${r.url})`)
-                    .join("\n\n");
-                  
-                  const searchResultsMessage = `[SEARCH RESULTS for "${searchAction.query}"]:
-
-${resultsText}
-
-Based on these search results, please provide a comprehensive and detailed answer to the user's question.`;
-                  
-                  setTimeout(() => {
-                    handleSend(searchResultsMessage);
-                  }, 1000);
-                });
-              }
-            });
+            executeAction(fullResponse);
 
             if (autoSpeak && fullResponse) {
               setSpeakingMessageId(assistantId);
@@ -280,7 +228,7 @@ Based on these search results, please provide a comprehensive and detailed answe
         );
       }
     },
-    [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, getAutoContextMessage, enrichMessageWithContext, getContextInfo, activeWindow, executeAction]
+    [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, enrichMessageWithContext, getContextInfo, activeWindow, executeAction]
   );
 
   const triggerGodMode = useCallback(() => {
@@ -292,7 +240,6 @@ Based on these search results, please provide a comprehensive and detailed answe
     setTimeout(() => {
       setIsGodModeActive(false);
       setShowGodTerminal(true);
-      setShowGlitch(true);
       
       // Check for custom greeting in memories
       const customGreeting = memories.find(m => m.category === 'system' && m.content.startsWith('GREETING_OVERRIDE:'));
@@ -309,7 +256,6 @@ Based on these search results, please provide a comprehensive and detailed answe
   const handleGodModeAnimationComplete = useCallback(() => {
     if (isGodModeActive) {
       setShowGodTerminal(true);
-      setShowGlitch(true);
     }
   }, [isGodModeActive]);
 
@@ -404,16 +350,6 @@ Based on these search results, please provide a comprehensive and detailed answe
     playSound("listenStop");
   }, [stopSpeaking, playSound]);
 
-  const handleAdaptiveAction = useCallback(
-    (action: string) => createAdaptiveActionHandler(handleSend)(action),
-    [handleSend]
-  );
-
-  const handleClipboardSummarize = useCallback(
-    async (text: string) => createClipboardSummarizeHandler(handleSend)(text),
-    [handleSend]
-  );
-
   const messages = activeConversation?.messages ?? [];
 
   return (
@@ -437,13 +373,7 @@ Based on these search results, please provide a comprehensive and detailed answe
       />
 
       <FileDropZone onFileSelected={loadFile} isActive={true} />
-      <CommandChainProgress progress={progress} />
-      <ClipboardNotification
-        clipboardData={copiedText}
-        onSummarize={handleClipboardSummarize}
-        onDismiss={dismissClipboard}
-      />
-
+      
       {!isCompactMode && (
         <Sidebar
           collapsed={sidebarCollapsed}
@@ -486,8 +416,6 @@ Based on these search results, please provide a comprehensive and detailed answe
             </span>
             {!isCompactMode && activeConversation && (
               <div className="flex items-center gap-1 ml-2">
-                <ContextIndicator />
-                <AutoContextIndicator data={autoContext} />
                 <div className="flex items-center gap-1 px-2 py-1 rounded-md" style={{ background: `rgba(${config.accentRgb}, 0.1)`, border: `1px solid rgba(${config.accentRgb}, 0.3)` }}>
                   <Wifi size={12} style={{ color: config.accent }} />
                   <span className="text-xs" style={{ color: config.accent }}>
@@ -576,12 +504,6 @@ Based on these search results, please provide a comprehensive and detailed answe
               >
                 <div className="h-full flex flex-col">
                   <div className="px-5 pt-5">
-                    {!isCompactMode && (
-                      <>
-                        <AppAwareSuggestions onSuggestionClick={handleSend} />
-                        <AdaptiveActionButtons onActionClick={handleAdaptiveAction} />
-                      </>
-                    )}
                   </div>
                   <div className="flex-1">
                     <WelcomeScreen onSuggestion={handleSend} isCompact={isCompactMode} />
@@ -643,24 +565,6 @@ Based on these search results, please provide a comprehensive and detailed answe
           <div className="max-w-3xl mx-auto relative">
             <div className="absolute bottom-full left-0 right-0 mb-4 flex flex-col gap-2 pointer-events-none">
               <div className="pointer-events-auto">
-                <FileContextBadge 
-                  fileContext={fileContext} 
-                  onClear={clearFile} 
-                />
-                {!isCompactMode && (
-                  <>
-                    <ClipboardBadge 
-                      copiedText={copiedText}
-                      isVisible={clipboardVisible}
-                      onSummarize={handleClipboardSummarize}
-                      onDismiss={dismissClipboard}
-                      onConsume={consumeClipboard}
-                    />
-                    <ContextualActionBar 
-                      onAction={handleAdaptiveAction}
-                    />
-                  </>
-                )}
               </div>
             </div>
             
@@ -678,9 +582,6 @@ Based on these search results, please provide a comprehensive and detailed answe
           </div>
         </div>
 
-        <GlitchShader isActive={showGlitch} intensity={0.8} />
-        <NeuralMesh isActive={isGodModeActive} complexity={0.7} color="rgba(0, 242, 255, 0.15)" />
-
         <AnimatePresence>
           {isGodModeActive && (
             <CircuitDoor 
@@ -697,7 +598,6 @@ Based on these search results, please provide a comprehensive and detailed answe
               onClose={() => {
                 setShowGodTerminal(false);
                 setIsGodModeActive(false);
-                setShowGlitch(false);
               }}
               onExecute={executeGodCommand}
               memories={memories}
@@ -712,17 +612,7 @@ Based on these search results, please provide a comprehensive and detailed answe
             />
           )}
         </AnimatePresence>
-
-        {/* Parental Controls Button */}
-        <ParentalControlsButton />
-
-        {/* God Mode AI Chat */}
-        <GodModeAIChat 
-          isOpen={showGodModeAIChat}
-          onClose={() => setShowGodModeAIChat(false)}
-          onExecute={handleGodModeAIChatExecute}
-        </motion.div>
-      </div>
+      </main>
     </div>
     </GlobalLayout>
   );
