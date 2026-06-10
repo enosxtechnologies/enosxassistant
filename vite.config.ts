@@ -82,7 +82,7 @@ function vitePluginChatApi(): Plugin {
           return;
         }
 
-        const GROQ_API_KEY = process.env.GROQ_API_KEY || BUILT_IN_GROQ_API_KEY;
+        const GROQ_API_KEY = (process.env.GROQ_API_KEY || BUILT_IN_GROQ_API_KEY)?.trim();
 
         let body = "";
         for await (const chunk of req) {

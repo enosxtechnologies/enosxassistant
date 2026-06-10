@@ -70,10 +70,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
 
   if (!GROQ_API_KEY) {
-    return res.status(500).json({ error: "Groq API key not configured" });
+    return res.status(500).json({ error: "Groq API key not configured. Please check your Vercel environment variables." });
   }
 
   const { messages } = req.body;
@@ -108,8 +108,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
+      console.error("Groq API error:", errData);
       return res.status(response.status).json({
-        error: errData?.error?.message || `API error: ${response.status}`,
+        error: errData?.error?.message || `Groq API returned ${response.status}: ${response.statusText}`,
       });
     }
 
@@ -120,7 +121,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const reader = response.body?.getReader();
     if (!reader) {
-      return res.status(500).json({ error: "No response body" });
+      return res.status(500).json({ error: "No response body from Groq API" });
     }
 
     const decoder = new TextDecoder();
@@ -136,6 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.end();
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
+    console.error("Handler error:", err);
     return res.status(500).json({ error: msg });
   }
 }
