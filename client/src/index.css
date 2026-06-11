@@ -497,7 +497,6 @@
   .prose-crimson tr:nth-child(even) td {
     background: rgba(255,255,255,0.02);
   }
-}
 
   /* ── Rainbow Glow Animation (for typing and thinking) ── */
   @keyframes rainbow-glow {
