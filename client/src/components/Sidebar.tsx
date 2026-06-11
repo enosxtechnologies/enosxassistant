@@ -11,10 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Crown,
-  Github,
   Info,
   Sparkles,
-  ShieldOff,
   TerminalSquare,
 } from "lucide-react";
 import { Conversation } from "@/lib/types";
@@ -29,8 +27,7 @@ interface SidebarProps {
   onDelete: (id: string) => void;
   collapsed?: boolean;
   onToggle?: () => void;
-  onGitHubConnect?: () => void;
-  onGodMode?: () => void;
+
   isPro?: boolean;
 }
 
@@ -42,8 +39,7 @@ export default function Sidebar({
   onDelete,
   collapsed = true,
   onToggle,
-  onGitHubConnect,
-  onGodMode,
+
   isPro = false,
 }: SidebarProps) {
   const { config } = useTheme();
@@ -57,19 +53,7 @@ export default function Sidebar({
       onClick: onNew,
       accent: true,
     },
-    {
-      label: "GitHub Repos",
-      description: "Connect repo intelligence",
-      icon: Github,
-      onClick: onGitHubConnect,
-    },
-    {
-      label: "GOD MODE",
-      description: "Advanced operator terminal",
-      icon: ShieldOff,
-      onClick: onGodMode,
-      danger: true,
-    },
+
     {
       label: "About ENOSX",
       description: "Vision, stack, and founder",
