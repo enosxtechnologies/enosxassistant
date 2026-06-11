@@ -22,7 +22,7 @@ const BACKGROUND_PRESETS: BackgroundPreset[] = [
   {
     id: "lavender-field",
     name: "Lavender Field",
-    url: "/lavender-field-4k.jpg",
+    url: "/lavender-field-optimized.webp",
     color: "#7c5cbf",
   },
   {

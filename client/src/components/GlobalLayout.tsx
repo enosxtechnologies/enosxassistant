@@ -6,7 +6,7 @@ interface GlobalLayoutProps {
 }
 
 export function GlobalLayout({ children }: GlobalLayoutProps) {
-  const [backgroundUrl, setBackgroundUrl] = useState<string | null>("/lavender-field-4k.jpg");
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>("/lavender-field-optimized.webp");
   const [blurIntensity, setBlurIntensity] = useState(0);
   const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
 
@@ -26,7 +26,7 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
     if (saved) {
       try {
         const prefs = JSON.parse(saved);
-        setBackgroundUrl(prefs.uploaded || "/lavender-field-4k.jpg");
+        setBackgroundUrl(prefs.uploaded || "/lavender-field-optimized.webp");
         setBlurIntensity(prefs.blur || 0);
       } catch (e) {
         // Use defaults

@@ -304,18 +304,7 @@ export default function CommandBar({
             </div>
           </motion.div>
 
-          {/* Hint text */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-center mt-1.5"
-            style={{ color: config.textMuted, fontSize: "10px", letterSpacing: "0.04em" }}
-          >
-            {isListening
-              ? "Speak now — tap orb or mic to stop"
-              : "Enter to send · Shift+Enter for new line"}
-          </motion.p>
+
         </motion.div>
       </div>
     </>

@@ -21,8 +21,8 @@ export const WALLPAPER_PRESETS: WallpaperPreset[] = [
   {
     id: "lavender",
     label: "Lavender Field",
-    url: "/lavender-field-4k.jpg",
-    thumbnail: "/lavender-field-4k.jpg",
+    url: "/lavender-field-optimized.webp",
+    thumbnail: "/lavender-field-optimized.webp",
   },
   {
     id: "aurora",

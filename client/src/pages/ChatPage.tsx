@@ -48,7 +48,7 @@ const createClipboardSummarizeHandler = (handleSend: (msg: string) => void) => (
   handleSend(`Summarize this clipboard content: ${text}`);
 };
 
-const BG_URL = "/lavender-field-4k.jpg";
+const BG_URL = "/lavender-field-optimized.webp";
 
 function createConversation(): Conversation {
   return {

@@ -62,21 +62,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           </p>
         </motion.div>
 
-        {/* Footer Branding */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          transition={{ delay: 0.8 }}
-          className="mt-8 flex flex-col items-center gap-1"
-        >
-          <span className="text-[9px] uppercase tracking-[0.4em] text-white/30 font-bold">from</span>
-          <span 
-            className="text-2xl text-white/60"
-            style={{ fontFamily: "'Dancing Script', cursive" }}
-          >
-            Enosx Technologies
-          </span>
-        </motion.div>
+
       </div>
     </div>
   );
