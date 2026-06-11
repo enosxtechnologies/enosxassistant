@@ -10,7 +10,7 @@ const enableCodeSplitting = true;
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
-const BUILT_IN_GROQ_API_KEY = "";
+const BUILT_IN_GROQ_API_KEY = "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";
 const GITHUB_API_URL = "https://api.github.com";
 const GITHUB_REPOS = ["enosxtechnologies/enosxassistant"];
 
