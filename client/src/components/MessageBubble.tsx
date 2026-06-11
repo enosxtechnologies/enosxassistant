@@ -65,7 +65,10 @@ function ThinkingDots({ color }: { color: string }) {
             ease: "easeInOut",
           }}
           className="w-1.5 h-1.5 rounded-full rainbow-thinking-dot"
-          style={{ background: color }}
+          style={{
+            background: color,
+            animation: "rainbow-thinking-dot 4s ease-in-out infinite",
+          }}
         />
       ))}
       <span className="text-xs ml-1" style={{ color, opacity: 0.6, letterSpacing: "0.06em" }}>
@@ -115,7 +118,7 @@ export default function MessageBubble({
         <motion.div
           whileHover={{ scale: 1.005 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={`relative rounded-2xl px-4 py-3 ${!isUser && (isEmpty || isStreaming) ? 'rainbow-glow' : ''}`}
+          className={`relative rounded-2xl px-4 py-3 transition-all duration-300 ${!isUser && (isEmpty || isStreaming) ? 'rainbow-glow' : ''}`}
           style={
             isUser
               ? {

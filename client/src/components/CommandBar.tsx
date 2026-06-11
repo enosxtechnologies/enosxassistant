@@ -173,6 +173,8 @@ export default function CommandBar({
                       `0 0 0 0 rgba(0,242,255, 0)`,
                     ],
                   }
+                : value.trim().length > 0
+                ? {} // Let CSS animation handle it
                 : {
                     boxShadow: `0 8px 32px rgba(0,0,0,0.4)`,
                   }
@@ -182,7 +184,7 @@ export default function CommandBar({
                 ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
                 : { duration: 0.3 }
             }
-            className={`flex items-end gap-2 rounded-2xl px-4 py-3 ${value.trim().length > 0 ? 'rainbow-glow rainbow-glow-border' : ''}`}
+            className={`flex items-end gap-2 rounded-2xl px-4 py-3 transition-all duration-300 ${value.trim().length > 0 ? 'rainbow-glow rainbow-glow-border' : ''}`}
             style={{
               background: `rgba(12,12,16,${wallpaperSettings.panelOpacity})`,
               backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
