@@ -58,18 +58,23 @@ export default function Sidebar({
       icon: Plus,
       onClick: onNew,
       accent: true,
+      danger: false,
     },
     {
       label: "Settings",
       description: "Customize background",
       icon: Settings,
       onClick: onSettingsClick || (() => {}),
+      accent: false,
+      danger: false,
     },
     {
       label: "About ENOSX",
       description: "Vision, stack, and founder",
       icon: Info,
       onClick: () => { window.location.href = "/about"; },
+      accent: false,
+      danger: false,
     },
   ];
 
