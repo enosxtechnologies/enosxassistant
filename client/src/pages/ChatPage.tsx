@@ -67,6 +67,7 @@ function generateTitle(firstMessage: string): string {
 
 export default function ChatPage() {
   const { config } = useTheme();
+  const [isBgLoaded, setIsBgLoaded] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -311,6 +312,12 @@ export default function ChatPage() {
     }
   }, [error, playSound]);
 
+  useEffect(() => {
+    const img = new Image();
+    img.src = BG_URL;
+    img.onload = () => setIsBgLoaded(true);
+  }, []);
+
   const createNewChat = useCallback(() => {
     const conv = createConversation();
     setConversations((prev) => [conv, ...prev]);
@@ -368,13 +375,22 @@ export default function ChatPage() {
           borderColor: isCompactMode ? `rgba(${config.accentRgb}, 0.3)` : "transparent"
         }}
       >
+      {/* Tiny placeholder for instant load */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: "url('/lavender-field-tiny.webp')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(20px)",
+        }}
+      />
       <div
-        className="fixed inset-0 pointer-events-none"
+        className={`fixed inset-0 pointer-events-none z-0 transition-opacity duration-1000 ${isBgLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={{
           backgroundImage: `url(${BG_URL})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 1.0,
         }}
       />
 

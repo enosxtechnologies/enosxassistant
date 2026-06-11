@@ -54,12 +54,7 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           >
             What can I help with?
           </h2>
-          <p
-            className="text-base opacity-50 max-w-lg mx-auto leading-relaxed"
-            style={{ color: config.textMuted }}
-          >
-            Ask me anything — I can see your Windows screen, open apps, write code, manage files, and more.
-          </p>
+
         </motion.div>
 
 

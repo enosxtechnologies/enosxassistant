@@ -78,12 +78,7 @@ export const WALLPAPER_PRESETS: WallpaperPreset[] = [
     url: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&q=80",
     thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=60",
   },
-  {
-    id: "flowers",
-    label: "Flower Field",
-    url: "/flower-field.png",
-    thumbnail: "/flower-field.png",
-  },
+
 ];
 
 export interface WallpaperSettings {

@@ -25,12 +25,7 @@ const BACKGROUND_PRESETS: BackgroundPreset[] = [
     url: "/lavender-field-optimized.webp",
     color: "#7c5cbf",
   },
-  {
-    id: "flower-field",
-    name: "Flower Field",
-    url: "/flower-field-v2.png",
-    color: "#f5e6d3",
-  },
+
   {
     id: "tech-circuit",
     name: "Tech Circuit",

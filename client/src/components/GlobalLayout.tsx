@@ -7,6 +7,7 @@ interface GlobalLayoutProps {
 
 export function GlobalLayout({ children }: GlobalLayoutProps) {
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>("/lavender-field-optimized.webp");
+  const [isLoaded, setIsLoaded] = useState(false);
   const [blurIntensity, setBlurIntensity] = useState(0);
   const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
 
@@ -34,16 +35,44 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
     }
   }, []);
 
+  useEffect(() => {
+    if (backgroundUrl) {
+      const img = new Image();
+      img.src = backgroundUrl;
+      img.onload = () => setIsLoaded(true);
+    }
+  }, [backgroundUrl]);
+
   return (
     <div
-      className="w-screen h-screen overflow-hidden"
+      className="w-screen h-screen overflow-hidden relative"
       style={{
-        backgroundImage: backgroundUrl ? `url('${backgroundUrl}')` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        backgroundColor: "#0a0a0a",
       }}
     >
+      {/* Tiny placeholder for instant load */}
+      {backgroundUrl === "/lavender-field-optimized.webp" && (
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: "url('/lavender-field-tiny.webp')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(20px)",
+          }}
+        />
+      )}
+
+      {/* Main high-res wallpaper */}
+      <div
+        className={`absolute inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          backgroundImage: backgroundUrl ? `url('${backgroundUrl}')` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      />
       {/* Blurred overlay */}
       <div
         className="absolute inset-0 z-0"
