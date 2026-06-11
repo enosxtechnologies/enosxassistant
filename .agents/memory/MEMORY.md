@@ -1,1 +1,2 @@
 - [Mobile responsiveness pattern](mobile-responsive.md) — desktop sidebar hides on mobile; overlay drawer via isMobileOpen prop; h-dvh for viewport height
+- [Vite proxy for API](vite-proxy-api.md) — frontend fetch(/api/chat) hits Vite dev server; must add proxy in vite.config.ts server.proxy
