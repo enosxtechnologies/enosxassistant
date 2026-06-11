@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "q68CFdsgFL-IsvrXz_Z6_"
+uri = "file://artifacts/enosx-assistant-mobile/assets/images/icon.png"
+type = "image"
+title = "enosx_mobile_icon"
