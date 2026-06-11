@@ -66,7 +66,7 @@ export default function AIFace({
           "M 80 120 Q 100 130 120 120",
           "M 80 120 Q 100 140 120 120",
           "M 80 120 Q 100 130 120 120",
-        ],
+        ] as any,
         transition: { duration: 0.3, repeat: Infinity },
       };
     }
