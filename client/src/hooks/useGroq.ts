@@ -46,16 +46,18 @@ export function useGroq() {
 
         if (!reader) throw new Error("No response body");
 
+        let buffer = "";
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
 
           for (const line of lines) {
             const trimmedLine = line.trim();
-            if (!trimmedLine || trimmedLine === "") continue;
+            if (!trimmedLine) continue;
 
             if (trimmedLine.startsWith("data: ")) {
               const data = trimmedLine.slice(6).trim();
@@ -72,16 +74,6 @@ export function useGroq() {
                 }
               } catch (e) {
                 console.warn("Failed to parse SSE data chunk:", e);
-              }
-            } else {
-              // Try to parse as direct JSON in case of errors
-              try {
-                const parsed = JSON.parse(trimmedLine);
-                if (parsed.error) {
-                  throw new Error(parsed.error.message || parsed.error);
-                }
-              } catch (e) {
-                // Not JSON or other error, ignore if it's just partial data
               }
             }
           }

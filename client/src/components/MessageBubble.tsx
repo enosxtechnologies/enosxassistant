@@ -90,7 +90,7 @@ export default function MessageBubble({
   const [copied, setCopied] = useState(false);
   const isUser = message.role === "user";
   const isStreaming = message.isStreaming;
-  const isEmpty = !message.content && isStreaming;
+  const isEmpty = !message.content?.trim() && isStreaming;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message.content);
