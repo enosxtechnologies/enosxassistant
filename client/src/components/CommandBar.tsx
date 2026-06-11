@@ -182,12 +182,12 @@ export default function CommandBar({
                 ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
                 : { duration: 0.3 }
             }
-            className="flex items-end gap-2 rounded-2xl px-4 py-3"
+            className={`flex items-end gap-2 rounded-2xl px-4 py-3 ${value.trim().length > 0 ? 'rainbow-glow rainbow-glow-border' : ''}`}
             style={{
               background: `rgba(12,12,16,${wallpaperSettings.panelOpacity})`,
               backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
               WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
-              border: `1px solid rgba(${config.accentRgb}, ${isListening ? "0.4" : "0.15"})`,
+              border: value.trim().length > 0 ? undefined : `1px solid rgba(${config.accentRgb}, ${isListening ? "0.4" : "0.15"})`,
               transition: "border-color 0.3s ease",
             }}
           >

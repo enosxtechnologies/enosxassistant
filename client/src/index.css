@@ -498,3 +498,102 @@
     background: rgba(255,255,255,0.02);
   }
 }
+
+  /* ── Rainbow Glow Animation (for typing and thinking) ── */
+  @keyframes rainbow-glow {
+    0% {
+      box-shadow:
+        0 0 10px rgba(255, 0, 0, 0.4),
+        0 0 20px rgba(255, 0, 0, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    16.67% {
+      box-shadow:
+        0 0 10px rgba(255, 127, 0, 0.4),
+        0 0 20px rgba(255, 127, 0, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    33.33% {
+      box-shadow:
+        0 0 10px rgba(255, 255, 0, 0.4),
+        0 0 20px rgba(255, 255, 0, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    50% {
+      box-shadow:
+        0 0 10px rgba(0, 255, 0, 0.4),
+        0 0 20px rgba(0, 255, 0, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    66.67% {
+      box-shadow:
+        0 0 10px rgba(0, 0, 255, 0.4),
+        0 0 20px rgba(0, 0, 255, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    83.33% {
+      box-shadow:
+        0 0 10px rgba(75, 0, 130, 0.4),
+        0 0 20px rgba(75, 0, 130, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    100% {
+      box-shadow:
+        0 0 10px rgba(148, 0, 211, 0.4),
+        0 0 20px rgba(148, 0, 211, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  /* ── Rainbow Border Animation ── */
+  @keyframes rainbow-border {
+    0% { border-color: rgba(255, 0, 0, 0.5); }
+    16.67% { border-color: rgba(255, 127, 0, 0.5); }
+    33.33% { border-color: rgba(255, 255, 0, 0.5); }
+    50% { border-color: rgba(0, 255, 0, 0.5); }
+    66.67% { border-color: rgba(0, 0, 255, 0.5); }
+    83.33% { border-color: rgba(75, 0, 130, 0.5); }
+    100% { border-color: rgba(148, 0, 211, 0.5); }
+  }
+
+  /* ── Rainbow Glow Thinking Dots ── */
+  @keyframes rainbow-thinking-dot {
+    0%, 100% {
+      background: rgba(255, 0, 0, 0.8);
+      box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+    }
+    16.67% {
+      background: rgba(255, 127, 0, 0.8);
+      box-shadow: 0 0 8px rgba(255, 127, 0, 0.6);
+    }
+    33.33% {
+      background: rgba(255, 255, 0, 0.8);
+      box-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
+    }
+    50% {
+      background: rgba(0, 255, 0, 0.8);
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+    }
+    66.67% {
+      background: rgba(0, 0, 255, 0.8);
+      box-shadow: 0 0 8px rgba(0, 0, 255, 0.6);
+    }
+    83.33% {
+      background: rgba(75, 0, 130, 0.8);
+      box-shadow: 0 0 8px rgba(75, 0, 130, 0.6);
+    }
+  }
+
+  /* ── Utility class for rainbow glow ── */
+  .rainbow-glow {
+    animation: rainbow-glow 4s ease-in-out infinite;
+  }
+
+  .rainbow-glow-border {
+    animation: rainbow-border 4s ease-in-out infinite;
+  }
+
+  .rainbow-thinking-dot {
+    animation: rainbow-thinking-dot 4s ease-in-out infinite;
+  }
+}
