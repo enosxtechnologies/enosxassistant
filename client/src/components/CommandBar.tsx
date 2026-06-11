@@ -213,7 +213,7 @@ export default function CommandBar({
                 color: config.text,
                 caretColor: config.accent,
                 maxHeight: 140,
-                fontFamily: "inherit",
+                fontFamily: "'Eurostile', sans-serif",
               }}
             />
 

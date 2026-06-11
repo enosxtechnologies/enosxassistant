@@ -84,7 +84,7 @@ export default function SplashPage({ onComplete }: { onComplete: () => void }) {
           <span 
             className="text-2xl text-white/80"
             style={{ 
-              fontFamily: "'Dancing Script', 'Pacifico', cursive",
+              fontFamily: "'Eurostile', sans-serif",
               textShadow: "0 0 10px rgba(255,255,255,0.2)"
             }}
           >
