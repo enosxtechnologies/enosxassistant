@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { Request, Response } from "express";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile"; // Ensuring correct model name
@@ -65,7 +65,7 @@ Context-Aware Behavior:
 
 If the active app is "unknown", provide general assistance and ask the user what they're working on.`;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: Request, res: Response) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -73,7 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
 
   if (!GROQ_API_KEY) {
-    return res.status(500).json({ error: "Groq API key not configured. Please check your Vercel environment variables." });
+    return res.status(500).json({ error: "Groq API key not configured. Please check your environment variables." });
   }
 
   const { messages } = req.body;

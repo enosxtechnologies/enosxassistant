@@ -33,6 +33,13 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useCompactMode } from "@/hooks/useCompactMode";
 import { ChevronDown, Wifi } from "lucide-react";
 
+// Declare global window interface for settings handler
+declare global {
+  interface Window {
+    __openBackgroundPicker?: () => void;
+  }
+}
+
 const createAdaptiveActionHandler = (handleSend: (msg: string) => void) => (action: string) => {
   handleSend(action);
 };
@@ -383,6 +390,11 @@ export default function ChatPage() {
           onDelete={deleteConversation}
           collapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onSettingsClick={() => {
+            if (typeof window !== 'undefined' && (window as any).__openBackgroundPicker) {
+              (window as any).__openBackgroundPicker();
+            }
+          }}
         />
       )}
 

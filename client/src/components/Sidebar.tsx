@@ -14,6 +14,7 @@ import {
   Info,
   Sparkles,
   TerminalSquare,
+  Settings,
 } from "lucide-react";
 import { Conversation } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -27,7 +28,7 @@ interface SidebarProps {
   onDelete: (id: string) => void;
   collapsed?: boolean;
   onToggle?: () => void;
-
+  onSettingsClick?: () => void;
   isPro?: boolean;
 }
 
@@ -39,7 +40,7 @@ export default function Sidebar({
   onDelete,
   collapsed = true,
   onToggle,
-
+  onSettingsClick,
   isPro = false,
 }: SidebarProps) {
   const { config } = useTheme();
@@ -53,7 +54,12 @@ export default function Sidebar({
       onClick: onNew,
       accent: true,
     },
-
+    {
+      label: "Settings",
+      description: "Customize background",
+      icon: Settings,
+      onClick: onSettingsClick || (() => {}),
+    },
     {
       label: "About ENOSX",
       description: "Vision, stack, and founder",
@@ -148,6 +154,7 @@ export default function Sidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto px-2.5 pb-2 space-y-1 scrollbar-thin">
+        {/* Conversation history */}
         <AnimatePresence initial={false}>
           {conversations.map((conv, i) => (
             <motion.div
@@ -205,6 +212,9 @@ export default function Sidebar({
           ))}
         </AnimatePresence>
       </div>
+      
+      {/* Bottom spacer for footer items */}
+      <div className="flex-shrink-0 px-2.5 py-2 border-t" style={{ borderColor: `rgba(${config.accentRgb}, 0.08)` }}></div>
     </motion.aside>
   );
 }
