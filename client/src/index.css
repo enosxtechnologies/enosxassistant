@@ -585,14 +585,14 @@
 
   /* ── Utility class for rainbow glow ── */
   .rainbow-glow {
-    animation: rainbow-glow 4s ease-in-out infinite;
+    animation: rainbow-glow 4s ease-in-out infinite !important;
   }
 
   .rainbow-glow-border {
-    animation: rainbow-border 4s ease-in-out infinite;
+    animation: rainbow-border 4s ease-in-out infinite !important;
   }
 
   .rainbow-thinking-dot {
-    animation: rainbow-thinking-dot 4s ease-in-out infinite;
+    animation: rainbow-thinking-dot 4s ease-in-out infinite !important;
   }
 }

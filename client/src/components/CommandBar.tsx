@@ -174,7 +174,7 @@ export default function CommandBar({
                     ],
                   }
                 : value.trim().length > 0
-                ? {} // Let CSS animation handle it
+                ? { boxShadow: "none" } // Ensure Framer Motion doesn't override CSS box-shadow
                 : {
                     boxShadow: `0 8px 32px rgba(0,0,0,0.4)`,
                   }

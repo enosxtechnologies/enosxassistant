@@ -129,11 +129,11 @@ export default function MessageBubble({
                   boxShadow: `0 4px 20px rgba(${config.accentRgb}, 0.08)`,
                 }
               : {
-                  background: `rgba(18,18,24,${wallpaperSettings.panelOpacity * 0.7})`,
+                  background: `rgba(12,12,24,${wallpaperSettings.panelOpacity * 0.7})`,
                   border: "1px solid rgba(255,255,255,0.08)",
                   backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
                   WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                  boxShadow: !isUser && (isEmpty || isStreaming) ? "none" : "0 4px 20px rgba(0,0,0,0.3)",
                 }
           }
         >
