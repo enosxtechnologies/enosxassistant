@@ -63,7 +63,7 @@ export default function ChatPage() {
   const { config } = useTheme();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -375,8 +375,6 @@ export default function ChatPage() {
       
       {!isCompactMode && (
         <Sidebar
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
           conversations={conversations}
           activeId={activeId}
           onSelect={setActiveId}
