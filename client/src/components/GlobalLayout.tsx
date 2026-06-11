@@ -6,8 +6,8 @@ interface GlobalLayoutProps {
 }
 
 export function GlobalLayout({ children }: GlobalLayoutProps) {
-  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
-  const [blurIntensity, setBlurIntensity] = useState(40);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>("/lavender-field-4k.jpg");
+  const [blurIntensity, setBlurIntensity] = useState(0);
   const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
 
   // Expose settings handler globally for Sidebar
@@ -26,8 +26,8 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
     if (saved) {
       try {
         const prefs = JSON.parse(saved);
-        setBackgroundUrl(prefs.uploaded || null);
-        setBlurIntensity(prefs.blur || 40);
+        setBackgroundUrl(prefs.uploaded || "/lavender-field-4k.jpg");
+        setBlurIntensity(prefs.blur || 0);
       } catch (e) {
         // Use defaults
       }

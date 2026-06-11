@@ -48,8 +48,7 @@ const createClipboardSummarizeHandler = (handleSend: (msg: string) => void) => (
   handleSend(`Summarize this clipboard content: ${text}`);
 };
 
-const BG_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663581012760/3KsVJNzTNHX32FLQf9aZCC/enosx-bg-mesh-dMF6AjTJ234cK4z3d5pivU.webp";
+const BG_URL = "/lavender-field-4k.jpg";
 
 function createConversation(): Conversation {
   return {
@@ -375,7 +374,7 @@ export default function ChatPage() {
           backgroundImage: `url(${BG_URL})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.06,
+          opacity: 1.0,
         }}
       />
 

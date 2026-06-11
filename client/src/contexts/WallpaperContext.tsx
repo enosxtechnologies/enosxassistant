@@ -19,6 +19,12 @@ export const WALLPAPER_PRESETS: WallpaperPreset[] = [
     thumbnail: "",
   },
   {
+    id: "lavender",
+    label: "Lavender Field",
+    url: "/lavender-field-4k.jpg",
+    thumbnail: "/lavender-field-4k.jpg",
+  },
+  {
     id: "aurora",
     label: "Aurora",
     url: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80",
@@ -94,11 +100,11 @@ export interface WallpaperSettings {
 }
 
 const DEFAULT_SETTINGS: WallpaperSettings = {
-  activePresetId: "flowers",
+  activePresetId: "lavender",
   customUrl: "",
-  blurAmount: 16,
+  blurAmount: 10,
   panelOpacity: 0.75,
-  wallpaperOpacity: 0.85,
+  wallpaperOpacity: 1.0,
 };
 
 interface WallpaperContextType {

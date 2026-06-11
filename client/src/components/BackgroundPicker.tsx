@@ -20,6 +20,12 @@ interface BackgroundPickerProps {
 
 const BACKGROUND_PRESETS: BackgroundPreset[] = [
   {
+    id: "lavender-field",
+    name: "Lavender Field",
+    url: "/lavender-field-4k.jpg",
+    color: "#7c5cbf",
+  },
+  {
     id: "flower-field",
     name: "Flower Field",
     url: "/flower-field-v2.png",
@@ -68,7 +74,7 @@ export function BackgroundPicker({
   isOpen,
   onClose,
 }: BackgroundPickerProps) {
-  const [selectedPreset, setSelectedPreset] = useState<string>("flower-field");
+  const [selectedPreset, setSelectedPreset] = useState<string>("lavender-field");
   const [blurIntensity, setBlurIntensity] = useState(40);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -79,7 +85,7 @@ export function BackgroundPicker({
     if (saved) {
       try {
         const prefs = JSON.parse(saved);
-        setSelectedPreset(prefs.preset || "flower-field");
+        setSelectedPreset(prefs.preset || "lavender-field");
         setBlurIntensity(prefs.blur || 40);
         setUploadedImage(prefs.uploaded || null);
       } catch {
