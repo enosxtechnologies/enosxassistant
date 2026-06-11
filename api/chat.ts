@@ -70,7 +70,7 @@ export default async function handler(req: Request, res: Response) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const GROQ_API_KEY = (process.env.GROQ_API_KEY || "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")?.trim();
+  const GROQ_API_KEY = (process.env.GROQ_API_KEY || "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")?.trim();
 
   if (!GROQ_API_KEY) {
     return res.status(500).json({ error: "Groq API key not configured. Please check your environment variables." });
