@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Message } from "@/lib/types";
 
 // Use server-side API route to keep API key secure
-const API_URL = "/api/chat";
+const API_URL = "http://localhost:3001/api/chat";
 
 export function useGroq() {
   const [isLoading, setIsLoading] = useState(false);
