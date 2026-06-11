@@ -4,7 +4,6 @@ const chatRouter = Router();
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
-const BUILT_IN_GROQ_API_KEY = "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";
 
 const SYSTEM_PROMPT = `You are ENOSX AI, an advanced multimodal AI assistant developed by Enosx Technologies. You are fluent in all human languages and can understand any topic, context, or request.
 
@@ -36,10 +35,10 @@ GOD MODE:
 When a user message begins with [GOD MODE COMMAND], switch to advanced operator mode. Give concise, direct, implementation-first answers.`;
 
 chatRouter.post("/chat", async (req, res) => {
-  const GROQ_API_KEY = (process.env.GROQ_API_KEY || BUILT_IN_GROQ_API_KEY)?.trim();
+  const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
 
   if (!GROQ_API_KEY) {
-    res.status(500).json({ error: "Groq API key not configured." });
+    res.status(500).json({ error: "GROQ_API_KEY environment variable is not set. Please add it in the Replit Secrets tab." });
     return;
   }
 

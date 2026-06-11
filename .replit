@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-24", "python-3.11"]
 
 [deployment]
 router = "application"
@@ -26,3 +26,8 @@ externalPort = 80
 [[ports]]
 localPort = 18426
 externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+GROQ_API_KEY = "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"

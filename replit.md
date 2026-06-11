@@ -7,7 +7,7 @@ An AI assistant web app powered by Groq's LLM, with a cyberpunk glassmorphism de
 - Frontend workflow: `artifacts/enosx-assistant: web`
 - API workflow: `artifacts/api-server: API Server`
 - `pnpm run typecheck` — full typecheck across all packages
-- Optional env: `GROQ_API_KEY` — Groq API key (falls back to built-in key)
+- Required env: `GROQ_API_KEY` — Groq API key (set in Replit Secrets tab)
 - Optional env: `GITHUB_TOKEN` — for GitHub context feature
 
 ## Stack
@@ -57,7 +57,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 - Do NOT run `pnpm dev` at workspace root — it has no dev script.
 - The splash screen lasts 3.5s intentionally — not a bug.
-- `GROQ_API_KEY` env var is optional — there's a built-in key for dev, but set your own for production.
+- `GROQ_API_KEY` env var must be set in Replit Secrets tab — the app will return an error if missing.
 - Vite config requires `PORT` and `BASE_PATH` env vars (provided automatically by Replit workflows).
 
 ## Pointers
