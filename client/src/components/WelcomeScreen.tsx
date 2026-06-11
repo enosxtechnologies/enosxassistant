@@ -11,6 +11,7 @@ import { useWallpaper } from "@/contexts/WallpaperContext";
 
 interface WelcomeScreenProps {
   onSuggestion: (text: string) => void;
+  isCompact?: boolean;
 }
 
 const GREETINGS = [
@@ -21,7 +22,7 @@ const GREETINGS = [
   "Your AI workspace is ready."
 ];
 
-export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onSuggestion, isCompact }: WelcomeScreenProps) {
   const { config } = useTheme();
   const { settings: wallpaperSettings } = useWallpaper();
   const [greetingIndex, setGreetingIndex] = useState(0);

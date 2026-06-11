@@ -55,7 +55,7 @@ export function useGroq() {
 
           for (const line of lines) {
             const trimmedLine = line.trim();
-            if (!trimmedLine) continue;
+            if (!trimmedLine || trimmedLine === "") continue;
 
             if (trimmedLine.startsWith("data: ")) {
               const data = trimmedLine.slice(6).trim();
@@ -70,20 +70,18 @@ export function useGroq() {
                 if (content) {
                   onChunk(content);
                 }
-              } catch {
-                // skip malformed chunks
+              } catch (e) {
+                console.warn("Failed to parse SSE data chunk:", e);
               }
             } else {
-              // Handle non-SSE formatted error messages from the backend
+              // Try to parse as direct JSON in case of errors
               try {
                 const parsed = JSON.parse(trimmedLine);
                 if (parsed.error) {
-                  throw new Error(parsed.error);
+                  throw new Error(parsed.error.message || parsed.error);
                 }
               } catch (e) {
-                if (e instanceof Error && e.message !== "Unexpected token 'd', \"data: \"... is not valid JSON") {
-                   throw e;
-                }
+                // Not JSON or other error, ignore if it's just partial data
               }
             }
           }

@@ -10,7 +10,7 @@ const enableCodeSplitting = true;
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
-const BUILT_IN_GROQ_API_KEY = "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";
+const BUILT_IN_GROQ_API_KEY = "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";
 const GITHUB_API_URL = "https://api.github.com";
 const GITHUB_REPOS = ["enosxtechnologies/enosxassistant"];
 
@@ -139,11 +139,17 @@ function vitePluginChatApi(): Plugin {
           });
 
           if (!response.ok) {
-            const errData = await response.json().catch(() => ({})) as { error?: { message?: string } };
+            const errText = await response.text().catch(() => "Unknown error");
+            let errorMessage = `API error: ${response.status}`;
+            try {
+              const errData = JSON.parse(errText);
+              errorMessage = errData?.error?.message || errorMessage;
+            } catch {
+              errorMessage = errText || errorMessage;
+            }
+            console.error("Groq API Error:", errorMessage);
             res.writeHead(response.status, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({
-              error: errData?.error?.message || `API error: ${response.status}`,
-            }));
+            res.end(JSON.stringify({ error: errorMessage }));
             return;
           }
 
