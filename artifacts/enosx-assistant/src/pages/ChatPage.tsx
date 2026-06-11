@@ -100,7 +100,7 @@ export default function ChatPage() {
 
   const { play: playSound, setEnabled: setSoundFn } = useSoundEffects();
   const { executeAction } = useSystemActions();
-  const { enrichMessageWithContext, getContextInfo } = useContextAwareMessages();
+  const { enrichMessageWithContext } = useContextAwareMessages();
   const { activeWindow } = useActiveWindow();
   const { fileContext, loadFile, clearFile, getFileContextMessage } = useFileContext();
   const {
@@ -174,11 +174,10 @@ export default function ChatPage() {
       }
 
       const memoryContext = getMemoryContext();
-      const contextInfo = getContextInfo(activeWindow);
-      
+
       const enrichedUserMessage = {
         ...userMessage,
-        content: userMessage.content + memoryContext + contextInfo
+        content: userMessage.content + memoryContext
       };
 
       const contextEnrichedMessages = enrichMessageWithContext([...currentMessages, enrichedUserMessage], activeWindow);
@@ -238,7 +237,7 @@ export default function ChatPage() {
         );
       }
     },
-    [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, enrichMessageWithContext, getContextInfo, activeWindow, executeAction]
+    [sendMessage, speak, autoSpeak, playSound, fileContext, getFileContextMessage, clearFile, getMemoryContext, enrichMessageWithContext, activeWindow, executeAction]
   );
 
   const triggerGodMode = useCallback(() => {
