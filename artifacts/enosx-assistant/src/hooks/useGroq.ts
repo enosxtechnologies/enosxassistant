@@ -1,0 +1,95 @@
+import { useState, useCallback } from "react";
+import { Message } from "@/lib/types";
+
+// Use server-side API route to keep API key secure
+const API_URL = "/api/chat";
+
+export function useGroq() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const sendMessage = useCallback(
+          async (
+        messages: Message[],
+        onChunk: (chunk: string) => void,
+        onDone: () => void,
+        options?: { githubContext?: string }
+      ) => {
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: messages.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            githubContext: options?.githubContext,
+          }),
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(
+            errData?.error || `API error: ${response.status}`
+          );
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) throw new Error("No response body");
+
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+
+            if (trimmedLine.startsWith("data: ")) {
+              const data = trimmedLine.slice(6).trim();
+              if (data === "[DONE]") {
+                onDone();
+                setIsLoading(false);
+                return;
+              }
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  onChunk(content);
+                }
+              } catch (e) {
+                console.warn("Failed to parse SSE data chunk:", e);
+              }
+            }
+          }
+        }
+
+        onDone();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        setError(msg);
+        onDone();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  return { sendMessage, isLoading, error };
+}
