@@ -54,8 +54,11 @@ export function useGroq() {
           const lines = chunk.split("\n");
 
           for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const data = line.slice(6).trim();
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+
+            if (trimmedLine.startsWith("data: ")) {
+              const data = trimmedLine.slice(6).trim();
               if (data === "[DONE]") {
                 onDone();
                 setIsLoading(false);
@@ -69,6 +72,18 @@ export function useGroq() {
                 }
               } catch {
                 // skip malformed chunks
+              }
+            } else {
+              // Handle non-SSE formatted error messages from the backend
+              try {
+                const parsed = JSON.parse(trimmedLine);
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+              } catch (e) {
+                if (e instanceof Error && e.message !== "Unexpected token 'd', \"data: \"... is not valid JSON") {
+                   throw e;
+                }
               }
             }
           }

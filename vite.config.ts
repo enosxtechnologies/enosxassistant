@@ -84,6 +84,12 @@ function vitePluginChatApi(): Plugin {
 
         const GROQ_API_KEY = (process.env.GROQ_API_KEY || BUILT_IN_GROQ_API_KEY)?.trim();
 
+        if (!GROQ_API_KEY) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Groq API key is missing. Please add GROQ_API_KEY to your .env file." }));
+          return;
+        }
+
         let body = "";
         for await (const chunk of req) {
           body += chunk;
