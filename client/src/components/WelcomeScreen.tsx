@@ -4,7 +4,8 @@
  * Features: breathing orb, staggered fade-in, glassmorphism cards
  */
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWallpaper } from "@/contexts/WallpaperContext";
 
@@ -12,9 +13,25 @@ interface WelcomeScreenProps {
   onSuggestion: (text: string) => void;
 }
 
+const GREETINGS = [
+  "Hello there!",
+  "Hii its Enosx",
+  "How can I assist you today?",
+  "Let's build something amazing.",
+  "Your AI workspace is ready."
+];
+
 export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
   const { config } = useTheme();
   const { settings: wallpaperSettings } = useWallpaper();
+  const [greetingIndex, setGreetingIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreetingIndex((prev) => (prev + 1) % GREETINGS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
@@ -48,12 +65,19 @@ export default function WelcomeScreen({ onSuggestion }: WelcomeScreenProps) {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="text-center"
         >
-          <h2
-            className="text-4xl font-semibold tracking-tight mb-3"
-            style={{ color: config.text }}
-          >
-            What can I help with?
-          </h2>
+          <AnimatePresence mode="wait">
+            <motion.h2
+              key={greetingIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl font-semibold tracking-tight mb-3 h-12"
+              style={{ color: config.text }}
+            >
+              {GREETINGS[greetingIndex]}
+            </motion.h2>
+          </AnimatePresence>
 
         </motion.div>
 
