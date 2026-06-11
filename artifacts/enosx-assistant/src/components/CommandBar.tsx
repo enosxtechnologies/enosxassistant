@@ -222,7 +222,7 @@ export default function CommandBar({
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={handleVoiceClick}
-                  className="relative w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
+                  className="relative w-9 h-9 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-all duration-200"
                   style={
                     isListening || isSpeaking
                       ? {
@@ -248,11 +248,11 @@ export default function CommandBar({
                     />
                   )}
                   {isSpeaking ? (
-                    <Square size={12} />
+                    <Square size={14} />
                   ) : isListening ? (
-                    <MicOff size={13} />
+                    <MicOff size={15} />
                   ) : (
-                    <Mic size={13} />
+                    <Mic size={15} />
                   )}
                 </motion.button>
               )}
@@ -263,7 +263,7 @@ export default function CommandBar({
                 whileTap={canSend ? { scale: 0.92 } : {}}
                 onClick={handleSend}
                 disabled={!canSend}
-                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
+                className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-all duration-200"
                 style={
                   canSend
                     ? {

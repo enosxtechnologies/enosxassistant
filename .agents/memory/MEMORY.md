@@ -1,0 +1,1 @@
+- [Mobile responsiveness pattern](mobile-responsive.md) — desktop sidebar hides on mobile; overlay drawer via isMobileOpen prop; h-dvh for viewport height

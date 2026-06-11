@@ -15,6 +15,7 @@ import {
   Sparkles,
   TerminalSquare,
   Settings,
+  X,
 } from "lucide-react";
 import { Conversation } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -30,6 +31,8 @@ interface SidebarProps {
   onToggle?: () => void;
   onSettingsClick?: () => void;
   isPro?: boolean;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export default function Sidebar({
@@ -42,6 +45,8 @@ export default function Sidebar({
   onToggle,
   onSettingsClick,
   isPro = false,
+  isMobileOpen = false,
+  onMobileClose,
 }: SidebarProps) {
   const { config } = useTheme();
   const { settings } = useWallpaper();
@@ -68,10 +73,10 @@ export default function Sidebar({
     },
   ];
 
-  return (
+  const sidebarContent = (
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 64 : 280 }}
+      animate={{ width: isMobileOpen ? 280 : collapsed ? 64 : 280 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="relative flex-shrink-0 flex flex-col h-full overflow-hidden"
       style={{
@@ -217,4 +222,46 @@ export default function Sidebar({
       <div className="flex-shrink-0 px-2.5 py-2 border-t" style={{ borderColor: `rgba(${config.accentRgb}, 0.08)` }}></div>
     </motion.aside>
   );
+
+  if (isMobileOpen) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          key="mobile-sidebar-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex"
+          onClick={onMobileClose}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <motion.div
+            key="mobile-sidebar-panel"
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: "spring", stiffness: 320, damping: 32 }}
+            className="relative h-full w-72 flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={onMobileClose}
+              className="absolute top-4 right-3 z-50 w-8 h-8 rounded-full flex items-center justify-center border transition-all"
+              style={{
+                background: "rgba(0,0,0,0.5)",
+                borderColor: `rgba(${config.accentRgb}, 0.2)`,
+                color: config.textMuted,
+              }}
+            >
+              <X size={14} />
+            </button>
+            {sidebarContent}
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  return sidebarContent;
 }

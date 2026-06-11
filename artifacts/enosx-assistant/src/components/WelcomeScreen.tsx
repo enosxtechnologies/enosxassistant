@@ -73,7 +73,7 @@ export default function WelcomeScreen({ onSuggestion, isCompact }: WelcomeScreen
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.5 }}
-              className="text-4xl font-semibold tracking-tight mb-3 min-h-[3rem] flex items-center justify-center"
+              className="text-2xl sm:text-4xl font-semibold tracking-tight mb-3 min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center text-center"
               style={{ color: config.text }}
             >
               {GREETINGS[greetingIndex]}

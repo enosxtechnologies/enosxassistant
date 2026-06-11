@@ -31,7 +31,8 @@ import { useMemoryBank } from "@/hooks/useMemoryBank";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCompactMode } from "@/hooks/useCompactMode";
-import { ChevronDown, Wifi } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ChevronDown, Wifi, Menu } from "lucide-react";
 
 // Declare global window interface for settings handler
 declare global {
@@ -111,7 +112,9 @@ export default function ChatPage() {
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { isCompactMode, toggleCompactMode } = useCompactMode();
+  const isMobile = useIsMobile();
 
   // handleSend defined early to avoid circular dependencies
   const handleSend = useCallback(
@@ -368,7 +371,7 @@ export default function ChatPage() {
   return (
     <GlobalLayout>
       <div
-        className={`flex h-screen w-screen overflow-hidden ${isCompactMode ? "rounded-3xl border-2 shadow-2xl" : ""}`}
+        className={`flex h-dvh w-screen overflow-hidden ${isCompactMode ? "rounded-3xl border-2 shadow-2xl" : ""}`}
         style={{ 
           background: config.bg, 
           transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
@@ -396,7 +399,8 @@ export default function ChatPage() {
 
       <FileDropZone onFileSelected={loadFile} isActive={true} />
       
-      {!isCompactMode && (
+      {/* Desktop sidebar — hidden on mobile */}
+      {!isCompactMode && !isMobile && (
         <Sidebar
           conversations={conversations}
           activeId={activeId}
@@ -413,8 +417,62 @@ export default function ChatPage() {
         />
       )}
 
-      <main className="flex-1 flex flex-col relative">
+      {/* Mobile sidebar — drawer overlay */}
+      {isMobile && (
+        <Sidebar
+          conversations={conversations}
+          activeId={activeId}
+          onSelect={(id) => { setActiveId(id); setIsMobileSidebarOpen(false); }}
+          onNew={() => { createNewChat(); setIsMobileSidebarOpen(false); }}
+          onDelete={deleteConversation}
+          collapsed={false}
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileClose={() => setIsMobileSidebarOpen(false)}
+          onSettingsClick={() => {
+            setIsMobileSidebarOpen(false);
+            if (typeof window !== 'undefined' && (window as any).__openBackgroundPicker) {
+              (window as any).__openBackgroundPicker();
+            }
+          }}
+        />
+      )}
 
+      <main className="flex-1 flex flex-col relative min-w-0">
+
+        {/* Mobile top bar */}
+        {isMobile && !isCompactMode && (
+          <div
+            className="flex items-center justify-between px-4 py-3 flex-shrink-0 z-20 relative"
+            style={{
+              background: `rgba(7,8,12,0.85)`,
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              borderBottom: `1px solid rgba(${config.accentRgb}, 0.1)`,
+            }}
+          >
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: `1px solid rgba(${config.accentRgb}, 0.15)`,
+                color: config.textMuted,
+              }}
+            >
+              <Menu size={18} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md flex items-center justify-center font-black text-white text-xs shadow-[0_0_10px_rgba(124,111,247,0.5)]"
+                   style={{ background: 'linear-gradient(135deg, #7c6ff7, #a78bfa)' }}>
+                EX
+              </div>
+              <span className="font-bold text-sm tracking-tight" style={{ color: config.text }}>
+                ENOSX AI
+              </span>
+            </div>
+            <div className="w-9 h-9" />
+          </div>
+        )}
 
         <div className="flex-1 relative overflow-hidden">
           <AnimatePresence mode="wait">
@@ -428,8 +486,6 @@ export default function ChatPage() {
                 className="h-full"
               >
                 <div className="h-full flex flex-col">
-                  <div className="px-5 pt-5">
-                  </div>
                   <div className="flex-1">
                     <WelcomeScreen onSuggestion={handleSend} isCompact={isCompactMode} />
                   </div>

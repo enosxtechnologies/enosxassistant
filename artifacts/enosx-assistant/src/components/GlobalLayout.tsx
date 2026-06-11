@@ -45,7 +45,7 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
 
   return (
     <div
-      className="w-screen h-screen overflow-hidden relative"
+      className="w-screen h-dvh overflow-hidden relative"
       style={{
         backgroundColor: "#0a0a0a",
       }}
