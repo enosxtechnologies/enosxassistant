@@ -103,6 +103,7 @@ export default function ChatPage() {
 
   const [isGodModeActive, setIsGodModeActive] = useState(false);
   const [showGodTerminal, setShowGodTerminal] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const { isCompactMode, toggleCompactMode } = useCompactMode();
 
   // handleSend defined early to avoid circular dependencies
@@ -380,6 +381,8 @@ export default function ChatPage() {
           onSelect={setActiveId}
           onNew={createNewChat}
           onDelete={deleteConversation}
+          collapsed={isSidebarCollapsed}
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       )}
 

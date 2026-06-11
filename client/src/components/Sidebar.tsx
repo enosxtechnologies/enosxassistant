@@ -62,13 +62,10 @@ export default function Sidebar({
     },
   ];
 
-  // Force collapsed state for the always-small mode
-  const isCollapsed = true;
-
   return (
     <motion.aside
       initial={false}
-      animate={{ width: 64 }}
+      animate={{ width: collapsed ? 64 : 280 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="relative flex-shrink-0 flex flex-col h-full overflow-hidden"
       style={{
@@ -80,13 +77,37 @@ export default function Sidebar({
       }}
     >
       <div
-        className="flex items-center px-3 py-4 flex-shrink-0"
+        className="flex items-center px-3 py-4 flex-shrink-0 relative"
         style={{ borderBottom: `1px solid rgba(${config.accentRgb}, 0.08)`, minHeight: 72 }}
       >
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(124,111,247,0.5)] mx-auto"
-             style={{ background: 'linear-gradient(135deg, #7c6ff7, #a78bfa)' }}>
-          EX
+        <div className={`flex items-center gap-3 ${collapsed ? 'mx-auto' : 'px-2'}`}>
+          <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(124,111,247,0.5)]"
+               style={{ background: 'linear-gradient(135deg, #7c6ff7, #a78bfa)' }}>
+            EX
+          </div>
+          {!collapsed && (
+            <motion.span 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="font-bold text-lg tracking-tight"
+              style={{ color: config.text }}
+            >
+              ENOSX AI
+            </motion.span>
+          )}
         </div>
+        
+        <button
+          onClick={onToggle}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center border transition-all duration-200 z-50 bg-black"
+          style={{ 
+            borderColor: `rgba(${config.accentRgb}, 0.2)`,
+            color: config.accent,
+            boxShadow: `0 0 10px rgba(${config.accentRgb}, 0.15)`
+          }}
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
       </div>
 
       <div className="px-2.5 py-3 flex-shrink-0 space-y-1.5">
@@ -95,10 +116,10 @@ export default function Sidebar({
           return (
             <motion.button
               key={item.label}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={item.onClick}
-              className="w-full flex items-center justify-center px-2.5 py-2.5 rounded-2xl transition-all duration-200"
+              className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-start px-4'} py-2.5 rounded-2xl transition-all duration-200 gap-3`}
               style={{
                 background: item.accent
                   ? `linear-gradient(135deg, rgba(${config.accentRgb}, 0.18), rgba(${config.accentRgb}, 0.07))`
@@ -112,9 +133,15 @@ export default function Sidebar({
                   : "1px solid rgba(255,255,255,0.06)",
                 color: item.accent ? config.accent : item.danger ? "#ff6b8a" : config.text,
               }}
-              title={item.label}
+              title={collapsed ? item.label : undefined}
             >
               <Icon size={16} className="flex-shrink-0" />
+              {!collapsed && (
+                <div className="flex flex-col items-start overflow-hidden">
+                  <span className="text-sm font-semibold whitespace-nowrap">{item.label}</span>
+                  <span className="text-[10px] opacity-60 whitespace-nowrap">{item.description}</span>
+                </div>
+              )}
             </motion.button>
           );
         })}
@@ -132,10 +159,10 @@ export default function Sidebar({
               className="group relative"
             >
               <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onSelect(conv.id)}
-                className="w-full flex items-center justify-center px-2.5 py-2.5 rounded-xl text-left transition-all duration-200"
+                className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-start px-4'} py-2.5 rounded-xl text-left transition-all duration-200 gap-3`}
                 style={
                   activeId === conv.id
                     ? {
@@ -150,12 +177,29 @@ export default function Sidebar({
                         color: config.textMuted,
                       }
                 }
-                title={conv.title}
+                title={collapsed ? conv.title : undefined}
               >
                 <MessageSquare
                   size={13}
                   style={{ color: activeId === conv.id ? config.accent : config.textMuted, flexShrink: 0 }}
                 />
+                {!collapsed && (
+                  <span className="text-sm truncate flex-1">
+                    {conv.title}
+                  </span>
+                )}
+                {!collapsed && (
+                   <motion.button
+                    whileHover={{ scale: 1.2, color: "#ff6b8a" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(conv.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                  >
+                    <Trash2 size={12} />
+                  </motion.button>
+                )}
               </motion.button>
             </motion.div>
           ))}
