@@ -173,11 +173,7 @@ export default function CommandBar({
                       `0 0 0 0 rgba(0,242,255, 0)`,
                     ],
                   }
-                : value.trim().length > 0
-                ? { boxShadow: "none" } // Ensure Framer Motion doesn't override CSS box-shadow
-                : {
-                    boxShadow: `0 8px 32px rgba(0,0,0,0.4)`,
-                  }
+                : { boxShadow: "none" } // Ensure Framer Motion doesn't override the CSS rainbow-glow animation
             }
             transition={
               isListening
@@ -189,7 +185,8 @@ export default function CommandBar({
               background: `rgba(12,12,16,${wallpaperSettings.panelOpacity})`,
               backdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
               WebkitBackdropFilter: `blur(${wallpaperSettings.blurAmount}px)`,
-              border: "1px solid transparent",
+              borderWidth: "1px",
+              borderStyle: "solid",
               transition: "border-color 0.3s ease",
             }}
           >
