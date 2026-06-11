@@ -13,7 +13,6 @@ import MessageBubble from "@/components/MessageBubble";
 import CommandBar from "@/components/CommandBar";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import PulseOrb from "@/components/PulseOrb";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
 import FileDropZone from "@/components/FileDropZone";
 import GodModeTerminal from "@/components/GodModeTerminal";
 import CircuitDoor from "@/components/CircuitDoor";
@@ -32,7 +31,7 @@ import { useMemoryBank } from "@/hooks/useMemoryBank";
 import { Conversation, Message } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCompactMode } from "@/hooks/useCompactMode";
-import { ChevronDown, Info, Volume2, VolumeX, Minimize2, Maximize2, Wifi } from "lucide-react";
+import { ChevronDown, Wifi } from "lucide-react";
 
 const createAdaptiveActionHandler = (handleSend: (msg: string) => void) => (action: string) => {
   handleSend(action);
@@ -387,109 +386,7 @@ export default function ChatPage() {
       )}
 
       <main className="flex-1 flex flex-col relative">
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="h-16 flex items-center justify-between px-6 z-10"
-          style={{
-            background: "rgba(10, 10, 10, 0.4)",
-            backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
-          }}
-        >
-          <div className="flex items-center gap-2.5">
-            <PulseOrb
-              voiceState={voiceState}
-              isLoading={isLoading}
-              size={32}
-            />
-            <span
-              className="text-sm font-semibold truncate"
-              style={{
-                color: config.text,
-                letterSpacing: "-0.02em",
-                maxWidth: isCompactMode ? 150 : 300,
-                transition: "color 0.3s ease",
-              }}
-            >
-              {activeConversation?.title ?? "ENOSX XAI Assistant"}
-            </span>
-            {!isCompactMode && activeConversation && (
-              <div className="flex items-center gap-1 ml-2">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md" style={{ background: `rgba(${config.accentRgb}, 0.1)`, border: `1px solid rgba(${config.accentRgb}, 0.3)` }}>
-                  <Wifi size={12} style={{ color: config.accent }} />
-                  <span className="text-xs" style={{ color: config.accent }}>
-                    {currentProvider === "groq" ? `Groq (${currentModel.includes("70b") ? "Elite" : "Power"})` : "OpenRouter"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
 
-          <div className="flex items-center gap-4">
-            {!isCompactMode && (
-              <div className="flex items-center gap-3 pr-4 border-r border-white/5">
-                <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  className="p-2 rounded-lg transition-all hover:bg-white/5"
-                  style={{ color: soundEnabled ? `rgba(${config.accentRgb},0.8)` : config.textMuted }}
-                >
-                  {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                </button>
-                <ThemeSwitcher />
-              </div>
-            )}
-
-            <button
-              onClick={toggleCompactMode}
-              className="p-2 rounded-lg transition-all hover:bg-white/5"
-              style={{ color: config.textMuted }}
-              title={isCompactMode ? "Standard Mode" : "Compact Mode"}
-            >
-              {isCompactMode ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
-            </button>
-
-            {!isCompactMode && (
-              <>
-                <div className="hidden md:flex flex-col items-end gap-0.5">
-                  <span
-                    className="font-black"
-                    style={{
-                      color: isLoading ? `rgba(${config.accentRgb},1)` : config.text,
-                      fontSize: "10px",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
-                    {isLoading ? "THINKING" : "READY"}
-                  </span>
-                </div>
-
-                <div
-                  className="flex items-center gap-1"
-                  style={{ color: config.textMuted }}
-                >
-                  <Wifi size={11} style={{ color: `rgba(${config.accentRgb},0.5)` }} />
-                  <span style={{ fontSize: "10px", letterSpacing: "0.06em" }}>GROQ</span>
-                </div>
-
-                <motion.a
-                  href="/about"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200"
-                  style={{
-                    background: "rgba(0, 242, 255, 0.07)",
-                    border: "1px solid rgba(0, 242, 255, 0.18)",
-                    color: "rgba(0, 242, 255, 0.6)",
-                  }}
-                >
-                  <Info size={12} />
-                  <span style={{ letterSpacing: "0.04em", fontSize: "10px" }}>ABOUT</span>
-                </motion.a>
-              </>
-            )}
-          </div>
-        </motion.div>
 
         <div className="flex-1 relative overflow-hidden">
           <AnimatePresence mode="wait">
