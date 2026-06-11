@@ -473,11 +473,6 @@ export default function ChatPage() {
 
         <div className={`p-4 ${isCompactMode ? "pb-6" : "md:p-6"} z-20`}>
           <div className="max-w-3xl mx-auto relative">
-            <div className="absolute bottom-full left-0 right-0 mb-4 flex flex-col gap-2 pointer-events-none">
-              <div className="pointer-events-auto">
-              </div>
-            </div>
-            
             <CommandBar
               onSend={handleSend}
               isLoading={isLoading}

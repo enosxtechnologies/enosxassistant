@@ -20,6 +20,12 @@ interface BackgroundPickerProps {
 
 const BACKGROUND_PRESETS: BackgroundPreset[] = [
   {
+    id: "flower-field",
+    name: "Flower Field",
+    url: "/flower-field-v2.png",
+    color: "#f5e6d3",
+  },
+  {
     id: "tech-circuit",
     name: "Tech Circuit",
     url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1920&q=80",
@@ -62,7 +68,7 @@ export function BackgroundPicker({
   isOpen,
   onClose,
 }: BackgroundPickerProps) {
-  const [selectedPreset, setSelectedPreset] = useState<string>("tech-circuit");
+  const [selectedPreset, setSelectedPreset] = useState<string>("flower-field");
   const [blurIntensity, setBlurIntensity] = useState(40);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -73,7 +79,7 @@ export function BackgroundPicker({
     if (saved) {
       try {
         const prefs = JSON.parse(saved);
-        setSelectedPreset(prefs.preset || "tech-circuit");
+        setSelectedPreset(prefs.preset || "flower-field");
         setBlurIntensity(prefs.blur || 40);
         setUploadedImage(prefs.uploaded || null);
       } catch {
@@ -157,6 +163,7 @@ export function BackgroundPicker({
     );
   };
 
+  // Remove empty suggestion div above command bar
   if (!isOpen) return null;
 
   return (
