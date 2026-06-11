@@ -30,4 +30,3 @@ externalPort = 3000
 [userenv]
 
 [userenv.shared]
-GROQ_API_KEY = "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"
