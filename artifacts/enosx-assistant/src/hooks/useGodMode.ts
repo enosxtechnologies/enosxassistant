@@ -7,8 +7,24 @@
  * 2. Alt + E + X (Alternative)
  *
  * When either sequence is matched, it triggers the callback.
+ * 
+ * PRIVACY: Godmode is now PRIVATE and requires authorization.
+ * Only authorized users can access this feature.
  */
 import { useEffect, useRef, useCallback } from "react";
+
+// Authorization check: Only allow Godmode if user is authorized
+const isGodModeAuthorized = (): boolean => {
+  // Check for authorization token in localStorage
+  const authToken = localStorage.getItem('godmode_auth_token');
+  const isAuthorized = authToken === 'ENOSX_AUTHORIZED_2024';
+  
+  if (!isAuthorized) {
+    console.warn('[GODMODE] Unauthorized access attempt blocked');
+  }
+  
+  return isAuthorized;
+};
 
 export function useGodMode(onTrigger: () => void) {
   // Track currently pressed keys
@@ -30,7 +46,7 @@ export function useGodMode(onTrigger: () => void) {
     // Sequence 2: Alt + E + X
     const sequence2 = hasKeys(["Alt", "e", "x"]);
 
-    if (sequence1 || sequence2) {
+    if ((sequence1 || sequence2) && isGodModeAuthorized()) {
       onTrigger();
       // Clear after trigger to prevent multiple activations
       pressedKeys.current.clear();
@@ -63,4 +79,21 @@ export function useGodMode(onTrigger: () => void) {
       window.removeEventListener("blur", handleBlur);
     };
   }, [checkSequence]);
+}
+
+// Export authorization function for admin setup
+export function authorizeGodMode(token: string): boolean {
+  if (token === 'ENOSX_AUTHORIZED_2024') {
+    localStorage.setItem('godmode_auth_token', token);
+    console.log('[GODMODE] Authorization successful');
+    return true;
+  }
+  console.error('[GODMODE] Invalid authorization token');
+  return false;
+}
+
+// Export function to revoke authorization
+export function revokeGodModeAccess(): void {
+  localStorage.removeItem('godmode_auth_token');
+  console.log('[GODMODE] Access revoked');
 }

@@ -65,7 +65,9 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        // FIXED: Use dynamic API port from environment variable
+        // This ensures the frontend proxy matches the API server port
+        target: `http://localhost:${process.env.API_PORT || "8080"}`,
         changeOrigin: true,
       },
     },
