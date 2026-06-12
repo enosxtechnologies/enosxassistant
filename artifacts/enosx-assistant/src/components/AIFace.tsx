@@ -58,8 +58,14 @@ export default function AIFace({
     return { y: eyePosition.y * 0.5 };
   };
 
-  // Mouth animation based on state
-  const getMouthAnimation = () => {
+  // Mouth path and animation based on state
+  const getMouthD = () => {
+    if (emotion === "happy") return "M 80 120 Q 100 135 120 120";
+    if (emotion === "confused") return "M 80 125 Q 100 115 120 125";
+    return "M 80 120 Q 100 125 120 120";
+  };
+
+  const getMouthAnimate = () => {
     if (isSpeaking) {
       return {
         d: [
@@ -67,16 +73,9 @@ export default function AIFace({
           "M 80 120 Q 100 140 120 120",
           "M 80 120 Q 100 130 120 120",
         ],
-        transition: { duration: 0.3, repeat: Infinity },
       };
     }
-    if (emotion === "happy") {
-      return { d: "M 80 120 Q 100 135 120 120" };
-    }
-    if (emotion === "confused") {
-      return { d: "M 80 125 Q 100 115 120 125" };
-    }
-    return { d: "M 80 120 Q 100 125 120 120" };
+    return undefined;
   };
 
   return (
@@ -156,7 +155,9 @@ export default function AIFace({
 
         {/* Mouth */}
         <motion.path
-          {...getMouthAnimation()}
+          d={getMouthD()}
+          animate={getMouthAnimate()}
+          transition={isSpeaking ? { duration: 0.3, repeat: Infinity } : undefined}
           stroke={accentColor}
           strokeWidth="2.5"
           fill="none"

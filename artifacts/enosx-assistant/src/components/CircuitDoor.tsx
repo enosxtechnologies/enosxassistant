@@ -29,30 +29,26 @@ export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDo
 
   useEffect(() => {
     if (phase === "closing") {
-      // Doors have started closing, show text after a short delay
       const textTimer = setTimeout(() => setShowText(true), 600);
-      // Move to display phase
       const displayTimer = setTimeout(() => setPhase("display"), 800);
       return () => {
         clearTimeout(textTimer);
         clearTimeout(displayTimer);
       };
     }
+    return undefined;
   }, [phase]);
 
   useEffect(() => {
     if (phase === "display") {
-      // Show the text for a moment, then open the doors
-      const openTimer = setTimeout(() => {
-        setPhase("opening");
-      }, 1500);
+      const openTimer = setTimeout(() => setPhase("opening"), 1500);
       return () => clearTimeout(openTimer);
     }
+    return undefined;
   }, [phase]);
 
   useEffect(() => {
     if (phase === "opening") {
-      // Doors are opening, trigger callback after animation
       const completeTimer = setTimeout(() => {
         if (!hasCalledComplete.current && onAnimationComplete) {
           hasCalledComplete.current = true;
@@ -61,6 +57,7 @@ export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDo
       }, 1000);
       return () => clearTimeout(completeTimer);
     }
+    return undefined;
   }, [phase, onAnimationComplete]);
 
   // Determine if doors should be visible
@@ -79,13 +76,8 @@ export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDo
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 40, 
-              damping: 15,
-              exit: { duration: 1, ease: [0.7, 0, 0.3, 1], delay: 0.5 }
-            }}
+            exit={{ x: "-100%", transition: { duration: 1, ease: [0.7, 0, 0.3, 1], delay: 0.5 } }}
+            transition={{ type: "spring", stiffness: 40, damping: 15 }}
             className="w-1/2 h-full relative overflow-hidden"
             style={{
               background: "#05050a",
@@ -115,13 +107,8 @@ export default function CircuitDoor({ isActive, onAnimationComplete }: CircuitDo
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 40, 
-              damping: 15,
-              exit: { duration: 1, ease: [0.7, 0, 0.3, 1], delay: 0.5 }
-            }}
+            exit={{ x: "100%", transition: { duration: 1, ease: [0.7, 0, 0.3, 1], delay: 0.5 } }}
+            transition={{ type: "spring", stiffness: 40, damping: 15 }}
             className="w-1/2 h-full relative overflow-hidden"
             style={{
               background: "#05050a",

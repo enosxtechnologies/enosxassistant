@@ -172,9 +172,11 @@ export default function PulseOrb({
     if (prevStateRef.current === "speaking" && voiceState === "idle") {
       setShowCompleted(true);
       const t = setTimeout(() => setShowCompleted(false), 2000);
+      prevStateRef.current = voiceState;
       return () => clearTimeout(t);
     }
     prevStateRef.current = voiceState;
+    return undefined;
   }, [voiceState]);
 
   const effectiveState: keyof typeof STATE_COLORS = showCompleted

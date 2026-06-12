@@ -51,7 +51,14 @@ export default function Sidebar({
   const { config } = useTheme();
   const { settings } = useWallpaper();
 
-  const navItems = [
+  const navItems: Array<{
+    label: string;
+    description: string;
+    icon: typeof Plus;
+    onClick: () => void;
+    accent?: boolean;
+    danger?: boolean;
+  }> = [
     {
       label: "New Chat",
       description: "Start a fresh workspace",

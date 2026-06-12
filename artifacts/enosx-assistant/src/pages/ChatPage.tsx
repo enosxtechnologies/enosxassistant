@@ -86,7 +86,7 @@ export default function ChatPage() {
   useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
-  const { sendMessage, isLoading, error, currentProvider, currentModel } = useAI();
+  const { sendMessage, isLoading, error } = useAI();
 
   const {
     voiceState,
@@ -550,7 +550,6 @@ export default function ChatPage() {
               onStartVoice={handleStartVoice}
               onStopVoice={stopListening}
               onStopSpeaking={handleStopSpeak}
-              onScreenshot={handleScreenshot}
               voiceState={voiceState}
               transcript={transcript}
             />
@@ -575,15 +574,6 @@ export default function ChatPage() {
                 setIsGodModeActive(false);
               }}
               onExecute={executeGodCommand}
-              memories={memories}
-              onAddMemory={addMemory}
-              onRemoveMemory={removeMemory}
-              voiceState={voiceState}
-              transcript={transcript}
-              onStartVoice={handleStartVoice}
-              onStopVoice={stopListening}
-              onStopSpeaking={handleStopSpeak}
-              isLoading={isLoading}
             />
           )}
         </AnimatePresence>
