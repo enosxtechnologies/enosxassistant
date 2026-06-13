@@ -397,6 +397,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
 function SidebarGroupLabel({
   className,
   asChild = false,
+  style,
   ...props
 }: React.ComponentProps<"div"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "div"
@@ -410,6 +411,7 @@ function SidebarGroupLabel({
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
+      style={style as React.CSSProperties}
       {...props}
     />
   )
@@ -418,6 +420,7 @@ function SidebarGroupLabel({
 function SidebarGroupAction({
   className,
   asChild = false,
+  style,
   ...props
 }: React.ComponentProps<"button"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button"
@@ -433,6 +436,7 @@ function SidebarGroupAction({
         "group-data-[collapsible=icon]:hidden",
         className
       )}
+      style={style as React.CSSProperties}
       {...props}
     />
   )
@@ -519,6 +523,7 @@ function SidebarMenuButton({
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      style={props.style as React.CSSProperties}
       {...props}
     />
   )
@@ -550,6 +555,7 @@ function SidebarMenuAction({
   className,
   asChild = false,
   showOnHover = false,
+  style,
   ...props
 }: React.ComponentProps<"button"> & {
   asChild?: boolean
@@ -573,6 +579,7 @@ function SidebarMenuAction({
           "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className
       )}
+      style={style as React.CSSProperties}
       {...props}
     />
   )
@@ -672,6 +679,7 @@ function SidebarMenuSubButton({
   size = "md",
   isActive = false,
   className,
+  style,
   ...props
 }: React.ComponentProps<"a"> & {
   asChild?: boolean
@@ -694,6 +702,7 @@ function SidebarMenuSubButton({
         "group-data-[collapsible=icon]:hidden",
         className
       )}
+      style={style as React.CSSProperties}
       {...props}
     />
   )
