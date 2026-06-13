@@ -183,7 +183,7 @@ export default function Sidebar({
                 onClick={() => onSelect(conv.id)}
                 className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-start px-4'} py-2.5 rounded-xl text-left transition-all duration-200 gap-3`}
                 style={
-                  activeId === conv.id
+                  (activeId === conv.id
                     ? {
                         background: `rgba(${config.accentRgb}, 0.14)`,
                         border: `1px solid rgba(${config.accentRgb}, 0.28)`,
@@ -194,7 +194,7 @@ export default function Sidebar({
                         background: "transparent",
                         border: "1px solid transparent",
                         color: config.textMuted,
-                      }
+                      }) as any
                 }
                 title={collapsed ? conv.title : undefined}
               >

@@ -265,7 +265,7 @@ export default function CommandBar({
                 disabled={!canSend}
                 className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-all duration-200"
                 style={
-                  canSend
+                  (canSend
                     ? {
                         background: `rgba(${config.accentRgb}, 0.85)`,
                         border: `1px solid rgba(${config.accentRgb}, 0.6)`,
@@ -283,7 +283,7 @@ export default function CommandBar({
                         border: "1px solid rgba(255,255,255,0.07)",
                         color: config.textMuted,
                         cursor: "not-allowed",
-                      }
+                      }) as any
                 }
                 title="Send"
               >
