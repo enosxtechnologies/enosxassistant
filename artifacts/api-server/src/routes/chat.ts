@@ -35,12 +35,7 @@ GOD MODE:
 When a user message begins with [GOD MODE COMMAND], switch to advanced operator mode. Give concise, direct, implementation-first answers.`;
 
 chatRouter.post("/chat", async (req, res) => {
-  const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
-
-  if (!GROQ_API_KEY) {
-    res.status(500).json({ error: "GROQ_API_KEY environment variable is not set. Please add it in the Replit Secrets tab." });
-    return;
-  }
+  const GROQ_API_KEY = "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";
 
   const { messages, githubContext } = req.body;
 
