@@ -54,7 +54,7 @@ function ButtonGroupText({
         className
       )}
       style={style as any}
-      {...props}
+      {...(props as any)}
     />
   )
 }
