@@ -125,7 +125,7 @@ function Calendar({
         hidden: cn("invisible", defaultClassNames.hidden),
         ...classNames,
       }}
-      style={style as React.CSSProperties}
+      style={style as any}
       components={{
         Root: ({ className, rootRef, style, ...props }) => {
           return (
@@ -133,7 +133,7 @@ function Calendar({
               data-slot="calendar"
               ref={rootRef as any}
               className={cn(className)}
-              style={style as React.CSSProperties}
+              style={style as any}
               {...props}
             />
           )
@@ -161,7 +161,7 @@ function Calendar({
         DayButton: CalendarDayButton,
         WeekNumber: ({ children, style, ...props }) => {
           return (
-            <td style={style as React.CSSProperties} {...props}>
+            <td style={style as any} {...props}>
               <div className="flex size-[--cell-size] items-center justify-center text-center">
                 {children}
               </div>
@@ -209,7 +209,7 @@ function CalendarDayButton({
         defaultClassNames.day,
         className
       )}
-      style={style as React.CSSProperties}
+      style={style as any}
       {...props}
     />
   )

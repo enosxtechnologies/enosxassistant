@@ -67,7 +67,7 @@ function Item({
       data-variant={variant}
       data-size={size}
       className={cn(itemVariants({ variant, size, className }))}
-      style={style as React.CSSProperties}
+      style={style as any}
       {...props}
     />
   )
