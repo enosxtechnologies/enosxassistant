@@ -19,6 +19,7 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  style,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -124,13 +125,15 @@ function Calendar({
         hidden: cn("invisible", defaultClassNames.hidden),
         ...classNames,
       }}
+      style={style as React.CSSProperties}
       components={{
-        Root: ({ className, rootRef, ...props }) => {
+        Root: ({ className, rootRef, style, ...props }) => {
           return (
             <div
               data-slot="calendar"
               ref={rootRef}
               className={cn(className)}
+              style={style as React.CSSProperties}
               {...props}
             />
           )
@@ -156,9 +159,9 @@ function Calendar({
           )
         },
         DayButton: CalendarDayButton,
-        WeekNumber: ({ children, ...props }) => {
+        WeekNumber: ({ children, style, ...props }) => {
           return (
-            <td {...props}>
+            <td style={style as React.CSSProperties} {...props}>
               <div className="flex size-[--cell-size] items-center justify-center text-center">
                 {children}
               </div>
