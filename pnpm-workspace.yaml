@@ -75,6 +75,13 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
+  # Dedupe React type packages to a single version across the workspace.
+  # The Expo mobile app pins react 19.1.0, which drags in @types/react@19.1.x
+  # as a Radix peer variation. Without this, tsc sees two unrelated copies of
+  # @types/react and fails with "Two different types with this name exist"
+  # on SVG/lucide ref props in the mockup-sandbox build.
+  "@types/react": "19.2.14"
+  "@types/react-dom": "19.2.3"
   # replit uses linux-x64 only, we can exclude all other platforms
   "esbuild>@esbuild/darwin-arm64": "-"
   "esbuild>@esbuild/darwin-x64": "-"
